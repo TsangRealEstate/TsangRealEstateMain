@@ -1,7 +1,9 @@
 import Link from "next/link";
+import { FiChevronRight, FiMapPin, FiMail, FiPhone } from "react-icons/fi";
+import { FaInstagram, FaFacebook, FaLinkedin, FaTwitter } from "react-icons/fa";
 
 const quickLinks = [
-    { title: "Home", url: "#" },
+    { title: "Home", url: "/" },
     { title: "About", url: "#" },
     { title: "FAQ", url: "#" },
     { title: "Properties", url: "#" },
@@ -32,7 +34,7 @@ export function Footer() {
                             <div className="grid md:grid-cols-12 grid-cols-1 gap-[30px]">
                                 <div className="lg:col-span-4 md:col-span-12 flex flex-col px-2 md:px-0 items-center md:items-start">
                                     <Link
-                                        href="#"
+                                        href="/"
                                         aria-label="Home"
                                         className="flex items-center"
                                     >
@@ -63,7 +65,18 @@ export function Footer() {
                                                     rel="noopener noreferrer"
                                                     className="rounded-full bg-blue-600 inline-block p-2 text-slate-100 hover:bg-slate-100 hover:text-blue-600"
                                                 >
-
+                                                    {socialLink.icon === "instagram" && (
+                                                        <FaInstagram className="w-5 h-5" />
+                                                    )}
+                                                    {socialLink.icon === "facebook" && (
+                                                        <FaFacebook className="w-5 h-5" />
+                                                    )}
+                                                    {socialLink.icon === "linkedin" && (
+                                                        <FaLinkedin className="w-5 h-5" />
+                                                    )}
+                                                    {socialLink.icon === "twitter" && (
+                                                        <FaTwitter className="w-5 h-5" />
+                                                    )}
                                                 </a>
                                             </li>
                                         ))}
@@ -81,7 +94,7 @@ export function Footer() {
                                                     href={link.url}
                                                     className="text-slate-300 hover:text-slate-400 duration-500 ease-in-out flex items-center"
                                                 >
-
+                                                    <FiChevronRight className="w-5 h-5 text-blue-600 me-3" />
                                                     {link.title}
                                                 </a>
                                             </li>
@@ -100,28 +113,32 @@ export function Footer() {
                                                     href={service.url}
                                                     className="text-slate-300 hover:text-slate-400 duration-500 ease-in-out flex items-center"
                                                 >
-
+                                                    <FiChevronRight className="w-5 h-5 text-blue-600 me-3" />
                                                     {service.title}
                                                 </a>
                                             </li>
                                         ))}
                                     </ul>
                                 </div>
+
                                 <div className="lg:col-span-3 md:col-span-4">
                                     <h5 className="tracking-[1px] text-gray-100 font-semibold">
                                         Contact
                                     </h5>
+
                                     <div className="flex mt-6">
-                                        <div className="">
+                                        <FiMapPin className="w-5 h-5 text-blue-600 me-3" />
+                                        <div>
                                             <h6 className="text-gray-300 mb-2">
-                                                C/54 Northwest Freeway, <br /> Suite 558, <br />{" "}
+                                                C/54 Northwest Freeway, <br /> Suite 558, <br />
                                                 Houston, USA 485
                                             </h6>
                                         </div>
                                     </div>
 
                                     <div className="flex mt-6">
-                                        <div className="">
+                                        <FiMail className="w-5 h-5 text-blue-600 me-3" />
+                                        <div>
                                             <a
                                                 href="mailto:contact@example.com"
                                                 className="text-slate-300 hover:text-slate-400 duration-500 ease-in-out"
@@ -132,7 +149,8 @@ export function Footer() {
                                     </div>
 
                                     <div className="flex mt-6">
-                                        <div className="">
+                                        <FiPhone className="w-5 h-5 text-blue-600 me-3" />
+                                        <div>
                                             <a
                                                 href="tel:+152534-468-854"
                                                 className="text-slate-300 hover:text-slate-400 duration-500 ease-in-out"
@@ -153,8 +171,7 @@ export function Footer() {
                     <div className="grid md:grid-cols-2 items-center gap-6">
                         <div className="md:text-start text-center">
                             <p className="mb-0 text-gray-300">
-                                © Copyright Tsang {new Date().getFullYear()} {""}
-                                All Right Reserved.{" "}
+                                © Copyright Tsang {new Date().getFullYear()} All Right Reserved.
                             </p>
                         </div>
 
