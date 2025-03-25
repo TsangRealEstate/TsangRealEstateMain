@@ -44,9 +44,9 @@ export default function Home() {
         />
         <div className="mx-auto max-w-7xl px-6 pt-10 pb-24 sm:pb-32 lg:px-8">
           <div className="mx-auto max-w-2xl lg:max-w-none grid grid-cols-1 lg:grid-cols-2 lg:gap-x-16 xl:gap-x-24">
-            <div className="flex flex-col justify-between">
+            <div className="flex flex-col justify-center">
               <div>
-                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl leading-tight">
+                <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-5xl leading-tight">
                   Discover Your Next
                   <br />
                   <span className="text-blue-600">Home with Less Effort</span>

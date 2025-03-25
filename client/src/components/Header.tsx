@@ -19,7 +19,7 @@ export function Header() {
             <div className="container mx-auto px-4">
                 <nav className="relative z-50 flex justify-between">
                     <div className="flex items-center md:gap-x-12">
-                        <Link href="#" aria-label="Home" className="flex items-center">
+                        <Link href="/" aria-label="Home" className="flex items-center">
                             <svg
                                 viewBox="0 0 54 65"
                                 className="h-14 w-auto text-blue-600"
@@ -42,13 +42,13 @@ export function Header() {
                         </div>
                         <Link
                             href="/apply"
-                            className="inline-block rounded-md bg-blue-600 px-5 py-2.5 text-sm font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            className="inline-block rounded-md bg-blue-600 px-5 py-2.5 font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
                             Get Started
                         </Link>
                         <Link
                             href="/agent"
-                            className="inline-block rounded-md bg-blue-600 px-5 py-2.5 text-sm font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            className="inline-block rounded-md bg-blue-600 px-5 py-2.5 font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
                             Agent
                         </Link>
