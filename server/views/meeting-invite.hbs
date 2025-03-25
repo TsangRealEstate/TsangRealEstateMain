@@ -1,0 +1,22 @@
+<div style="font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px;">
+    <h2 style="color: #4CAF50;">Hello {{firstName}},</h2>
+    <p>You have been invited to schedule a meeting with our team.</p>
+
+    <p style="font-size: 16px;">Please click the button below to select a suitable time:</p>
+
+    <a href="{{eventSchedulingUrl}}" 
+       style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; 
+              color: white; text-decoration: none; border-radius: 5px; 
+              font-size: 18px; margin-top: 10px;">
+      Schedule Meeting
+    </a>
+
+    <p style="margin-top: 20px;">Or copy and paste the link into your browser:</p>
+    <a href="{{eventSchedulingUrl}}" style="color: #4CAF50;">{{eventSchedulingUrl}}</a>
+
+    <hr style="margin: 20px 0;">
+    <p style="font-size: 14px; color: #777;">If you have any questions, feel free to reply to this email.</p>
+    <p style="font-size: 14px; color: #777;">Best Regards,<br><strong>Agent Team</strong></p>
+  </div>
+</div>

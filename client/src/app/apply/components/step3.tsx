@@ -1,0 +1,352 @@
+import * as yup from "yup";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import Datepicker, { DateValueType } from "react-tailwindcss-datepicker";
+import { TextInput } from "./TextInput";
+import { OptionInput } from "./Options";
+
+const schema = yup.object().shape({
+    instagram: yup.string().required("Instagram value is not valid"),
+    leaseEndDate: yup.string().required("Select lease end date"),
+    propertyOwnerName: yup.string().required("property owner name is not valid"),
+    bedrooms: yup.string().required("bedrooms is not valid"),
+    bathrooms: yup.string().required("bathrooms is not valid"),
+    desiredLocation: yup.array().min(1, "select at least one options"),
+    budget: yup.string().required("budget is not valid"),
+    brokenLease: yup.array().min(1, "select at least one options"),
+    grossIncome: yup.string().required("grossIncome value is not valid"),
+    creditScore: yup.string().required("creditScore is not valid"),
+    nonNegotiables: yup
+        .array()
+        .of(yup.string().required("value is required"))
+        .min(1, "select at least one options"),
+});
+
+type stepProps = {
+    callBack: (data: any) => void;
+    goBack: () => void;
+};
+
+const inputContainerClass =
+    "flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-600 sm:max-w-md";
+
+const formFields = {
+    instagram: {
+        name: "instagram",
+        labelText:
+            "What is your Instagram? This is used to send videos and quotes.",
+        inputContainerClass,
+        registerOptions: { required: true },
+    },
+    propertyOwnerName: {
+        name: "propertyOwnerName",
+        labelText:
+            'What is the full name of the property you currently have a lease at? <br /> If you are renting from a private owner, then please list "private owner".',
+        inputContainerClass,
+        registerOptions: { required: true },
+    },
+    bedrooms: {
+        name: "bedrooms",
+        labelText: "How many bedrooms is your household looking for?",
+        inputType: "radio",
+        options: [
+            { value: "1", label: "1" },
+            { value: "2", label: "2" },
+            { value: "3", label: "3" },
+            { value: "4", label: "4" },
+            { value: "5+", label: "5+" },
+        ],
+    },
+    bathrooms: {
+        name: "bathrooms",
+        labelText: "How many bathrooms is your household looking for?",
+        inputType: "radio",
+        options: [
+            { value: "1", label: "1" },
+            { value: "2", label: "2" },
+            { value: "3", label: "3" },
+            { value: "4", label: "4" },
+            { value: "5+", label: "5+" },
+        ],
+    },
+    desiredLocation: {
+        name: "desiredLocation",
+        labelText: "What part(s) of San Antonio are you looking to move to?",
+        inputType: "checkbox",
+        options: [
+            {
+                value: "Dominion/Rim/La Cantera/UTSA",
+                label: "Dominion/Rim/La Cantera/UTSA",
+            },
+            { value: "Boerne", label: "Boerne" },
+            { value: "Stone Oak", label: "Stone Oak" },
+            {
+                value: "North Central/Castle Hills",
+                label: "North Central/Castle Hills",
+            },
+            { value: "Medical Center", label: "Medical Center" },
+            {
+                value: "Alamo Ranch/Westover Hills",
+                label: "Alamo Ranch/Westover Hills",
+            },
+            { value: "Downtown", label: "Downtown" },
+            { value: "Alamo Heights", label: "Alamo Heights" },
+            {
+                value: "Thousand Oaks/Far Northeast/Live Oak/Schertz/Converse",
+                label: "Thousand Oaks/Far Northeast/Live Oak/Schertz/Converse",
+            },
+            {
+                value: "Southeast/South Central/Brooks City Base",
+                label: "Southeast/South Central/Brooks City Base",
+            },
+            { value: "New Braunfels", label: "New Braunfels" },
+            {
+                value: "I am unsure. I am new to San Antonio.",
+                label: "I am unsure. I am new to San Antonio.",
+            },
+        ],
+    },
+    budget: {
+        name: "budget",
+        labelText: "What is your budget for rent (not including residential fees)?",
+        inputType: "radio",
+        options: [
+            { value: "Below $1200", label: "Below $1200" },
+            {
+                value:
+                    "$1200 - $1300 (average pricing of one-bedrooms as of July 2023)",
+                label:
+                    "$1200 - $1300 (average pricing of one-bedrooms as of July 2023)",
+            },
+            { value: "$1400 - $1500", label: "$1400 - $1500" },
+            {
+                value: "$1500 - $1600 (average pricing of two-bedrooms as of Jan 2023)",
+                label: "$1500 - $1600 (average pricing of two-bedrooms as of Jan 2023)",
+            },
+            { value: "$1600 - $1700", label: "$1600 - $1700" },
+            { value: "$1700 - $1800", label: "$1700 - $1800" },
+            {
+                value:
+                    "$1800 - $1900 (average pricing of three-bedrooms as of July 2023)",
+                label:
+                    "$1800 - $1900 (average pricing of three-bedrooms as of July 2023)",
+            },
+            { value: "$1900+", label: "$1900+" },
+            { value: "inp1", label: "Other", input: true },
+        ],
+    },
+    brokenLease: {
+        name: "brokenLease",
+        labelText:
+            "Does anybody that is going to be on the lease (including co-signer/guarantor) have any broken leases, evictions, or criminal history?",
+        inputType: "checkbox",
+        options: [
+            {
+                value: "Broken lease/Owe money to a property",
+                label: "Broken lease/Owe money to a property",
+            },
+            {
+                value: "Owe a property money",
+                label: "Owe a property money",
+            },
+            {
+                value: "Eviction",
+                label: "Eviction",
+            },
+            {
+                value: "Felony",
+                label: "Felony",
+            },
+            {
+                value: "Misdemeanor",
+                label: "Misdemeanor",
+            },
+            {
+                value: "None",
+                label: "None",
+            },
+        ],
+    },
+    grossIncome: {
+        name: "grossIncome",
+        labelText:
+            "What is the whole household's (all adults being added on the lease) monthly gross income (includes all job income, child support, monthly benefits, all other income provable via direct deposits/paystubs)? <br /> Reason: San Antonio properties require an income requirement for approved applications.",
+        inputContainerClass,
+        registerOptions: { required: true },
+    },
+    creditScore: {
+        name: "creditScore",
+        labelText: "Where is your current credit score ranging from?",
+        inputType: "radio",
+        options: [
+            { value: "Below 550", label: "Below 550" },
+            { value: "550 - 600", label: "550 - 600" },
+            { value: "600 - 650", label: "600 - 650" },
+            { value: "650+", label: "650+" },
+        ],
+    },
+    nonNegotiables: {
+        name: "nonNegotiables",
+        labelText: "What are your non-negotiables? (check applicable)",
+        inputType: "checkbox",
+        options: [
+            {
+                value: "1st floor",
+                label: "1st floor",
+            },
+            {
+                value: "2nd floor",
+                label: "2nd floor",
+            },
+            {
+                value: "3rd floor or top floor",
+                label: "3rd floor or top floor",
+            },
+            {
+                value: "Washer/dryer connections",
+                label: "Washer/dryer connections",
+            },
+            {
+                value: "Washer/dryer included",
+                label: "Washer/dryer included",
+            },
+            {
+                value: "Patio/Balcony",
+                label: "Patio/Balcony",
+            },
+            {
+                value: "No carpet in living room",
+                label: "No carpet in living room",
+            },
+            {
+                value: "Yard",
+                label: "Yard",
+            },
+            { value: "inp2", label: "Other", input: true },
+        ],
+    },
+};
+
+export function StepThree({ callBack, goBack }: stepProps) {
+    const formState = useForm({
+        mode: "onChange",
+        reValidateMode: "onBlur",
+        resolver: yupResolver(schema),
+    });
+    const {
+        register,
+        formState: { errors, dirtyFields },
+        handleSubmit,
+        getValues,
+        reset,
+        control,
+    } = formState;
+
+    const SubmitForm = async (data: any) => {
+        callBack(data);
+    };
+
+    return (
+        <form onSubmit={handleSubmit(SubmitForm)} className="w-full px-10">
+            <div className="space-y-12 w-full">
+                <div className="border-b border-gray-900/10 pb-12">
+                    <h2 className="text-base font-semibold leading-7 text-gray-900">
+                        Step 3
+                    </h2>
+
+                    <div className="mt-10 text-left">
+                        {/* instagram */}
+                        <TextInput formState={formState} field={formFields.instagram} />
+
+                        {/* leaseEndDate */}
+                        <div className="mt-4">
+                            <label
+                                htmlFor="leaseEndDate"
+                                className="block text-sm font-medium leading-6"
+                            >
+                                When does your current lease end?
+                            </label>
+                            <div className={inputContainerClass}
+                            >
+                                <Controller
+                                    control={control}
+                                    name="leaseEndDate"
+                                    rules={{ required: true }}
+                                    render={({ field, fieldState: { invalid, error } }) => {
+                                        return (
+                                            <Datepicker
+                                                inputId="leaseEndDate"
+                                                useRange={false}
+                                                minDate={new Date()}
+                                                asSingle={true}
+                                                value={{ startDate: new Date(field.value), endDate: new Date(field.value) }}
+                                                onChange={(newValue: DateValueType, option) => {
+                                                    field.onChange(newValue?.startDate, option);
+                                                }}
+                                                placeholder={"Lease end date"}
+                                                inputClassName={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
+                                                    }`}
+                                            />
+                                        );
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* propertyOwnername  */}
+                        <TextInput
+                            formState={formState}
+                            field={formFields.propertyOwnerName}
+                        />
+
+                        {/* bedrooms */}
+                        <OptionInput formState={formState} field={formFields.bedrooms} />
+
+                        {/* bathrooms */}
+                        <OptionInput formState={formState} field={formFields.bathrooms} />
+
+                        {/* desiredLocation */}
+                        <OptionInput
+                            formState={formState}
+                            field={formFields.desiredLocation}
+                        />
+
+                        {/* budget */}
+                        <OptionInput formState={formState} field={formFields.budget} />
+
+                        {/* brokenLease */}
+                        <OptionInput formState={formState} field={formFields.brokenLease} />
+
+                        {/* grossIncome */}
+                        <TextInput formState={formState} field={formFields.grossIncome} />
+
+                        {/* creditScore */}
+                        <OptionInput formState={formState} field={formFields.creditScore} />
+
+                        {/* nonNegotiables */}
+                        <OptionInput
+                            formState={formState}
+                            field={formFields.nonNegotiables}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-x-6">
+                <button
+                    type="button"
+                    onClick={goBack}
+                    className="text-sm font-semibold leading-6 text-gray-900"
+                >
+                    Back
+                </button>
+                <button
+                    type="submit"
+                    className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                >
+                    Submit
+                </button>
+            </div>
+        </form>
+    );
+}
