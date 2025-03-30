@@ -43,7 +43,6 @@ export function StepTwo({ callBack, goBack, defaultValues }: stepProps) {
         defaultValues,
     });
     let OtherOnLease = watch("OtherOnLease");
-    // console.log("Step 2 =>", defaultValues);
 
     const { ref: OtherOnLeaseRef, ...OtherOnLeaseField } =
         register("OtherOnLease");
@@ -52,7 +51,6 @@ export function StepTwo({ callBack, goBack, defaultValues }: stepProps) {
 
     const SubmitForm = async (data: any) => {
         callBack(data);
-        console.log("Data from step-two form", data)
     };
 
     return (

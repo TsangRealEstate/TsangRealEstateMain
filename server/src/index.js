@@ -22,15 +22,15 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log("✅ Connected to MongoDB");
+    console.log("Connected to MongoDB");
 
     // Start the Server AFTER DB Connects
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
+      console.log(`Server running on http://localhost:${PORT}`);
     });
   } catch (err) {
-    console.error("❌ Failed to connect:", err);
-    process.exit(1); // Exit process on failure
+    console.error("Failed to connect:", err);
+    process.exit(1);
   }
 };
 

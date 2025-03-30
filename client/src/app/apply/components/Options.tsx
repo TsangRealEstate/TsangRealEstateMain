@@ -53,8 +53,7 @@ export function OptionInput(props: OptionsProps) {
                                     });
                                 }
                                 if (inputType === "checkbox") {
-                                    // const values = getValues(name);
-                                    // console.log("values =>", values);
+                                   
                                 }
                             }
                             return (
@@ -115,9 +114,7 @@ export function OptionInput(props: OptionsProps) {
                                                 });
                                                 // get value,
                                                 if (inputType === "checkbox") {
-                                                    // const values = getValues(name);
-                                                    // const vIndex = values.indexOf(value);
-                                                    // console.log("inputs =>", inputs);
+                                                   
                                                 } else {
                                                     setValue(name, e.target.value);
                                                 }

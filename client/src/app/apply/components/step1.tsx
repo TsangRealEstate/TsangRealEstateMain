@@ -41,7 +41,6 @@ export function StepOne({ callBack, defaultValues }: stepProps) {
 
     const SubmitForm = async (data: any) => {
         callBack(data);
-        console.log("Data from step-one form", data)
     };
 
     return (

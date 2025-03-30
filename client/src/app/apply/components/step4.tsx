@@ -56,7 +56,6 @@ export function StepFour({ callBack, goBack, defaultValues }: stepProps) {
 
   const SubmitForm = async (data: any) => {
     callBack(data);
-    console.log("Data from step four", data)
   };
 
   return (

@@ -12,20 +12,21 @@ export default function Apply() {
 
     const submitFormData = async (email: string, informations: any) => {
         try {
-            console.log("Data from step four", informations);
-            console.log("Email", email);
             const payload = {
                 ...informations,
                 email,
             };
 
-            // Axios POST request
             const response = await axios.post('http://localhost:5000/api/v1/tenants', payload);
 
-            console.log("✅ Response:", response.data);
+            console.log("Response:", response.data.message);
+
+            alert(`${response.data.message} ${email}`);
+
             setSetp(4);
         } catch (error: any) {
-            console.error("❌ Error posting data:", error.response?.data || error.message);
+            console.error("Error posting data:", error.response?.data || error.message);
+            alert(`❌ Failed to submit: ${error.response?.data?.error || error.message}`);
         }
     };
 

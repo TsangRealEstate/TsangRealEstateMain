@@ -3,8 +3,8 @@ import Agent from './Agent'
 
 export default function page() {
     return (
-        <>
-            <Agent />
-        </>
+        <div>
+        <Agent />
+        </div>
     )
 }
