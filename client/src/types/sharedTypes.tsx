@@ -1,4 +1,11 @@
-// types.ts
+export interface TenantDashboardProps {
+  tenants: Tenant[];
+  currentCardIndex: number;
+  swipeHandlers: any;
+  setCurrentCardIndex: React.Dispatch<React.SetStateAction<number>>;
+  handleSendInvite: (id: string, firstName: string, lastName: string) => void;
+}
+
 export interface Tenant {
   firstName: string;
   lastName: string;
@@ -7,8 +14,8 @@ export interface Tenant {
   mobileNumber: string;
   searchType: string;
   budget: string;
-  bedrooms: number;
-  bathrooms: number;
+  bedrooms: string;
+  bathrooms: string;
   leaseEndDate: string;
   desiredLocation?: string[];
   brokenLease?: string[];
