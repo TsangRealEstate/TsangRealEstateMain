@@ -19,7 +19,6 @@ export default function Agent() {
     const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-
     const [columns, setColumns] = useState<Column[]>([
         { id: "initial-leads", title: "Initial Leads", cards: [], newCard: "" },
         { id: "active-clients", title: "Active Clients", cards: [], newCard: "" },
