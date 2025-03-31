@@ -3,6 +3,7 @@ import { Column, Tenant } from "@/types/sharedTypes";
 import axios from "axios";
 import React, { useState, useRef, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
+import TenantModal from "./TenantDashboard";
 
 
 export default function Agent() {
@@ -15,7 +16,10 @@ export default function Agent() {
     const [error, setError] = useState<string>("");
     const [loading, setLoading] = useState<boolean>(false);
     const [authenticated, setAuthenticated] = useState<boolean>(false);
+    const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
     const [isDataLoaded, setIsDataLoaded] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const [columns, setColumns] = useState<Column[]>([
         { id: "initial-leads", title: "Initial Leads", cards: [], newCard: "" },
         { id: "active-clients", title: "Active Clients", cards: [], newCard: "" },
@@ -49,12 +53,13 @@ export default function Agent() {
 
             if (tenantData && tenantData.length > 0) {
                 setTenants(tenantData);
-                console.log(tenantData);
-                initialColumns[0].cards = tenantData.map((tenant: { firstName: string; lastName: string; }) => ({
-                    id: crypto.randomUUID(),
-                    content: `${tenant.firstName || "No Firstname"} ${tenant.lastName || "No Lastname"}`,
+                // console.log(tenantData);
+                initialColumns[0].cards = tenantData.map((tenant: { _id: string; firstName: string; lastName: string }) => ({
+                    id: tenant._id,
+                    content: `${tenant.firstName || "No Firstname"} ${tenant.lastName || "No Lastname"}`
                 }));
             }
+
 
             setColumns(initialColumns);
             setAuthenticated(true);
@@ -69,6 +74,15 @@ export default function Agent() {
             localStorage.removeItem("authPassword");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCardClick = (tenantId: string) => {
+        // console.log(tenantId);
+        const tenant = tenants.find((t) => t._id === tenantId);
+        if (tenant) {
+            setSelectedTenant(tenant);
+            setIsModalOpen(true);
         }
     };
 
@@ -239,6 +253,7 @@ export default function Agent() {
                                                                     ref={provided.innerRef}
                                                                     {...provided.draggableProps}
                                                                     {...provided.dragHandleProps}
+                                                                    onClick={() => handleCardClick(card.id)}
                                                                     className="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-all border border-gray-200 hover:border-blue-400 group"
                                                                 >
                                                                     <p className="text-gray-800 flex items-center">
@@ -274,6 +289,13 @@ export default function Agent() {
                                                         Add Card
                                                     </button>
                                                 </div>
+
+                                                {isModalOpen && selectedTenant && (
+                                                    <TenantModal
+                                                        tenant={selectedTenant}
+                                                        onClose={() => setIsModalOpen(false)}
+                                                    />
+                                                )}
                                             </div>
                                         )}
                                     </Droppable>
