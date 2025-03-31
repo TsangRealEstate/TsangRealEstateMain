@@ -17,3 +17,15 @@ export interface Tenant {
   createdAt: string;
   _id: string
 }
+
+export interface Card {
+  id: string;
+  content: string;
+}
+
+export interface Column {
+  id: string;
+  title: string;
+  cards: Card[];
+  newCard: string;
+}
