@@ -99,6 +99,16 @@ export default function Agent() {
             setPassword(storedPassword);
             setAuthenticated(true);
             fetchTenants(storedPassword);
+            const container = scrollContainerRef.current;
+            if (!container) return;
+
+            const handleTouchMove = (e: TouchEvent) => {
+                e.preventDefault();
+            };
+
+            container.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+            return () => container.removeEventListener("touchmove", handleTouchMove);
         }
     }, []);
 
@@ -141,7 +151,6 @@ export default function Agent() {
         const x = touch.pageX - scrollContainerRef.current.offsetLeft;
         const walk = (x - startX) * 2;
         scrollContainerRef.current.scrollLeft = scrollLeft - walk;
-        e.preventDefault();
     };
 
     // Card functions
@@ -163,10 +172,12 @@ export default function Agent() {
         setColumns(updatedColumns);
     };
 
+    // Drag and drop functionality
     const onDragEnd = (result: DropResult) => {
         if (!result.destination) return;
 
         const { source, destination } = result;
+
         if (source.droppableId === destination.droppableId && source.index === destination.index) {
             return;
         }
@@ -176,17 +187,23 @@ export default function Agent() {
         const destColIndex = updatedColumns.findIndex(col => col.id === destination.droppableId);
 
         if (sourceColIndex === destColIndex) {
+            // Moving within the same column
             const column = updatedColumns[sourceColIndex];
             const [movedCard] = column.cards.splice(source.index, 1);
             column.cards.splice(destination.index, 0, movedCard);
+            console.log(`Card "${movedCard.content}" moved within "${column.title}" from index ${source.index} to ${destination.index}`);
         } else {
+            // Moving across columns
             const sourceColumn = updatedColumns[sourceColIndex];
             const destColumn = updatedColumns[destColIndex];
             const [movedCard] = sourceColumn.cards.splice(source.index, 1);
             destColumn.cards.splice(destination.index, 0, movedCard);
+            console.log(`Card "${movedCard.content}" moved from "${sourceColumn.title}" to "${destColumn.title}"`);
         }
-
         setColumns(updatedColumns);
+
+        // Optional: Send real-time update if using WebSockets
+        // socket.emit('cardMoved', { updatedColumns });
     };
 
     return (
