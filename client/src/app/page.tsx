@@ -60,7 +60,7 @@ export default function Home() {
               <div className="mt-10 flex flex-col sm:flex-row items-center gap-6">
                 <Link
                   href="/apply"
-                  className="rounded-lg bg-blue-600 px-6 py-3.5 text-lg font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-blue-600 transition-colors duration-200"
+                  className="rounded-lg bg-blue-600 px-6 py-3.5 text-lg font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-4 focus-visible:outline-blue-600 transition-colors duration-200"
                 >
                   Get started
                 </Link>
@@ -92,7 +92,6 @@ export default function Home() {
           <div className="col md:col-span-2 md:col-start-2 md:mx-0 mx-10 shadow-[5px_10px_20px_1px_rgba(152,152,152,0.15)] text-center rounded-lg border border-blue-50 border-b-4 hover:border-blue-600">
             <Link href="/apply">
               <div className="bg-white size-20 mx-auto mt-14 flex justify-center items-center rounded-full shadow-[5px_10px_20px_1px_rgba(152,152,152,0.15)]">
-                {/* <RentHome className="size-12 text-blue-600" /> */}
                 <svg
                   width={32}
                   height={32}
@@ -118,10 +117,6 @@ export default function Home() {
               </div>
               <div className="text-base mt-4 mb-8 text-blue-600">
                 Find A Home
-                {/* <FeatherIcon
-                  icon="arrow-right"
-                  className="size-4 ml-3 inline-block"
-                /> */}
               </div>
             </Link>
           </div>
@@ -129,7 +124,6 @@ export default function Home() {
           <div className="col md:col-span-2 md:mx-0 mx-10 shadow-[5px_10px_20px_1px_rgba(152,152,152,0.15)] text-center rounded-lg border border-blue-50 border-b-4 hover:border-blue-600">
             <Link href="/apply">
               <div className="bg-white size-20 mx-auto mt-14 flex justify-center items-center rounded-full shadow-[5px_10px_20px_1px_rgba(152,152,152,0.15)]">
-                {/* <BuyHome className="size-12 text-blue-600" /> */}
                 <svg
                   width={32}
                   height={32}
@@ -154,10 +148,6 @@ export default function Home() {
               </div>
               <div className="text-base mt-4 mb-8 text-blue-600">
                 Find A Home
-                {/* <FeatherIcon
-                  icon="arrow-right"
-                  className="size-4 ml-3 inline-block"
-                /> */}
               </div>
             </Link>
           </div>
@@ -182,7 +172,7 @@ export default function Home() {
                     <div className="mt-4">
                       <Link
                         href="/apply"
-                        className="inline-block rounded-md bg-blue-600 px-5 py-2.5 text-lg font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        className="inline-block rounded-md bg-blue-600 px-5 py-2.5 text-lg font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                       >
                         Take the 1ST step
                       </Link>
@@ -194,10 +184,6 @@ export default function Home() {
                     <span className="[writing-mode:vertical-lr] text-blue-500 -mb-2 font-semibold">
                       - - -
                     </span>
-                    {/* <FeatherIcon
-                      icon="arrow-down"
-                      className="size-8 text-blue-500"
-                    /> */}
                   </div>
                 )}
               </div>

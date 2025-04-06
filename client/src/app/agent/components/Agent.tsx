@@ -1,9 +1,9 @@
 "use client";
-import { Column, Tenant } from "@/types/sharedTypes";
-import axios from "axios";
+import { Tenant } from "@/types/sharedTypes";
 import React, { useState, useRef, useEffect } from "react";
-import { DragDropContext, Droppable, Draggable, DropResult } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided } from "react-beautiful-dnd";
 import TenantModal from "./TenantDashboard";
+import { useAuth } from "@/context/AuthContext";
 
 
 export default function Agent() {
@@ -11,70 +11,10 @@ export default function Agent() {
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
-    const [password, setPassword] = useState<string>("");
-    const [tenants, setTenants] = useState<Tenant[]>([]);
-    const [error, setError] = useState<string>("");
-    const [loading, setLoading] = useState<boolean>(false);
-    const [authenticated, setAuthenticated] = useState<boolean>(false);
     const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
-    const [isDataLoaded, setIsDataLoaded] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [columns, setColumns] = useState<Column[]>([
-        { id: "initial-leads", title: "Initial Leads", cards: [], newCard: "" },
-        { id: "active-clients", title: "Active Clients", cards: [], newCard: "" },
-        { id: "sent-list", title: "Sent List", cards: [], newCard: "" },
-        { id: "touring", title: "Touring", cards: [], newCard: "" },
-        { id: "follow-ups", title: "Follow Ups", cards: [], newCard: "" },
-        { id: "application", title: "Application", cards: [], newCard: "" },
-        { id: "moving-in", title: "Moving In", cards: [], newCard: "" },
-        { id: "trash", title: "Trash", cards: [], newCard: "" },
-    ]);
+    const { authenticated, setColumns, password, columns, setPassword, fetchTenants, loading, error, tenants, isDataLoaded } = useAuth();
 
-    const fetchTenants = async (adminPassword: string) => {
-        setLoading(true);
-        setError("");
-        try {
-            const response = await axios.get("http://localhost:5000/api/v1/tenants", {
-                headers: { "admin-secret": adminPassword },
-            });
-            const tenantData = response.data.tenants;
-
-            const initialColumns = [
-                { id: "initial-leads", title: "Initial Leads", cards: [], newCard: "" },
-                { id: "active-clients", title: "Active Clients", cards: [], newCard: "" },
-                { id: "sent-list", title: "Sent List", cards: [], newCard: "" },
-                { id: "touring", title: "Touring", cards: [], newCard: "" },
-                { id: "follow-ups", title: "Follow Ups", cards: [], newCard: "" },
-                { id: "application", title: "Application", cards: [], newCard: "" },
-                { id: "moving-in", title: "Moving In", cards: [], newCard: "" },
-                { id: "trash", title: "Trash", cards: [], newCard: "" },
-            ];
-
-            if (tenantData && tenantData.length > 0) {
-                setTenants(tenantData);
-                // console.log(tenantData);
-                initialColumns[0].cards = tenantData.map((tenant: { _id: string; firstName: string; lastName: string }) => ({
-                    id: tenant._id,
-                    content: `${tenant.firstName || "No Firstname"} ${tenant.lastName || "No Lastname"}`
-                }));
-            }
-
-
-            setColumns(initialColumns);
-            setAuthenticated(true);
-            setIsDataLoaded(true);
-            localStorage.setItem("authenticated", "true");
-            localStorage.setItem("authPassword", adminPassword);
-        } catch (err: any) {
-            setError("Access denied. Incorrect password.");
-            setAuthenticated(false);
-            setIsDataLoaded(false);
-            localStorage.removeItem("authenticated");
-            localStorage.removeItem("authPassword");
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleCardClick = (tenantId: string) => {
         // console.log(tenantId);
@@ -92,23 +32,9 @@ export default function Agent() {
     };
 
     useEffect(() => {
-        const isAuthenticated = localStorage.getItem("authenticated") === "true";
         const storedPassword = localStorage.getItem("authPassword");
-
-        if (isAuthenticated && storedPassword) {
-            setPassword(storedPassword);
-            setAuthenticated(true);
+        if (storedPassword) {
             fetchTenants(storedPassword);
-            const container = scrollContainerRef.current;
-            if (!container) return;
-
-            const handleTouchMove = (e: TouchEvent) => {
-                e.preventDefault();
-            };
-
-            container.addEventListener("touchmove", handleTouchMove, { passive: false });
-
-            return () => container.removeEventListener("touchmove", handleTouchMove);
         }
     }, []);
 
@@ -262,9 +188,9 @@ export default function Agent() {
                                                     </span>
                                                 </div>
                                                 <div className="space-y-3 max-h-[200px] overflow-x-hidden overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                                                    {column.cards.map((card, i) => (
+                                                    {column.cards.map((card: { id: string; content: string }, i: number) => (
                                                         <Draggable key={card.id} draggableId={card.id} index={i}>
-                                                            {(provided) => (
+                                                            {(provided: DraggableProvided) => (
                                                                 <div
                                                                     ref={provided.innerRef}
                                                                     {...provided.draggableProps}

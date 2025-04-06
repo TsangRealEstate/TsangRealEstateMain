@@ -42,3 +42,17 @@ export interface DetailItemProps {
   value: React.ReactNode; // ✅ Accept JSX like <input />, <span>, text, number, etc.
   icon: React.ReactNode;
 }
+export interface AuthContextType {
+  authenticated: boolean;
+  setAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+  password: string;
+  setPassword: React.Dispatch<React.SetStateAction<string>>;
+  fetchTenants: (adminPassword: string) => Promise<void>;
+  loading: boolean;
+  error: string;
+  isDataLoaded: boolean;
+  tenants: any[];
+  setTenants: React.Dispatch<React.SetStateAction<any[]>>;
+  columns: any[];
+  setColumns: React.Dispatch<React.SetStateAction<any[]>>;
+}
