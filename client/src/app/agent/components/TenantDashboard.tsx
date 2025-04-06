@@ -11,9 +11,15 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
         <div className="fixed inset-0 flex items-center justify-center bg-black/15 z-50 p-4 cursor-default">
             <div className="bg-white relative rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between items-start mb-4">
-                    <h2 className="text-2xl font-bold">
-                        {tenant.firstName} {tenant.lastName}
-                    </h2>
+                    <span>
+                        <h2 className="text-2xl font-bold">
+                            {tenant.firstName} {tenant.lastName}
+                        </h2>
+                        <p className="text-sm text-gray-500">
+                            Joined {new Date(tenant.createdAt).toLocaleDateString()}
+                        </p>
+
+                    </span>
                     <button
                         onClick={onClose}
                         className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
