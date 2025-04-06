@@ -1,7 +1,7 @@
 const Tenant = require("../models/Tenant");
 const { sendMeetingInvite } = require("./meetingController");
 
-// ✅ Create or Update a Tenant
+// ✅ Create a Tenant
 const createOrUpdateTenant = async (req, res) => {
   try {
     const tenantData = req.body;
@@ -14,18 +14,9 @@ const createOrUpdateTenant = async (req, res) => {
     let tenant;
     let message;
 
-    // if (await Tenant.findOne({ email })) {
-    //     tenant = await Tenant.findOneAndUpdate(
-    //         { email },
-    //         { $set: tenantData },
-    //         { new: true, runValidators: true }
-    //     );
-    //     message = "Tenant updated successfully!";
-    // } else {
     tenant = new Tenant(tenantData);
     await tenant.save();
     message = "Tenant created successfully!";
-    // }
 
     const inviteResult = await sendMeetingInvite(tenant._id);
     return res.status(tenant.isNew ? 201 : 200).json({
@@ -60,7 +51,37 @@ const getAllTenants = async (req, res) => {
   }
 };
 
+// ✅ Update Tenant (by ID)
+const updateTenant = async (req, res) => {
+  try {
+    const tenantId = req.params.id;
+    const updateData = req.body;
+
+    if (!tenantId) {
+      return res.status(400).json({ error: "Tenant ID is required." });
+    }
+
+    const updatedTenant = await Tenant.findByIdAndUpdate(
+      tenantId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedTenant) {
+      return res.status(404).json({ error: "Tenant not found." });
+    }
+
+    res.status(200).json({
+      message: "Tenant updated successfully!",
+      tenant: updatedTenant,
+    });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createOrUpdateTenant,
   getAllTenants,
+  updateTenant,
 };

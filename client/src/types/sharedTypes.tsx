@@ -36,3 +36,9 @@ export interface Column {
   cards: Card[];
   newCard: string;
 }
+
+export interface DetailItemProps {
+  label: string;
+  value: React.ReactNode; // ✅ Accept JSX like <input />, <span>, text, number, etc.
+  icon: React.ReactNode;
+}

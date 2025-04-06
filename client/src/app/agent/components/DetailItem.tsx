@@ -1,8 +1,4 @@
-interface DetailItemProps {
-    label: string;
-    value: string | number;
-    icon: React.ReactNode;
-}
+import { DetailItemProps } from "@/types/sharedTypes";
 
 function DetailItem({ label, value, icon }: DetailItemProps) {
     return (
