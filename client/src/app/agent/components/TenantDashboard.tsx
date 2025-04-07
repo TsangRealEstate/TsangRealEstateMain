@@ -363,6 +363,10 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
                         </div>
                     )}
                 </div>
+
+                <section className="activity-log">
+
+                </section>
             </div>
         </div>
     );
