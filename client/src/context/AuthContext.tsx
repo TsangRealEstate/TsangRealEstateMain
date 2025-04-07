@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useState } from "react";
 import axios from "axios";
 import { AuthContextType, Column } from "@/types/sharedTypes";
+import axiosInstance from "@/api/axiosInstance";
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
@@ -18,7 +19,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
         setLoading(true);
         setError("");
         try {
-            const response = await axios.get("http://localhost:5000/api/v1/tenants", {
+            const response = await axiosInstance.get("/tenants", {
                 headers: { "admin-secret": adminPassword },
             });
             const tenantData = response.data.tenants;

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { StepOne } from "./components/step1";
 import { StepTwo } from "./components/step2";
 import { StepThree } from "./components/step3";
-import axios from 'axios';
+import axiosInstance from "@/api/axiosInstance";
 
 
 export default function Apply() {
@@ -17,7 +17,7 @@ export default function Apply() {
                 email,
             };
 
-            const response = await axios.post('http://localhost:5000/api/v1/tenants', payload);
+            const response = await axiosInstance.post('/tenants', payload);
 
             console.log("Response:", response.data.message);
 

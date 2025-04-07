@@ -80,8 +80,30 @@ const updateTenant = async (req, res) => {
   }
 };
 
+// ✅ Delete Tenant (by ID)
+const deleteTenant = async (req, res) => {
+  try {
+    const tenantId = req.params.id;
+
+    if (!tenantId) {
+      return res.status(400).json({ error: "Tenant ID is required." });
+    }
+
+    const deletedTenant = await Tenant.findByIdAndDelete(tenantId);
+
+    if (!deletedTenant) {
+      return res.status(404).json({ error: "Tenant not found." });
+    }
+
+    res.status(200).json({ message: "Tenant deleted successfully!" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createOrUpdateTenant,
   getAllTenants,
   updateTenant,
+  deleteTenant,
 };

@@ -2,8 +2,9 @@ import React, { JSX, useState } from "react";
 import { AiOutlineMail, AiOutlinePhone, AiOutlineDollarCircle, AiOutlineEdit } from "react-icons/ai";
 import { FiSearch, FiHome, FiCalendar, FiMapPin, FiAlertCircle, FiXCircle, FiPlus, FiX } from "react-icons/fi";
 import DetailItem from "./DetailItem";
-import axios from "axios";
 import { BsCheckLg } from "react-icons/bs";
+import { useAuth } from "@/context/AuthContext";
+import axiosInstance from "@/api/axiosInstance";
 const defaultColors = [
     { id: "red", color: "bg-red-500" },
     { id: "blue", color: "bg-blue-500" },
@@ -21,6 +22,7 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
     const [showNewLabelInput, setShowNewLabelInput] = useState(false);
     const [newLabelText, setNewLabelText] = useState("");
     const [newLabelColor, setNewLabelColor] = useState("#000000");
+    const { setTenants, setColumns } = useAuth();
 
     if (!tenant) return null;
 
@@ -33,7 +35,7 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
         if (!editField) return;
 
         try {
-            await axios.put(`http://localhost:5000/api/v1/tenants/${tenant._id}`, {
+            await axiosInstance.put(`/tenants/${tenant._id}`, {
                 [editField]: editedValue,
             });
 
@@ -142,6 +144,24 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
         setNewLabelColor("#000000");
     };
 
+    const handleDelete = async () => {
+        try {
+            const confirmed = window.confirm(`Are you sure you want to delete ${tenant.firstName} ${tenant.lastName}? This action cannot be undone.`);
+            if (!confirmed) return;
+            await axiosInstance.delete(`/tenants/${tenant._id}`);
+            setTenants(prevTenants => prevTenants.filter(t => t._id !== tenant._id));
+            setColumns(prevColumns =>
+                prevColumns.map(column => ({
+                    ...column,
+                    cards: column.cards.filter((card: { id: string; }) => card.id !== tenant._id)
+                }))
+            ); onClose();
+        } catch (error) {
+            console.error('Delete failed', error);
+            alert('Failed to delete tenant.');
+        }
+    };
+
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/15 z-50 p-4 cursor-default">
             <div className="bg-white relative rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl">
@@ -169,12 +189,20 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
                         </div>
                     </span>
 
-                    <button
-                        onClick={onClose}
-                        className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
-                    >
-                        Close
-                    </button>
+                    <div>
+                        <button
+                            onClick={handleDelete}
+                            className="bg-red-600 mr-3 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+                        >
+                            Delete
+                        </button>
+                        <button
+                            onClick={onClose}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            Close
+                        </button>
+                    </div>
                 </div>
 
                 {/* Preview Section */}
