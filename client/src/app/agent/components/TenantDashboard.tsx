@@ -188,14 +188,14 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
                         )}
                     </div>
 
-                    <div className={`flex flex-wrap gap-2 p-4 bg-gray-50 rounded-xl min-h-auto border border-gray-200 transition-all duration-200 ${selectedLabels.length === 0 ? 'items-center justify-center' : ''}`}>
+                    <div className={`flex flex-wrap gap-2 p-4 bg-gray-50 rounded-xl min-h-auto border border-gray-200 transition-all duration-200 ${selectedLabels.length === 0 ? 'hidden' : ''}`}>
                         {selectedLabels && (
                             selectedLabels.map(({ id, text, customColor }) => {
                                 const foundColor = colors.find((c) => c.id === id)?.color;
                                 return (
                                     <div
                                         key={id}
-                                        className={`flex items-center w-[150px] gap-x-2.5 justify-center h-[40px] rounded-md text-white text-[13px] font-semibold shadow-xs hover:shadow-sm transition-all ${!id.startsWith("custom-") ? foundColor : ''}`}
+                                        className={`flex items-center w-auto px-2 gap-x-2.5 justify-center h-[40px] rounded-md text-white text-[13px] font-semibold shadow-xs hover:shadow-sm transition-all ${!id.startsWith("custom-") ? foundColor : ''}`}
                                         style={{
                                             backgroundColor: id.startsWith("custom-") ? customColor : undefined,
                                         }}
