@@ -5,13 +5,7 @@ import DetailItem from "./DetailItem";
 import { BsCheckLg } from "react-icons/bs";
 import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
-const defaultColors = [
-    { id: "red", color: "bg-red-500" },
-    { id: "blue", color: "bg-blue-500" },
-    { id: "green", color: "bg-green-500" },
-    { id: "yellow", color: "bg-yellow-400" },
-    { id: "purple", color: "bg-purple-500" },
-];
+import { defaultColors } from "@/data/defaultColors";
 
 const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) => {
     const [editField, setEditField] = useState<string | null>(null);
