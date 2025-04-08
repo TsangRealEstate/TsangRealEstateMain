@@ -191,7 +191,7 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
             }}>
 
             <div className="bg-white relative rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl">
-                <div className="flex justify-between items-start mb-4">
+                <div className="flex justify-between items-start mb-4 Top_CTA_BTNS">
                     <span>
                         <h2 className="text-2xl font-semibold capitalize text-blue-500">
                             {tenant.firstName.charAt(0).toUpperCase() + tenant.firstName.slice(1)}{" "}
@@ -232,7 +232,7 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
                 </div>
 
                 {/* Preview Section */}
-                <div className="my-8">
+                <div className="my-8 preview_section">
                     <div className="flex items-center justify-between mb-3">
                         <h3 className="text-lg font-semibold text-gray-800">Label Preview</h3>
                         {selectedLabels.length > 0 && (
@@ -405,7 +405,6 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
                     showHeader={false}
                     className="mt-8"
                 />
-
             </div>
         </div>
     );
