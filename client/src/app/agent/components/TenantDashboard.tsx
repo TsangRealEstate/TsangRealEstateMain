@@ -183,7 +183,13 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
 
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black/15 z-50 p-4 cursor-default">
+        <div className="fixed inset-0 flex items-center justify-center bg-black/15 z-50 p-4 cursor-default"
+            onClick={(e) => {
+                if (e.target === e.currentTarget) {
+                    onClose();
+                }
+            }}>
+
             <div className="bg-white relative rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl">
                 <div className="flex justify-between items-start mb-4">
                     <span>
