@@ -14,6 +14,7 @@ app.use(
 const tenantRoutes = require("./routes/tenantRoutes");
 const meetingRoutes = require("./routes/meetingRoutes");
 const movementRoutes = require("./routes/movementRoutes");
+const labelRoutes = require("./routes/labelRoutes");
 
 app.use(express.json());
 
@@ -39,6 +40,7 @@ const connectDB = async () => {
 app.use("/api/v1/tenants", tenantRoutes);
 app.use("/api/v1/meetings", meetingRoutes);
 app.use("/api/v1/movements", movementRoutes);
+app.use("/api/v1/labels", labelRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello, Express with MongoDB!");

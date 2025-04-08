@@ -101,23 +101,50 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
         );
     };
 
+
+    useEffect(() => {
+        const fetchLabels = async () => {
+            try {
+                const res = await axiosInstance.get(`/labels/${tenant._id}`);
+                setSelectedLabels(res.data.labels || []);
+            } catch (error) {
+                console.error('Failed to fetch labels', error);
+            }
+        };
+
+        if (tenant._id) fetchLabels();
+    }, [tenant._id]);
+
+    // Toggle label selection (custom and predefined labels)
     const toggleLabel = (id: string) => {
-        if (selectedLabels.find((label) => label.id === id)) {
-            setSelectedLabels((prev) => prev.filter((label) => label.id !== id));
+        const isPredefinedLabel = !id.startsWith("custom-");
+        let updatedLabels: { id: string; text: string; customColor?: string }[];
+
+        if (isPredefinedLabel) {
+            updatedLabels = selectedLabels.some((label) => label.id === id)
+                ? selectedLabels.filter((label) => label.id !== id) // Remove label
+                : [
+                    ...selectedLabels,
+                    { id, text: inputTexts[id] || "", customColor: colors.find((c) => c.id === id)?.color || '' }
+                ];
         } else {
-            const foundColor = colors.find(c => c.id === id);
-            const isCustom = id.startsWith("custom-");
-            setSelectedLabels((prev) => [
-                ...prev,
-                {
-                    id,
-                    text: inputTexts[id] || "",
-                    customColor: isCustom ? inputTexts[id + "-color"] : undefined,
-                },
-            ]);
+            updatedLabels = selectedLabels.some((label) => label.id === id)
+                ? selectedLabels.filter((label) => label.id !== id)
+                : [
+                    ...selectedLabels,
+                    {
+                        id,
+                        text: inputTexts[id] || "",
+                        customColor: inputTexts[id + "-color"] || undefined,
+                    },
+                ];
         }
+
+        setSelectedLabels(updatedLabels);
+        saveLabelsToBackend(updatedLabels);
     };
 
+    // Handle input changes for labels (custom and predefined)
     const handleInputChange = (id: string, value: string) => {
         setInputTexts((prev) => ({ ...prev, [id]: value }));
         setSelectedLabels((prev) =>
@@ -127,11 +154,12 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
         );
     };
 
+    // Add a new label (custom label)
     const handleAddNewLabel = () => {
         if (!newLabelText.trim()) return;
 
         const newId = `custom-${Date.now()}`;
-        setColors((prev) => [...prev, { id: newId, color: "" }]); // Just add the ID
+        setColors((prev) => [...prev, { id: newId, color: "" }]);
         setInputTexts((prev) => ({
             ...prev,
             [newId]: newLabelText,
@@ -147,6 +175,24 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
         setNewLabelText("");
         setNewLabelColor("#000000");
     };
+
+    // Send the updated labels to the backend
+    const saveLabelsToBackend = async (updatedLabels: { id: string; text: string; customColor?: string }[]) => {
+        try {
+            await axiosInstance.post('/labels', {
+                cardId: tenant._id,
+                labels: updatedLabels,
+            });
+        } catch (error) {
+            console.error('Failed to save labels', error);
+        }
+    };
+
+    useEffect(() => {
+        if (selectedLabels.length > 0) {
+            saveLabelsToBackend(selectedLabels);
+        }
+    }, [selectedLabels]);
 
     const handleDelete = async () => {
         try {
@@ -189,7 +235,6 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
                     onClose();
                 }
             }}>
-
             <div className="bg-white relative rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-xl">
                 <div className="flex justify-between items-start mb-4 Top_CTA_BTNS">
                     <span>
