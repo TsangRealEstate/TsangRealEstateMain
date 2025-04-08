@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided } from "react-beautiful-dnd";
 import TenantModal from "./TenantDashboard";
 import { useAuth } from "@/context/AuthContext";
+import axiosInstance from "@/api/axiosInstance";
 
 
 export default function Agent() {
@@ -98,6 +99,19 @@ export default function Agent() {
         setColumns(updatedColumns);
     };
 
+    const logMovement = async (cardId: any, fromColumn: any, toColumn: any) => {
+        try {
+            await axiosInstance.post('/movements', {
+                cardId,
+                fromColumn,
+                toColumn,
+            });
+            // console.log('Movement logged successfully!');
+        } catch (error) {
+            console.error('Failed to log movement', error);
+        }
+    };
+
     // Drag and drop functionality
     const onDragEnd = (result: DropResult) => {
         if (!result.destination) return;
@@ -117,19 +131,17 @@ export default function Agent() {
             const column = updatedColumns[sourceColIndex];
             const [movedCard] = column.cards.splice(source.index, 1);
             column.cards.splice(destination.index, 0, movedCard);
-            console.log(`Card "${movedCard.content}" moved within "${column.title}" from index ${source.index} to ${destination.index}`);
+            //console.log(`Card "${movedCard.content}" with id:${movedCard.id}  moved within "${column.title}" from index ${source.index} to ${destination.index}`);
         } else {
             // Moving across columns
             const sourceColumn = updatedColumns[sourceColIndex];
             const destColumn = updatedColumns[destColIndex];
             const [movedCard] = sourceColumn.cards.splice(source.index, 1);
             destColumn.cards.splice(destination.index, 0, movedCard);
-            console.log(`Card "${movedCard.content}" moved from "${sourceColumn.title}" to "${destColumn.title}"`);
+            logMovement(movedCard.id, sourceColumn.title, destColumn.title);
+            //console.log(`Card "${movedCard.content}" with id:${movedCard.id}  moved from "${sourceColumn.title}" to "${destColumn.title}"`);
         }
         setColumns(updatedColumns);
-
-        // Optional: Send real-time update if using WebSockets
-        // socket.emit('cardMoved', { updatedColumns });
     };
 
     return (

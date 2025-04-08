@@ -1,4 +1,4 @@
-import React, { JSX, useState } from "react";
+import React, { JSX, useEffect, useState } from "react";
 import { AiOutlineMail, AiOutlinePhone, AiOutlineDollarCircle, AiOutlineEdit } from "react-icons/ai";
 import { FiSearch, FiHome, FiCalendar, FiMapPin, FiAlertCircle, FiXCircle, FiPlus, FiX } from "react-icons/fi";
 import DetailItem from "./DetailItem";
@@ -6,6 +6,8 @@ import { BsCheckLg } from "react-icons/bs";
 import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
 import { defaultColors } from "@/data/defaultColors";
+import ActivityLog from "./ActivityLog";
+
 
 const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) => {
     const [editField, setEditField] = useState<string | null>(null);
@@ -17,6 +19,14 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
     const [newLabelText, setNewLabelText] = useState("");
     const [newLabelColor, setNewLabelColor] = useState("#000000");
     const { setTenants, setColumns } = useAuth();
+    interface Movement {
+        _id: string;
+        fromColumn: string;
+        toColumn: string;
+        movedAt: string;
+    }
+
+    const [movements, setMovements] = useState<Movement[]>([]);
 
     if (!tenant) return null;
 
@@ -155,6 +165,22 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
             alert('Failed to delete tenant.');
         }
     };
+
+    const fetchMovements = async () => {
+        try {
+            const res = await axiosInstance.get(`/movements/${tenant._id}`);
+            setMovements(res.data);  // save to state
+        } catch (error) {
+            console.error('Failed to fetch movements', error);
+        }
+    };
+
+    useEffect(() => {
+        if (tenant?._id) {
+            fetchMovements();
+        }
+    }, [tenant]);
+
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black/15 z-50 p-4 cursor-default">
@@ -364,9 +390,16 @@ const TenantModal = ({ tenant, onClose }: { tenant: any, onClose: () => void }) 
                     )}
                 </div>
 
-                <section className="activity-log">
+                <ActivityLog
+                    movements={movements}
+                    title="Recent Activity"
+                    emptyMessage="Nothing to show yet"
+                    maxHeight="400px"
+                    userDisplayName="Alex Tsang"
+                    showHeader={false}
+                    className="mt-8"
+                />
 
-                </section>
             </div>
         </div>
     );

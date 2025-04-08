@@ -1,9 +1,7 @@
 "use client"
 import React, { createContext, useContext, useState } from "react";
-import axios from "axios";
 import { AuthContextType, Column } from "@/types/sharedTypes";
 import axiosInstance from "@/api/axiosInstance";
-
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
@@ -15,15 +13,35 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     const [tenants, setTenants] = useState<any[]>([]);
     const [columns, setColumns] = useState<Column[]>([]);
 
+    type Card = {
+        id: string | number;
+        content: string;
+    };
+
+    type Column = {
+        id: string;
+        title: string;
+        cards: Card[];
+        newCard: string;
+    };
+
+
     const fetchTenants = async (adminPassword: string) => {
         setLoading(true);
         setError("");
         try {
-            const response = await axiosInstance.get("/tenants", {
-                headers: { "admin-secret": adminPassword },
-            });
-            const tenantData = response.data.tenants;
-            const initialColumns = [
+            const [tenantsResponse, positionsResponse] = await Promise.all([
+                axiosInstance.get("/tenants", {
+                    headers: { "admin-secret": adminPassword },
+                }),
+                axiosInstance.get("/movements/positions/latest")
+            ]);
+
+            const tenantData = tenantsResponse.data.tenants;
+            const cardPositions = positionsResponse.data;
+
+            // Initialize columns with proper typing
+            const initialColumns: Column[] = [
                 { id: "initial-leads", title: "Initial Leads", cards: [], newCard: "" },
                 { id: "active-clients", title: "Active Clients", cards: [], newCard: "" },
                 { id: "sent-list", title: "Sent List", cards: [], newCard: "" },
@@ -34,12 +52,21 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
                 { id: "trash", title: "Trash", cards: [], newCard: "" },
             ];
 
-            if (tenantData && tenantData.length > 0) {
+            if (tenantData?.length > 0) {
                 setTenants(tenantData);
-                initialColumns[0].cards = tenantData.map((tenant: { _id: string; firstName: string; lastName: string }) => ({
-                    id: tenant._id,
-                    content: `${tenant.firstName || "No Firstname"} ${tenant.lastName || "No Lastname"}`,
-                }));
+                tenantData.forEach((tenant: { _id: string | number; firstName?: string; lastName?: string }) => {
+                    const card: Card = {
+                        id: tenant._id,
+                        content: `${tenant.firstName || "No Firstname"} ${tenant.lastName || "No Lastname"}`,
+                    };
+
+                    const lastPosition = cardPositions[tenant._id];
+                    const targetColumn = initialColumns.find(col =>
+                        lastPosition ? col.title === lastPosition : col.id === "initial-leads"
+                    );
+
+                    (targetColumn || initialColumns[0]).cards.push(card);
+                });
             }
 
             setColumns(initialColumns);
@@ -48,12 +75,13 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
             localStorage.setItem("authenticated", "true");
             localStorage.setItem("authPassword", adminPassword);
         } catch (err: any) {
-            setError(`${err.response.data.message}` || "Access denied. Incorrect password.");
+            const errorMessage = err.response?.data?.message || "Access denied. Incorrect password.";
+            setError(errorMessage);
             setAuthenticated(false);
             setIsDataLoaded(false);
             localStorage.removeItem("authenticated");
             localStorage.removeItem("authPassword");
-            console.error("Error fetching tenants:", err);
+            console.error("Error fetching initial data:", err);
         } finally {
             setLoading(false);
         }
