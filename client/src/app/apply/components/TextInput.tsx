@@ -15,8 +15,8 @@ export function TextInput(props: TextInputProps) {
         name,
         labelText,
         containerClass = "mt-4",
-        labelClass = "block text-sm font-medium leading-6",
-        inputContainerClass = "mt-2 flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-600",
+        labelClass = "block text-sm font-semibold leading-6 mb-3",
+        inputContainerClass = "mt-2 font-medium flex rounded-md shadow-sm  ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-blue-600",
         registerOptions = {},
     } = props.field;
 
@@ -34,7 +34,7 @@ export function TextInput(props: TextInputProps) {
             <div className={inputContainerClass}>
                 <input
                     id={name}
-                    className={`block px-3 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 ${errors?.[name] ? "ring-rose-600" : ""
+                    className={`block px-3 font-semibold leading-6 w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 ${errors?.[name] ? "ring-rose-600" : ""
                         } 
                       ${dirtyFields?.[name] && errors?.[name]
                             ? "ring-rose-600"

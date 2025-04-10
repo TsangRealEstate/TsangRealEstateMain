@@ -41,7 +41,7 @@ const formFields = {
     propertyOwnerName: {
         name: "propertyOwnerName",
         labelText:
-            'What is the full name of the property you currently have a lease at? <br /> If you are renting from a private owner, then please list "private owner".',
+            'What is the full name of the property you currently have a lease at? If you are renting from a private owner, then please list "private owner".',
         inputContainerClass,
         registerOptions: { required: true },
     },
@@ -170,7 +170,7 @@ const formFields = {
     grossIncome: {
         name: "grossIncome",
         labelText:
-            "What is the whole household's (all adults being added on the lease) monthly gross income (includes all job income, child support, monthly benefits, all other income provable via direct deposits/paystubs)? <br /> Reason: San Antonio properties require an income requirement for approved applications.",
+            "What is the whole household's (all adults being added on the lease) monthly gross income (includes all job income, child support, monthly benefits, all other income provable via direct deposits/paystubs)? Reason: San Antonio properties require an income requirement for approved applications.",
         inputContainerClass,
         registerOptions: { required: true },
     },
@@ -262,7 +262,7 @@ export function StepThree({ callBack, goBack }: stepProps) {
                         <div className="mt-4">
                             <label
                                 htmlFor="leaseEndDate"
-                                className="block text-sm font-medium leading-6"
+                               className="text-sm font-semibold leading-6 text-gray-900"
                             >
                                 When does your current lease end?
                             </label>
@@ -297,6 +297,7 @@ export function StepThree({ callBack, goBack }: stepProps) {
                         <TextInput
                             formState={formState}
                             field={formFields.propertyOwnerName}
+                            
                         />
 
                         {/* bedrooms */}

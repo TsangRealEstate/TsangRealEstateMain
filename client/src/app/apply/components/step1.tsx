@@ -55,7 +55,7 @@ export function StepOne({ callBack, defaultValues }: stepProps) {
                         <div className="sm:col-span-4">
                             <label
                                 htmlFor="email"
-                                className="block text-sm font-medium leading-6 text-gray-900"
+                                className="text-sm font-semibold leading-6 text-gray-900"
                             >
                                 What is a good email for apartments to send you information?
                             </label>
@@ -83,7 +83,7 @@ export function StepOne({ callBack, defaultValues }: stepProps) {
                         <div className="sm:col-span-4">
                             <label
                                 htmlFor="firstName"
-                                className="block text-sm font-medium leading-6 text-gray-900"
+                                className="text-sm font-semibold leading-6 text-gray-900"
                             >
                                 What is your legal first name?
                             </label>
@@ -111,7 +111,7 @@ export function StepOne({ callBack, defaultValues }: stepProps) {
                         <div className="sm:col-span-4">
                             <label
                                 htmlFor="lastName"
-                                className="block text-sm font-medium leading-6 text-gray-900"
+                               className="text-sm font-semibold leading-6 text-gray-900"
                             >
                                 What is your legal last name?
                             </label>
@@ -139,7 +139,7 @@ export function StepOne({ callBack, defaultValues }: stepProps) {
                         <div className="sm:col-span-4">
                             <label
                                 htmlFor="mobileNumber"
-                                className="block text-sm font-medium leading-6 text-gray-900"
+                                className="text-sm font-semibold leading-6 text-gray-900"
                             >
                                 What is your cell phone number? (i.e. 2109759800)
                             </label>
