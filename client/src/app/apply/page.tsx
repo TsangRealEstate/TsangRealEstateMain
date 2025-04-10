@@ -26,7 +26,7 @@ export default function Apply() {
             setSetp(4);
         } catch (error: any) {
             console.error("Error posting data:", error.response?.data || error.message);
-            alert(`❌ Failed to submit: ${error.response?.data?.error || error.message}`);
+            alert(`Failed to submit: ${error.response?.data?.error || error.message}`);
         }
     };
 
