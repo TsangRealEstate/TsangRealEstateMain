@@ -53,7 +53,6 @@ export function OptionInput(props: OptionsProps) {
                                     });
                                 }
                                 if (inputType === "checkbox") {
-                                   
                                 }
                             }
                             return (
@@ -114,14 +113,14 @@ export function OptionInput(props: OptionsProps) {
                                                 });
                                                 // get value,
                                                 if (inputType === "checkbox") {
-                                                   
+
                                                 } else {
                                                     setValue(name, e.target.value);
                                                 }
                                             }}
                                             className={`w-full border-transparent focus:ring-0 border-b-gray-300 border-2 text-blue-600 ring-0 focus:border-transparent focus:border-b-blue-500 ${inputs[value]?.selected && errors?.[name]
-                                                    ? "border-b-red-500"
-                                                    : ""
+                                                ? "border-b-red-500"
+                                                : ""
                                                 }`}
                                         />
                                     )}

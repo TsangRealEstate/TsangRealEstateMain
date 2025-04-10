@@ -4,6 +4,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import Datepicker, { DateValueType } from "react-tailwindcss-datepicker";
 import { TextInput } from "./TextInput";
 import { OptionInput } from "./Options";
+import { useState } from "react";
 
 const schema = yup.object().shape({
     instagram: yup.string().required("Instagram value is not valid"),
@@ -228,24 +229,31 @@ const formFields = {
 };
 
 export function StepThree({ callBack, goBack }: stepProps) {
+    const [isConsentChecked, setIsConsentChecked] = useState(false);
+
     const formState = useForm({
         mode: "onChange",
         reValidateMode: "onBlur",
         resolver: yupResolver(schema),
     });
     const {
-        register,
         formState: { errors, dirtyFields },
         handleSubmit,
-        getValues,
-        reset,
         control,
     } = formState;
 
+
     const SubmitForm = async (data: any) => {
+        if (!isConsentChecked) {
+            return;
+        }
         callBack(data);
     };
 
+    const handleConsentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setIsConsentChecked(e.target.checked);
+    };
+    
     return (
         <form onSubmit={handleSubmit(SubmitForm)} className="w-full px-10">
             <div className="space-y-12 w-full">
@@ -262,7 +270,7 @@ export function StepThree({ callBack, goBack }: stepProps) {
                         <div className="mt-4">
                             <label
                                 htmlFor="leaseEndDate"
-                               className="text-sm font-semibold leading-6 text-gray-900"
+                                className="text-sm font-semibold leading-6 text-gray-900"
                             >
                                 When does your current lease end?
                             </label>
@@ -297,7 +305,7 @@ export function StepThree({ callBack, goBack }: stepProps) {
                         <TextInput
                             formState={formState}
                             field={formFields.propertyOwnerName}
-                            
+
                         />
 
                         {/* bedrooms */}
@@ -329,6 +337,21 @@ export function StepThree({ callBack, goBack }: stepProps) {
                             formState={formState}
                             field={formFields.nonNegotiables}
                         />
+
+                        <div className="mt-4">
+                            <label className="flex items-start space-x-2">
+                                <input
+                                    type="checkbox"
+                                    checked={isConsentChecked}
+                                    onChange={handleConsentChange}
+                                    className="mt-1"
+                                />
+                                <span className="text-sm text-gray-700">
+                                    By clicking “Submit” below, I am providing my ESIGN signature and express written consent to receive phone calls, text messages, and emails from Tsang Real Estate Corporation (“Tsang Real Estate”) and its affiliates, including via automated technology, SMS/MMS messages, AI generated voice, and prerecorded and/or artificial voice messages. I acknowledge my consent is required to obtain any goods or services. To opt out from texts, I can reply, ‘out’ at any time. To opt out from emails, I can click on the ‘unsubscribe’ link in the emails. Message and data rates may apply.
+                                </span>
+                            </label>
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -343,7 +366,11 @@ export function StepThree({ callBack, goBack }: stepProps) {
                 </button>
                 <button
                     type="submit"
-                    className="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                    disabled={!isConsentChecked}
+                    className={`rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-offset-2 ${isConsentChecked
+                        ? 'bg-blue-600 text-white hover:bg-blue-500 focus-visible:outline-blue-600'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        }`}
                 >
                     Submit
                 </button>
