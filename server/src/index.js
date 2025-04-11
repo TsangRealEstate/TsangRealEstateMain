@@ -15,16 +15,23 @@ const tenantRoutes = require("./routes/tenantRoutes");
 const meetingRoutes = require("./routes/meetingRoutes");
 const movementRoutes = require("./routes/movementRoutes");
 const labelRoutes = require("./routes/labelRoutes");
+const {
+  createPredefinedLabels,
+  cleanupLabelCollection,
+} = require("./models/Label");
 
 app.use(express.json());
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.DB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.DB_URL);
     console.log("Connected to MongoDB");
+
+    // Clean up existing indexes first
+    await cleanupLabelCollection();
+
+    // Then initialize predefined labels
+    await createPredefinedLabels();
 
     // Start the Server AFTER DB Connects
     app.listen(PORT, () => {

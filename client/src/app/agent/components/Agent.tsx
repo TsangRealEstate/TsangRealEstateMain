@@ -6,9 +6,18 @@ import TenantModal from "./TenantDashboard";
 import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
 
+type CardLabel = {
+    _id: string;
+    name: string;
+    color: string;
+    isActive?: boolean;
+};
+
+type CardLabelsMap = Record<string, CardLabel[]>;
 
 export default function Agent() {
     const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [cardLabels, setCardLabels] = useState<CardLabelsMap>({});
     const [isDragging, setIsDragging] = useState(false);
     const [startX, setStartX] = useState(0);
     const [scrollLeft, setScrollLeft] = useState(0);
@@ -144,6 +153,25 @@ export default function Agent() {
         setColumns(updatedColumns);
     };
 
+    useEffect(() => {
+        if (!isModalOpen) {
+            const fetchAllData = async () => {
+                try {
+                    const [cardLabelsRes] = await Promise.all([
+                        axiosInstance.get("/labels/card-labels/all"),
+                    ]);
+
+                    setCardLabels(cardLabelsRes.data);
+                } catch (error) {
+                    console.error("Failed to fetch label data", error);
+                    alert("Failed to load label data");
+                }
+            };
+
+            fetchAllData();
+        }
+    }, [isModalOpen]);
+
     return (
         <DragDropContext onDragEnd={onDragEnd}>
             <div>
@@ -210,6 +238,21 @@ export default function Agent() {
                                                                     onClick={() => handleCardClick(card.id)}
                                                                     className="bg-white p-3 rounded-lg shadow-sm hover:shadow-md transition-all border border-gray-200 hover:border-blue-400 group"
                                                                 >
+                                                                    <div className="flex flex-row flex-wrap">
+                                                                        {cardLabels[card.id]?.map(label => (
+                                                                            <small
+                                                                                key={label._id}
+                                                                                className="w-fit px-2 py-1 rounded text-xs font-medium mb-2 mr-2"
+                                                                                style={{
+                                                                                    backgroundColor: `${label.color}20`,
+                                                                                    color: label.color
+                                                                                }}
+                                                                            >
+                                                                                {label.name}
+                                                                            </small>
+                                                                        ))}
+                                                                    </div>
+
                                                                     <p className="text-gray-800 flex items-center">
                                                                         <span className="mr-2 text-gray-400 group-hover:text-blue-500 transition-colors">
                                                                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
