@@ -19,11 +19,9 @@ interface CardLabel {
 
 interface LabelManagerProps {
     cardId: string;
-    onClose?: () => void;
-    onDelete?: () => void;
 }
 
-const LabelManager: React.FC<LabelManagerProps> = ({ cardId, onClose, onDelete }) => {
+const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
     const [allLabels, setAllLabels] = useState<Label[]>([]);
     const [cardLabels, setCardLabels] = useState<CardLabel[]>([]);
     const [showNewLabelForm, setShowNewLabelForm] = useState(false);
