@@ -5,8 +5,8 @@ import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided } 
 import TenantModal from "./TenantDashboard";
 import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
-import { FiChevronDown, FiSearch } from "react-icons/fi";
-import { AiOutlineMail, AiOutlineUser } from "react-icons/ai";
+import TenantSearch from "./TenantSearch";
+import AgentLoginForm from "./AgentLoginForm";
 
 type CardLabel = {
     _id: string;
@@ -36,7 +36,6 @@ export default function Agent() {
     const [scrollLeft, setScrollLeft] = useState(0);
     const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [filteredTenants, setFilteredTenants] = useState(tenants);
 
@@ -56,17 +55,10 @@ export default function Agent() {
         const filtered = tenants.filter(tenant =>
             `${tenant.firstName} ${tenant.lastName}`.toLowerCase().includes(term) ||
             tenant.email.toLowerCase().includes(term) ||
-            tenant.mobileNumber.includes(term)
+            tenant.mobileNumber?.toLowerCase().includes(term)
         );
 
         setFilteredTenants(filtered);
-        setIsDropdownOpen(term.length > 0);
-    };
-
-    const handleInputFocus = () => {
-        if (searchTerm.length > 0) {
-            setIsDropdownOpen(true);
-        }
     };
 
     // Handle manual authentication
@@ -210,81 +202,24 @@ export default function Agent() {
         <DragDropContext onDragEnd={onDragEnd}>
             <div className="2xl:container 2xl:mx-auto">
                 {!authenticated ? (
-                    <form onSubmit={handleSubmit} className="max-w-md text-center my-[8rem] mx-auto bg-white rounded-xl p-8 shadow-md">
-                        <h2 className="text-2xl font-bold">Agent Portal</h2>
-                        <p className="text-gray-600 my-5">Enter admin credentials to continue</p>
-                        <input
-                            type="password"
-                            placeholder="Enter admin password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full px-4 py-3 border rounded-lg mb-4"
-                            required
-                        />
-                        <button type="submit" className="w-full bg-blue-600 text-white py-3 rounded-lg">
-                            {loading ? "Authenticating..." : "Submit"}
-                        </button>
-                        {error && <p className="text-red-500 mt-2">{error}</p>}
-                    </form>
+                    <AgentLoginForm
+                        password={password}
+                        loading={loading}
+                        error={error}
+                        onPasswordChange={(e) => setPassword(e.target.value)}
+                        onSubmit={handleSubmit}
+                    />
                 ) : isDataLoaded ? (
                     <section>
-                        <div className="justify-between px-8 flex items-center py-8">
-                            <h1 className="text-3xl font-bold text-gray-800 my-5 text-center">Agent Dashboard</h1>
 
-                            {/* Search Input with Dropdown */}
-                            <div className="w-[350px] relative">
-                                <div className="relative">
-                                    <input
-                                        type="text"
-                                        placeholder="Find tenant: name, email, or phone..."
-                                        className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                        value={searchTerm}
-                                        onChange={handleSearch}
-                                        onFocus={handleInputFocus}
-                                        onBlur={() => setTimeout(() => setIsDropdownOpen(false), 200)}
-                                    />
-                                    <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                                        <FiSearch className="text-gray-400" />
-                                    </div>
-                                </div>
+                        <TenantSearch
+                            searchTerm={searchTerm}
+                            onSearchChange={handleSearch}
+                            filteredTenants={filteredTenants}
+                            onTenantSelect={handleCardClick}
+                        />
 
-                                {/* Dropdown Results */}
-                                {isDropdownOpen && filteredTenants.length > 0 && (
-                                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-96 overflow-y-auto">
-                                        {filteredTenants.map(tenant => (
-                                            <div
-                                                key={tenant._id}
-                                                onClick={() => handleCardClick(tenant._id)}
-                                                className="px-4 py-3 hover:bg-blue-50 cursor-pointer flex items-center border-b border-gray-100 last:border-b-0"
-                                            >
-                                                <div className="flex-shrink-0 mr-3 text-blue-500">
-                                                    <AiOutlineUser size={18} />
-                                                </div>
-                                                <div className="flex-1 min-w-0">
-                                                    <p className="text-sm font-medium text-gray-900 truncate">
-                                                        {tenant.firstName} {tenant.lastName}
-                                                    </p>
-                                                    <p className="text-sm text-gray-500 truncate flex items-center">
-                                                        <AiOutlineMail className="mr-1" size={14} />
-                                                        {tenant.email}
-                                                    </p>
-                                                </div>
-                                                <FiChevronDown className="ml-2 text-gray-400" size={16} />
-                                            </div>
-                                        ))}
-                                    </div>
-                                )}
-
-                                {/* No results message */}
-                                {isDropdownOpen && searchTerm && filteredTenants.length === 0 && (
-                                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-center text-gray-500">
-                                        No tenants found matching "{searchTerm}"
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="relative p-4 md:p-8 mx-auto bg-gradient-to-br from-gray-50 to-gray-100 min-h-[110vh] overflow-x-auto"
+                        <div className="relative drag-func p-4 md:p-8 mx-auto bg-gradient-to-br from-gray-50 to-gray-100 min-h-[110vh] overflow-x-auto"
                             ref={scrollContainerRef}
                             onMouseDown={startDrag}
                             onMouseMove={duringDrag}
