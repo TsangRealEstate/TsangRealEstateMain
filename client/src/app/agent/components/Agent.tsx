@@ -183,7 +183,6 @@ export default function Agent() {
                     setCardLabels(cardLabelsRes.data);
                 } catch (error) {
                     console.error("Failed to fetch label data", error);
-                    alert("Failed to load label data");
                 }
             };
 
