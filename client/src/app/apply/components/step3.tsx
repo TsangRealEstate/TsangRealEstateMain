@@ -253,7 +253,7 @@ export function StepThree({ callBack, goBack }: stepProps) {
     const handleConsentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setIsConsentChecked(e.target.checked);
     };
-    
+
     return (
         <form onSubmit={handleSubmit(SubmitForm)} className="w-full px-10">
             <div className="space-y-12 w-full">
@@ -346,7 +346,7 @@ export function StepThree({ callBack, goBack }: stepProps) {
                                     onChange={handleConsentChange}
                                     className="mt-1"
                                 />
-                                <span className="text-sm text-gray-700">
+                                <span className="text-sm font-bold text-gray-700">
                                     By clicking “Submit” below, I am providing my ESIGN signature and express written consent to receive phone calls, text messages, and emails from Tsang Real Estate Corporation (“Tsang Real Estate”) and its affiliates, including via automated technology, SMS/MMS messages, AI generated voice, and prerecorded and/or artificial voice messages. I acknowledge my consent is required to obtain any goods or services. To opt out from texts, I can reply, ‘out’ at any time. To opt out from emails, I can click on the ‘unsubscribe’ link in the emails. Message and data rates may apply.
                                 </span>
                             </label>
