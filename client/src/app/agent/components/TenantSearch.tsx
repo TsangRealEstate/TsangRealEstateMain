@@ -1,20 +1,7 @@
 import React, { useEffect } from "react";
 import { FiSearch, FiChevronDown } from "react-icons/fi";
 import { AiOutlineUser, AiOutlineMail } from "react-icons/ai";
-
-interface Tenant {
-    _id: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-}
-
-interface TenantSearchProps {
-    searchTerm: string;
-    onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-    filteredTenants: Tenant[];
-    onTenantSelect: (tenantId: string) => void;
-}
+import { TenantSearchProps } from "@/types/sharedTypes";
 
 const TenantSearch: React.FC<TenantSearchProps> = ({
     searchTerm,

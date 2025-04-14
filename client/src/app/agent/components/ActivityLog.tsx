@@ -1,24 +1,7 @@
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
+import { ActivityLogProps } from '@/types/sharedTypes';
 
-interface Movement {
-    _id: string;
-    fromColumn: string;
-    toColumn: string;
-    movedAt: string | Date;
-    userName?: string;
-    cardName?: string;
-}
-
-interface ActivityLogProps {
-    movements: Movement[];
-    title?: string;
-    emptyMessage?: string;
-    maxHeight?: string;
-    userDisplayName?: string;
-    showHeader?: boolean;
-    className?: string;
-}
 
 const ActivityLog: React.FC<ActivityLogProps> = ({
     movements = [],
@@ -51,7 +34,7 @@ const ActivityLog: React.FC<ActivityLogProps> = ({
                     <p className="mt-2 text-sm text-gray-500">{emptyMessage}</p>
                 </div>
             ) : (
-                <ul className={`overflow-y-auto divide-y divide-gray-100 divide-y flex flex-col-reverse`} style={{ maxHeight }}>
+                <ul className={`overflow-y-auto divide-y divide-gray-100 flex flex-col-reverse`} style={{ maxHeight }}>
                     {movements.map((movement) => (
                         <li
                             key={movement._id}

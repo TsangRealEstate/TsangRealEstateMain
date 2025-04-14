@@ -56,3 +56,61 @@ export interface AuthContextType {
   columns: any[];
   setColumns: React.Dispatch<React.SetStateAction<any[]>>;
 }
+
+export type CardLabel = {
+  _id: string;
+  name: string;
+  color: string;
+  isActive?: boolean;
+};
+
+export interface Tenant {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
+export interface TenantSearchProps {
+  searchTerm: string;
+  onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  filteredTenants: Tenant[];
+  onTenantSelect: (tenantId: string) => void;
+}
+
+export interface Movement {
+  _id: string;
+  fromColumn: string;
+  toColumn: string;
+  movedAt: string | Date;
+  userName?: string;
+  cardName?: string;
+}
+
+export interface ActivityLogProps {
+  movements: Movement[];
+  title?: string;
+  emptyMessage?: string;
+  maxHeight?: string;
+  userDisplayName?: string;
+  showHeader?: boolean;
+  className?: string;
+}
+
+export interface Label {
+  _id: string;
+  name: string;
+  color: string;
+  isPredefined?: boolean;
+}
+
+export interface CardLabel2 {
+  _id: string;
+  labelId: Label | string;
+  isActive: boolean;
+  customName?: string;
+}
+
+export interface LabelManagerProps {
+  cardId: string;
+}

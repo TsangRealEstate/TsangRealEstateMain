@@ -2,28 +2,12 @@
 import React, { useState, useEffect } from "react";
 import { FiPlus, FiX, FiEdit, FiTrash2 } from "react-icons/fi";
 import axiosInstance from "@/api/axiosInstance";
+import { LabelManagerProps, Label, CardLabel2 } from "@/types/sharedTypes";
 
-interface Label {
-    _id: string;
-    name: string;
-    color: string;
-    isPredefined?: boolean;
-}
-
-interface CardLabel {
-    _id: string;
-    labelId: Label | string;
-    isActive: boolean;
-    customName?: string;
-}
-
-interface LabelManagerProps {
-    cardId: string;
-}
 
 const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
     const [allLabels, setAllLabels] = useState<Label[]>([]);
-    const [cardLabels, setCardLabels] = useState<CardLabel[]>([]);
+    const [cardLabels, setCardLabels] = useState<CardLabel2[]>([]);
     const [showNewLabelForm, setShowNewLabelForm] = useState(false);
     const [newLabelName, setNewLabelName] = useState("");
     const [newLabelColor, setNewLabelColor] = useState("#3b82f6");

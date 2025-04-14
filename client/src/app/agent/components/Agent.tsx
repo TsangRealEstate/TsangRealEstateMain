@@ -1,5 +1,5 @@
 "use client";
-import { Tenant } from "@/types/sharedTypes";
+import { CardLabel, Tenant } from "@/types/sharedTypes";
 import React, { useState, useRef, useEffect } from "react";
 import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided } from "react-beautiful-dnd";
 import TenantModal from "./TenantDashboard";
@@ -7,13 +7,6 @@ import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
 import TenantSearch from "./TenantSearch";
 import AgentLoginForm from "./AgentLoginForm";
-
-type CardLabel = {
-    _id: string;
-    name: string;
-    color: string;
-    isActive?: boolean;
-};
 
 type CardLabelsMap = Record<string, CardLabel[]>;
 
