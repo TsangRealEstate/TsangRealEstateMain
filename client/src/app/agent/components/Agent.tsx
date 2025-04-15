@@ -1,7 +1,7 @@
 "use client";
 import { CardLabel, Tenant } from "@/types/sharedTypes";
 import React, { useState, useRef, useEffect } from "react";
-import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided } from "react-beautiful-dnd";
+import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided } from "@hello-pangea/dnd";
 import TenantModal from "./TenantDashboard";
 import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
