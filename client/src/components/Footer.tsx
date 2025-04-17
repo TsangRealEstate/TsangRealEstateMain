@@ -183,9 +183,9 @@ export function Footer() {
                             </li>
                             <li className="inline mx-2"> | </li>
                             <li className="inline">
-                                <a href="#" className="hover:text-slate-50">
+                                <Link href="/privacy-policy" className="hover:text-slate-50">
                                     Privacy Policy
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </div>
