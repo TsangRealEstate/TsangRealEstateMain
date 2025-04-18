@@ -48,22 +48,24 @@ const extractListingsFn = require("./extractListings");
 
   const page = await browser.newPage();
 
-  console.log("Navigating to:", finalUrl);
-
-  await page.goto(finalUrl, { waitUntil: "domcontentloaded" });
+  console.log("Navigating to baseUrl:", baseUrl);
+  console.log("Final url to navigate to:", finalUrl);
+  await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
 
   try {
     await page.waitForSelector(".MuiButtonBase-root", { timeout: 10000 });
-
     await page.click(".MuiButtonBase-root");
 
     console.log("Clicked 'I am a U.S. resident'");
-
     await new Promise((resolve) => setTimeout(resolve, 4000));
 
     console.log("Re-navigating to full URL with filters...");
-
     await page.goto(finalUrl, { waitUntil: "domcontentloaded" });
+
+    await new Promise((resolve) => setTimeout(resolve, 10000));
+    console.log(
+      "waiting for 10 seconds after re-navigating to full URL before page closed"
+    );
   } catch (err) {
     console.warn("Popup didn't appear or button not found:", err.message);
   }
