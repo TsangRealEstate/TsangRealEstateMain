@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "devStart": "nodemon src/index.js"
+    "devStart": "nodemon src/index.js",
+    "scrape:apartments": "node src/scraper/apartment-list-scraper.js"
   },
   "keywords": [],
   "author": "",
@@ -17,7 +18,8 @@
     "hbs": "^4.2.0",
     "mongoose": "^8.13.0",
     "nodemailer": "^6.10.0",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "puppeteer": "^24.6.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.9"
