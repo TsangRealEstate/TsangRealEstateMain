@@ -54,9 +54,16 @@ const extractListingsFn = require("./extractListings");
 
   try {
     await page.waitForSelector(".MuiButtonBase-root", { timeout: 10000 });
+
     await page.click(".MuiButtonBase-root");
+
     console.log("Clicked 'I am a U.S. resident'");
+
     await new Promise((resolve) => setTimeout(resolve, 4000));
+
+    console.log("Re-navigating to full URL with filters...");
+
+    await page.goto(finalUrl, { waitUntil: "domcontentloaded" });
   } catch (err) {
     console.warn("Popup didn't appear or button not found:", err.message);
   }
@@ -70,6 +77,7 @@ const extractListingsFn = require("./extractListings");
 
   console.log("Scraped Listings:");
   console.log(JSON.stringify(listings, null, 2));
+  console.log("Total Listings:", listings.length);
 
   await browser.close();
 })();
