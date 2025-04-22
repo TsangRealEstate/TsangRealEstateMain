@@ -1,85 +1,113 @@
 const puppeteer = require("puppeteer");
 const config = require("./config");
 const extractListingsFn = require("./extractListings");
+require("dotenv").config();
+const connectDB = require("../db");
+const Listing = require("../models/Listing");
+
+// Configuration
+const PAGES_TO_SCRAPE = 3;
+const DELAY_BETWEEN_PAGES = 2000;
+const POPUP_TIMEOUT = 10000;
 
 (async () => {
-  const {
-    state,
-    city,
-    beds,
-    baths,
-    minPrice,
-    maxPrice,
-    moveInDate,
-    amenities,
-    commuteLocation,
-    sort,
-  } = config;
-
-  const baseUrl = `https://www.apartmentlist.com/${state}/${city}`;
-  const queryParams = new URLSearchParams();
-
-  if (beds) queryParams.set("beds", beds.toString());
-  if (baths) queryParams.set("baths", baths.toString());
-  if (minPrice) queryParams.set("price_min", minPrice.toString());
-  if (maxPrice) queryParams.set("price_max", maxPrice.toString());
-  if (moveInDate) queryParams.set("move_in", moveInDate); // Format: YYYY-MM-DD
-  if (commuteLocation) queryParams.set("commute_location", commuteLocation);
-  if (sort) queryParams.set("sort", sort);
-
-  if (amenities && amenities.length > 0) {
-    queryParams.set("amenities", amenities.join(","));
-  }
-
-  const finalUrl = `${baseUrl}?${queryParams.toString()}`;
-
-  const browser = await puppeteer.launch({
-    headless: false,
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--start-maximized",
-      "--single-process",
-      "--no-zygote",
-    ],
-    defaultViewport: null,
-    executablePath: puppeteer.executablePath(),
-  });
-
-  const page = await browser.newPage();
-
-  console.log("Navigating to baseUrl:", baseUrl);
-  console.log("Final url to navigate to:", finalUrl);
-  await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
-
+  let browser;
   try {
-    await page.waitForSelector(".MuiButtonBase-root", { timeout: 10000 });
-    await page.click(".MuiButtonBase-root");
+    await connectDB();
+    const { state, city } = config;
+    const baseUrl = `https://www.apartmentlist.com/${state}/${city}`;
 
-    console.log("Clicked 'I am a U.S. resident'");
-    await new Promise((resolve) => setTimeout(resolve, 4000));
+    browser = await puppeteer.launch({
+      headless: false,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--start-maximized",
+        "--single-process",
+        "--no-zygote",
+      ],
+      defaultViewport: null,
+      executablePath: puppeteer.executablePath(),
+    });
 
-    console.log("Re-navigating to full URL with filters...");
-    await page.goto(finalUrl, { waitUntil: "domcontentloaded" });
+    const page = await browser.newPage();
 
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-    console.log(
-      "waiting for 10 seconds after re-navigating to full URL before page closed"
-    );
+    console.log("Navigating to baseUrl:", baseUrl);
+    await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+
+    // Handle the US resident popup if it appears
+    try {
+      await page.waitForSelector(".MuiButtonBase-root", {
+        timeout: POPUP_TIMEOUT,
+      });
+      await page.click(".MuiButtonBase-root");
+      console.log("Clicked 'I am a U.S. resident'");
+
+      await new Promise((resolve) => setTimeout(resolve, 4000)); // Wait after closing popup
+
+      await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
+      console.log("Re-navigated to URL after popup");
+
+      await new Promise((resolve) => setTimeout(resolve, 10000));
+    } catch (err) {
+      console.warn("Popup didn't appear or button not found:", err.message);
+    }
+
+    const scrapePage = async (url, pageNum) => {
+      console.log(`\nScraping page ${pageNum}: ${url}`);
+      try {
+        await page.goto(url, { waitUntil: "domcontentloaded" });
+
+        await page.waitForSelector('[data-testid="listing-card"]', {
+          timeout: 15000,
+        });
+
+        const listings = await page.evaluate(extractListingsFn);
+        console.log(`Found ${listings.length} listings on page ${pageNum}`);
+
+        const saveOps = listings.map((listing) =>
+          Listing.create(listing).catch((err) => {
+            console.error(
+              `Failed to save ${listing.name || "Unknown Listing"}:`,
+              err.message
+            );
+            return null;
+          })
+        );
+
+        const results = await Promise.all(saveOps);
+        const savedCount = results.filter(Boolean).length;
+
+        console.log(
+          `Successfully saved ${savedCount}/${listings.length} listings from page ${pageNum}`
+        );
+
+        return listings.length;
+      } catch (error) {
+        console.error(`Error scraping page ${pageNum}:`, error.message);
+        return 0;
+      }
+    };
+
+    let totalScraped = 0;
+    for (let i = 1; i <= PAGES_TO_SCRAPE; i++) {
+      const pageUrl = i === 1 ? baseUrl : `${baseUrl}/page-${i}`;
+      const count = await scrapePage(pageUrl, i);
+      totalScraped += count;
+
+      if (i < PAGES_TO_SCRAPE) {
+        await new Promise((resolve) => setTimeout(resolve, DELAY_BETWEEN_PAGES));
+      }
+    }
+
+    console.log(`\nDone! Total listings scraped: ${totalScraped}`);
   } catch (err) {
-    console.warn("Popup didn't appear or button not found:", err.message);
+    console.error("Fatal error during scraping:", err);
+  } finally {
+    if (browser) {
+      await browser.close();
+      console.log("Browser closed");
+    }
+    process.exit(0);
   }
-
-  await page.waitForSelector('[data-testid="listing-card"]', {
-    timeout: 15000,
-  });
-
-  // Inject and run the extractor function
-  const listings = await page.evaluate(extractListingsFn);
-
-  console.log("Scraped Listings:");
-  console.log(JSON.stringify(listings, null, 2));
-  console.log("Total Listings:", listings.length);
-
-  await browser.close();
 })();
