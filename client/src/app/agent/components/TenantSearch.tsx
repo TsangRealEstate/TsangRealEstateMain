@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { FiSearch, FiChevronDown } from "react-icons/fi";
 import { AiOutlineUser, AiOutlineMail } from "react-icons/ai";
 import { TenantSearchProps } from "@/types/sharedTypes";
+import Link from "next/link";
 
 const TenantSearch: React.FC<TenantSearchProps> = ({
     searchTerm,
@@ -41,7 +42,7 @@ const TenantSearch: React.FC<TenantSearchProps> = ({
 
     return (
         <div className="justify-between search-func px-8 flex items-center py-8">
-            <h1 className="text-3xl font-bold text-gray-800 my-5 text-center">Agent Dashboard</h1>
+            <h1 className="text-3xl font-bold text-gray-800 text-center">Agent Dashboard</h1>
 
             <div className="w-[350px] relative">
                 <div className="relative">
@@ -97,6 +98,13 @@ const TenantSearch: React.FC<TenantSearchProps> = ({
                     </div>
                 )}
             </div>
+
+            <Link
+                href="/listings"
+                className="inline-block rounded-md bg-blue-600 px-5 py-2.5 font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+            >
+                Listings
+            </Link>
         </div>
     );
 };

@@ -6,7 +6,7 @@ const connectDB = require("../db");
 const Listing = require("../models/Listing");
 
 // Configuration
-const PAGES_TO_SCRAPE = 3;
+const PAGES_TO_SCRAPE = 5;
 const DELAY_BETWEEN_PAGES = 2000;
 const POPUP_TIMEOUT = 10000;
 
