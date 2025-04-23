@@ -87,24 +87,89 @@ const scrapeListingDetailsById = async (req, res) => {
 
       // Wait for modal to appear
       try {
-        await page.waitForSelector('[role="dialog"], .MuiDialog-root', {
+        await page.waitForSelector(".animated-modal", {
           timeout: 10000,
         });
         console.log("✅ Modal opened successfully");
-      } catch {
+
+        // Now scrape the unit and pricing data from the modal
+        const unitsData = await page.evaluate(() => {
+          const units = [];
+
+          // Get all unit type sections (Studio, 1 Bedroom, 2 Bedrooms)
+          const unitTypeSections = Array.from(
+            document.querySelectorAll(
+              '[id^="Studio"], [id^="1 Bedroom"], [id^="2 Bedrooms"]'
+            )
+          );
+
+          unitTypeSections.forEach((section) => {
+            const unitType = section.id;
+
+            // Get all unit cards within this section
+            const unitCards = section.querySelectorAll(
+              '[aria-label^="Price and Availability"]'
+            );
+
+            unitCards.forEach((card) => {
+              const unitNumber = card
+                .querySelector('[class*="text-body-bold"]')
+                ?.textContent.trim();
+              const details = card
+                .querySelector('[class*="text-caption"]')
+                ?.textContent.trim();
+              const price = card
+                .querySelector('[class*="text-subheading-medium"]')
+                ?.textContent.trim();
+              const availability = card
+                .querySelector('[class*="text-caption-bold"]')
+                ?.textContent.trim();
+
+              if (unitNumber && price) {
+                units.push({
+                  unitType,
+                  unitNumber,
+                  details,
+                  price,
+                  availability: availability || "Available now",
+                });
+              }
+            });
+          });
+
+          return units;
+        });
+
+        console.log("📊 Scraped units data:", unitsData);
+
+        // Update the listing with the scraped data
+        listing.units = unitsData;
+        // await listing.save();
+
+        res.status(200).json({
+          success: true,
+          message: `Successfully scraped ${unitsData.length} units for '${listing.name}'`,
+          data: unitsData,
+          url,
+        });
+      } catch (error) {
         console.warn(
           "⚠️ Modal did not appear after clicking 'See all Floor Plans'"
         );
+        res.status(200).json({
+          success: false,
+          message: "Modal did not appear",
+          url,
+        });
       }
     } else {
       console.warn("⚠️ 'See all Floor Plans' button not found");
+      res.status(200).json({
+        success: false,
+        message: "'See all Floor Plans' button not found",
+        url,
+      });
     }
-
-    res.status(200).json({
-      success: true,
-      message: `Opened listing page for '${listing.name}', handled modal, and clicked 'See all Floor Plans'`,
-      url,
-    });
 
     setTimeout(async () => {
       await browser.close();
@@ -112,7 +177,7 @@ const scrapeListingDetailsById = async (req, res) => {
     }, 15000);
   } catch (error) {
     console.error("🔥 Error scraping listing by ID:", error.message);
-    res.status(500).json({ success: false, error: "Failed to open Puppeteer" });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
