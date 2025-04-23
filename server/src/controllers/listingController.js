@@ -45,7 +45,7 @@ const scrapeListingDetailsById = async (req, res) => {
     const url = `https://www.apartmentlist.com/tx/san-antonio/${slug}`;
 
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
