@@ -45,7 +45,7 @@ const scrapeListingDetailsById = async (req, res) => {
     const url = `https://www.apartmentlist.com/tx/san-antonio/${slug}`;
 
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
@@ -174,7 +174,7 @@ const scrapeListingDetailsById = async (req, res) => {
     setTimeout(async () => {
       await browser.close();
       console.log("🛑 Browser closed after preview.");
-    }, 15000);
+    }, 5000);
   } catch (error) {
     console.error("🔥 Error scraping listing by ID:", error.message);
     res.status(500).json({ success: false, error: error.message });

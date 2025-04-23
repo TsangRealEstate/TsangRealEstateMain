@@ -6,7 +6,13 @@ import {
     FaMapMarkerAlt,
     FaClock,
     FaSearch,
-    FaSortAmountDown
+    FaSortAmountDown,
+    FaBath,
+    FaBed,
+    FaCalendarAlt,
+    FaExternalLinkAlt,
+    FaRulerCombined,
+    FaTimes
 } from 'react-icons/fa';
 import { FiRefreshCw } from 'react-icons/fi';
 
@@ -19,16 +25,64 @@ interface Listing {
     scrapedAt: string;
 }
 
+interface UnitDetail {
+    unitType: string;
+    unitNumber: string;
+    details: string;
+    price: string;
+    availability: string;
+}
+
+interface ListingDetails {
+    success: boolean;
+    message: string;
+    data: UnitDetail[];
+    url: string;
+}
+
+
 const ApartmentListings = () => {
     const [listings, setListings] = useState<Listing[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [sortBy, setSortBy] = useState<'default' | 'price' | 'date'>('default');
+    const [unitDetails, setUnitDetails] = useState<ListingDetails | null>(null);
+    const [modalOpen, setModalOpen] = useState<boolean>(false);
+    const [detailsLoading, setDetailsLoading] = useState<boolean>(false);
+    const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
 
-    useEffect(() => {
-        fetchListings();
-    }, []);
+    const fetchUnitDetails = async (id: string) => {
+        try {
+            setDetailsLoading(true);
+            setError(null);
+
+            const response = await axiosInstance.get(`/listings/scrape/${id}`);
+            const data: ListingDetails = response.data;
+
+            if (data.success) {
+                setUnitDetails(data);
+            } else {
+                throw new Error(data.message || 'Failed to fetch unit details');
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        } finally {
+            setDetailsLoading(false);
+        }
+    };
+
+    const handleViewDetails = (listing: Listing) => {
+        setSelectedListing(listing);
+        setModalOpen(true);
+        fetchUnitDetails(listing._id);
+    };
+
+    const closeModal = () => {
+        setModalOpen(false);
+        setSelectedListing(null);
+        setUnitDetails(null);
+    };
 
     const fetchListings = async () => {
         try {
@@ -69,6 +123,10 @@ const ApartmentListings = () => {
             minute: '2-digit'
         });
     };
+
+    useEffect(() => {
+        fetchListings();
+    }, []);
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -172,6 +230,113 @@ const ApartmentListings = () => {
                     </div>
                 )}
 
+                {modalOpen && (
+                    <div className="fixed bg-black/15 z-50  inset-0">
+                        <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                            {/* Background overlay */}
+                            <div className="fixed inset-0 hidden transition-opacity" aria-hidden="true">
+                                <div className="absolute inset-0" onClick={closeModal}></div>
+                            </div>
+
+                            {/* Modal content */}
+                            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                    <div className="sm:flex sm:items-start">
+                                        <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                                            <div className="flex justify-between items-center">
+                                                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                                                    {selectedListing?.name}
+                                                </h3>
+                                                <button
+                                                    onClick={closeModal}
+                                                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                                                >
+                                                    <FaTimes className="h-5 w-5" />
+                                                </button>
+                                            </div>
+                                            <div className="mt-2">
+                                                <p className="text-sm text-gray-500 flex items-center">
+                                                    <FaMapMarkerAlt className="mr-1.5 h-3 w-3 text-gray-400" />
+                                                    {selectedListing?.address}
+                                                </p>
+                                                {unitDetails?.url && (
+                                                    <a
+                                                        href={unitDetails.url}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="mt-1 inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+                                                    >
+                                                        View on ApartmentList <FaExternalLinkAlt className="ml-1 h-3 w-3" />
+                                                    </a>
+                                                )}
+                                            </div>
+
+                                            {detailsLoading ? (
+                                                <div className="mt-6 flex justify-center">
+                                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                                                </div>
+                                            ) : unitDetails ? (
+                                                <div className="mt-6">
+                                                    <h4 className="text-md font-medium text-gray-900 mb-3">
+                                                        Available Units ({unitDetails.data.length})
+                                                    </h4>
+                                                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-h-[400px] overflow-y-auto">
+                                                        {unitDetails.data.map((unit, index) => (
+                                                            <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                                                                <h5 className="font-medium text-gray-900">{unit.unitType}</h5>
+                                                                <p className="text-sm text-gray-500 mb-2">{unit.unitNumber}</p>
+
+                                                                <div className="flex items-center text-sm text-gray-600 mb-1">
+                                                                    <FaBed className="mr-2 text-gray-400" />
+                                                                    {unit.details.split('·')[0].trim()}
+                                                                </div>
+                                                                <div className="flex items-center text-sm text-gray-600 mb-1">
+                                                                    <FaBath className="mr-2 text-gray-400" />
+                                                                    {unit.details.split('·')[1].trim()}
+                                                                </div>
+                                                                <div className="flex items-center text-sm text-gray-600 mb-1">
+                                                                    <FaRulerCombined className="mr-2 text-gray-400" />
+                                                                    {unit.details.split('·')[2].trim()}
+                                                                </div>
+                                                                <div className="flex items-center text-sm text-gray-600">
+                                                                    <FaCalendarAlt className="mr-2 text-gray-400" />
+                                                                    {unit.availability}
+                                                                </div>
+                                                                <div className="mt-3 font-medium text-blue-600">
+                                                                    {unit.price.includes('$') ? unit.price : `$${unit.price}`}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ) : error ? (
+                                                <div className="mt-6 bg-red-50 p-4 rounded-md">
+                                                    <p className="text-red-600">{error}</p>
+                                                    <button
+                                                        onClick={() => fetchUnitDetails(selectedListing?._id || '')}
+                                                        className="mt-2 text-sm text-red-600 hover:text-red-800"
+                                                    >
+                                                        Try again
+                                                    </button>
+                                                </div>
+                                            ) : null}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                                    <button
+                                        type="button"
+                                        onClick={closeModal}
+                                        className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Listings Grid */}
                 {!loading && !error && (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -203,6 +368,7 @@ const ApartmentListings = () => {
 
                                         <div className="mt-5">
                                             <button
+                                                onClick={() => handleViewDetails(listing)}
                                                 type="button"
                                                 className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                             >
