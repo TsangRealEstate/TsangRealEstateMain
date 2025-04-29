@@ -12,34 +12,39 @@ import {
     FaCalendarAlt,
     FaExternalLinkAlt,
     FaRulerCombined,
-    FaTimes
+    FaTimes,
+    FaDollarSign
 } from 'react-icons/fa';
 import { FiRefreshCw } from 'react-icons/fi';
 
 interface Listing {
     _id: string;
+    destinationURL: string;
+    lastScrapeInfo: string;
+    createdAt: string;
+    updatedAt: string;
+    rental_type: string;
+    available_units: AvailableUnit[] | null;
+}
+
+interface AvailableUnit {
+    id: number;
     name: string;
-    address: string;
-    price: string;
-    image: string;
-    scrapedAt: string;
+    bed: number;
+    bath: number;
+    sqft: number;
+    price: number;
+    units: Unit[];
 }
 
-interface UnitDetail {
-    unitType: string;
-    unitNumber: string;
-    details: string;
-    price: string;
+interface Unit {
+    id: number;
+    name: string;
+    price: number;
+    sqft: number;
     availability: string;
+    available_on: string;
 }
-
-interface ListingDetails {
-    success: boolean;
-    message: string;
-    data: UnitDetail[];
-    url: string;
-}
-
 
 const ApartmentListings = () => {
     const [listings, setListings] = useState<Listing[]>([]);
@@ -47,49 +52,14 @@ const ApartmentListings = () => {
     const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [sortBy, setSortBy] = useState<'default' | 'price' | 'date'>('default');
-    const [unitDetails, setUnitDetails] = useState<ListingDetails | null>(null);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
-    const [detailsLoading, setDetailsLoading] = useState<boolean>(false);
     const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-
-    const fetchUnitDetails = async (id: string) => {
-        try {
-            setDetailsLoading(true);
-            setError(null);
-
-            const response = await axiosInstance.get(`/listings/scrape/${id}`);
-            const data: ListingDetails = response.data;
-
-            if (data.success) {
-                setUnitDetails(data);
-            } else {
-                throw new Error(data.message || 'Failed to fetch unit details');
-            }
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'An unknown error occurred');
-        } finally {
-            setDetailsLoading(false);
-        }
-    };
-
-    const handleViewDetails = (listing: Listing) => {
-        setSelectedListing(listing);
-        setModalOpen(true);
-        fetchUnitDetails(listing._id);
-    };
-
-    const closeModal = () => {
-        setModalOpen(false);
-        setSelectedListing(null);
-        setUnitDetails(null);
-    };
 
     const fetchListings = async () => {
         try {
             setLoading(true);
             setError(null);
-
-            const response = await axiosInstance.get('/listings');
+            const response = await axiosInstance.get('/scrape-list');
             setListings(response.data.data);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An unknown error occurred');
@@ -97,18 +67,28 @@ const ApartmentListings = () => {
             setLoading(false);
         }
     };
+
+    const handleViewDetails = (listing: Listing) => {
+        setSelectedListing(listing);
+        setModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setModalOpen(false);
+        setSelectedListing(null);
+    };
+
     const filteredListings = listings.filter(listing =>
-        listing.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        listing.address.toLowerCase().includes(searchTerm.toLowerCase())
+        listing.destinationURL.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const sortedListings = [...filteredListings].sort((a, b) => {
         if (sortBy === 'price') {
-            const priceA = parseInt(a.price.replace(/[^0-9]/g, ''));
-            const priceB = parseInt(b.price.replace(/[^0-9]/g, ''));
+            const priceA = a.available_units?.[0]?.price || 0;
+            const priceB = b.available_units?.[0]?.price || 0;
             return priceA - priceB;
         } else if (sortBy === 'date') {
-            return new Date(b.scrapedAt).getTime() - new Date(a.scrapedAt).getTime();
+            return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
         }
         return 0;
     });
@@ -122,6 +102,26 @@ const ApartmentListings = () => {
             hour: '2-digit',
             minute: '2-digit'
         });
+    };
+
+    const formatPrice = (price: number) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 0
+        }).format(price);
+    };
+
+    const getPropertyNameFromUrl = (url: string) => {
+        try {
+            const pathParts = new URL(url).pathname.split('/');
+            return pathParts[pathParts.length - 1]
+                .split('-')
+                .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+        } catch {
+            return url;
+        }
     };
 
     useEffect(() => {
@@ -141,7 +141,7 @@ const ApartmentListings = () => {
                 </div>
 
                 {/* Search and Filter Bar */}
-                <div className="mb-8 bg-white p-4 rounded-lg shadow-md lg:w-2/3  mx-auto">
+                <div className="mb-8 bg-white p-4 rounded-lg shadow-md lg:w-2/3 mx-auto">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                         <div className="relative flex-grow">
                             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -150,7 +150,7 @@ const ApartmentListings = () => {
                             <input
                                 type="text"
                                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                placeholder="Search by name or address..."
+                                placeholder="Search by Name, Url..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
@@ -183,7 +183,7 @@ const ApartmentListings = () => {
                 </div>
 
                 {/* Total Listings Count */}
-                <div className="mb-6 bg-blue-50 p-3 rounded-lg border border-blue-100 lg:w-2/3  mx-auto">
+                <div className="mb-6 bg-blue-50 p-3 rounded-lg border border-blue-100 lg:w-2/3 mx-auto">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center">
                             <span className="text-blue-800 font-medium mr-2">Total Listings:</span>
@@ -230,22 +230,20 @@ const ApartmentListings = () => {
                     </div>
                 )}
 
-                {modalOpen && (
+                {modalOpen && selectedListing && (
                     <div className="fixed bg-black/15 z-50  inset-0">
                         <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                            {/* Background overlay */}
                             <div className="fixed inset-0 hidden transition-opacity" aria-hidden="true">
                                 <div className="absolute inset-0" onClick={closeModal}></div>
                             </div>
 
-                            {/* Modal content */}
                             <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
                                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                     <div className="sm:flex sm:items-start">
                                         <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
                                             <div className="flex justify-between items-center">
                                                 <h3 className="text-lg leading-6 font-medium text-gray-900">
-                                                    {selectedListing?.name}
+                                                    {getPropertyNameFromUrl(selectedListing.destinationURL)}
                                                 </h3>
                                                 <button
                                                     onClick={closeModal}
@@ -257,69 +255,59 @@ const ApartmentListings = () => {
                                             <div className="mt-2">
                                                 <p className="text-sm text-gray-500 flex items-center">
                                                     <FaMapMarkerAlt className="mr-1.5 h-3 w-3 text-gray-400" />
-                                                    {selectedListing?.address}
+                                                    {selectedListing.destinationURL}
                                                 </p>
-                                                {unitDetails?.url && (
-                                                    <a
-                                                        href={unitDetails.url}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="mt-1 inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
-                                                    >
-                                                        View on ApartmentList <FaExternalLinkAlt className="ml-1 h-3 w-3" />
-                                                    </a>
-                                                )}
+                                                <a
+                                                    href={selectedListing.destinationURL}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    className="mt-1 inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+                                                >
+                                                    View on ApartmentList <FaExternalLinkAlt className="ml-1 h-3 w-3" />
+                                                </a>
                                             </div>
 
-                                            {detailsLoading ? (
-                                                <div className="mt-6 flex justify-center">
-                                                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-                                                </div>
-                                            ) : unitDetails ? (
+                                            {selectedListing.available_units ? (
                                                 <div className="mt-6">
                                                     <h4 className="text-md font-medium text-gray-900 mb-3">
-                                                        Available Units ({unitDetails.data.length})
+                                                        Available Units ({selectedListing.available_units.reduce((acc, unit) => acc + (unit.units?.length || 0), 0)})
                                                     </h4>
                                                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-h-[400px] overflow-y-auto">
-                                                        {unitDetails.data.map((unit, index) => (
-                                                            <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                                                                <h5 className="font-medium text-gray-900">{unit.unitType}</h5>
-                                                                <p className="text-sm text-gray-500 mb-2">{unit.unitNumber}</p>
+                                                        {selectedListing.available_units.map((unit) => (
+                                                            unit.units.map((subUnit, index) => (
+                                                                <div key={`${unit.id}-${index}`} className="border border-blue-600 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                                                    <h5 className="font-medium text-gray-900">{unit.name}</h5>
+                                                                    <p className="text-sm text-gray-500 mb-2">{subUnit.name}</p>
 
-                                                                <div className="flex items-center text-sm text-gray-600 mb-1">
-                                                                    <FaBed className="mr-2 text-gray-400" />
-                                                                    {unit.details.split('·')[0].trim()}
+                                                                    <div className="flex items-center text-sm text-gray-600 mb-1">
+                                                                        <FaBed className="mr-2 text-gray-400" />
+                                                                        {unit.bed} beds
+                                                                    </div>
+                                                                    <div className="flex items-center text-sm text-gray-600 mb-1">
+                                                                        <FaBath className="mr-2 text-gray-400" />
+                                                                        {unit.bath} baths
+                                                                    </div>
+                                                                    <div className="flex items-center text-sm text-gray-600 mb-1">
+                                                                        <FaRulerCombined className="mr-2 text-gray-400" />
+                                                                        {unit.sqft} sqft
+                                                                    </div>
+                                                                    <div className="flex items-center text-sm text-gray-600">
+                                                                        <FaCalendarAlt className="mr-2 text-gray-400" />
+                                                                        Available {subUnit.available_on}
+                                                                    </div>
+                                                                    <div className="mt-3 font-medium text-blue-600 flex items-center">
+                                                                        {formatPrice(subUnit.price)}
+                                                                    </div>
                                                                 </div>
-                                                                <div className="flex items-center text-sm text-gray-600 mb-1">
-                                                                    <FaBath className="mr-2 text-gray-400" />
-                                                                    {unit.details.split('·')[1].trim()}
-                                                                </div>
-                                                                <div className="flex items-center text-sm text-gray-600 mb-1">
-                                                                    <FaRulerCombined className="mr-2 text-gray-400" />
-                                                                    {unit.details.split('·')[2].trim()}
-                                                                </div>
-                                                                <div className="flex items-center text-sm text-gray-600">
-                                                                    <FaCalendarAlt className="mr-2 text-gray-400" />
-                                                                    {unit.availability}
-                                                                </div>
-                                                                <div className="mt-3 font-medium text-blue-600">
-                                                                    {unit.price.includes('$') ? unit.price : `$${unit.price}`}
-                                                                </div>
-                                                            </div>
+                                                            ))
                                                         ))}
                                                     </div>
                                                 </div>
-                                            ) : error ? (
-                                                <div className="mt-6 bg-red-50 p-4 rounded-md">
-                                                    <p className="text-red-600">{error}</p>
-                                                    <button
-                                                        onClick={() => fetchUnitDetails(selectedListing?._id || '')}
-                                                        className="mt-2 text-sm text-red-600 hover:text-red-800"
-                                                    >
-                                                        Try again
-                                                    </button>
+                                            ) : (
+                                                <div className="mt-6 bg-yellow-50 p-4 rounded-md">
+                                                    <p className="text-yellow-700">No available units found for this property</p>
                                                 </div>
-                                            ) : null}
+                                            )}
                                         </div>
                                     </div>
                                 </div>
@@ -341,43 +329,67 @@ const ApartmentListings = () => {
                 {!loading && !error && (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {sortedListings.length > 0 ? (
-                            sortedListings.map((listing) => (
-                                <div key={listing._id} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-300">
-                                    <div className="px-4 py-5 sm:p-6">
-                                        <div className="flex items-center">
-                                            <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
-                                                <FaHome className="h-6 w-6 text-white" />
-                                            </div>
-                                            <div className="ml-4">
-                                                <h3 className="text-lg leading-6 font-medium text-gray-900">{listing.name}</h3>
-                                                <p className="text-sm text-blue-600 font-medium">{listing.price}</p>
-                                            </div>
-                                        </div>
+                            sortedListings.map((listing) => {
+                                const propertyName = getPropertyNameFromUrl(listing.destinationURL);
+                                const lowestPrice = listing.available_units?.reduce((min, unit) => {
+                                    const unitMin = unit.units.reduce((unitMin, subUnit) =>
+                                        Math.min(unitMin, subUnit.price), Infinity);
+                                    return Math.min(min, unitMin);
+                                }, Infinity);
 
-                                        <div className="mt-4">
-                                            <div className="flex items-center text-sm text-gray-500">
-                                                <FaMapMarkerAlt className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-                                                <p>{listing.address}</p>
+                                return (
+                                    <div key={listing._id} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-300">
+                                        <div className="px-4 py-5 sm:p-6">
+                                            <div className="flex items-center">
+                                                <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                                                    <FaHome className="h-6 w-6 text-white" />
+                                                </div>
+                                                <div className="ml-4">
+                                                    <h3 className="text-lg leading-6 font-medium text-gray-900">{propertyName}</h3>
+                                                    {lowestPrice && !isFinite(lowestPrice) ? (
+                                                        <p className="text-sm text-blue-600 font-medium">{formatPrice(lowestPrice)}</p>
+                                                    ) : (
+                                                        <p className="text-sm text-blue-700">
+                                                            {listing.rental_type.charAt(0).toUpperCase() + listing.rental_type.slice(1)}
+                                                        </p>
+                                                    )}
+                                                </div>
                                             </div>
 
-                                            <div className="mt-2 flex items-center text-sm text-gray-500">
-                                                <FaClock className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-                                                <p>ScrapedAt: {formatDate(listing.scrapedAt)}</p>
-                                            </div>
-                                        </div>
+                                            <div className="mt-4">
+                                                <div className="flex items-center text-sm text-gray-500">
+                                                    <FaMapMarkerAlt className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                                                    <p className="truncate">{listing.destinationURL}</p>
+                                                </div>
 
-                                        <div className="mt-5">
-                                            <button
-                                                onClick={() => handleViewDetails(listing)}
-                                                type="button"
-                                                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                            >
-                                                View Details
-                                            </button>
+                                                <div className="mt-2 flex items-center text-sm text-gray-500">
+                                                    <FaClock className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                                                    <p>Updated: {formatDate(listing.updatedAt)}</p>
+                                                </div>
+
+                                                {listing.available_units && (
+                                                    <div className="mt-2 flex items-center text-sm text-gray-500">
+                                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                            {listing.available_units.reduce((acc, unit) => acc + (unit.units?.length || 0), 0)} units
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            <div className="mt-5">
+                                                <button
+                                                    onClick={() => handleViewDetails(listing)}
+                                                    type="button"
+                                                    className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                    disabled={!listing.available_units || listing.available_units.length === 0}
+                                                >
+                                                    View Details
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            ))
+                                );
+                            })
                         ) : (
                             <div className="col-span-full text-center py-12">
                                 <svg

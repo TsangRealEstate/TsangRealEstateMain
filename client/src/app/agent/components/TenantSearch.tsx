@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { FiSearch, FiChevronDown } from "react-icons/fi";
 import { AiOutlineUser, AiOutlineMail } from "react-icons/ai";
-import { TenantSearchProps } from "@/types/sharedTypes";
+import { ApiResponse, TenantSearchProps } from "@/types/sharedTypes";
 import Link from "next/link";
+import AddListingModal from "./AddListingModal";
 
 const TenantSearch: React.FC<TenantSearchProps> = ({
     searchTerm,
@@ -11,6 +12,8 @@ const TenantSearch: React.FC<TenantSearchProps> = ({
     onTenantSelect,
 }) => {
     const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
     const inputRef = React.useRef<HTMLInputElement>(null);
 
     const handleInputFocus = () => {
@@ -39,6 +42,10 @@ const TenantSearch: React.FC<TenantSearchProps> = ({
             setIsDropdownOpen(true);
         }
     }, [searchTerm]);
+
+    const handleSuccess = (response: ApiResponse) => {
+        alert('Listing added susccessfully!');
+    };
 
     return (
         <div className="justify-between search-func px-8 flex items-center py-8">
@@ -99,12 +106,29 @@ const TenantSearch: React.FC<TenantSearchProps> = ({
                 )}
             </div>
 
-            <Link
-                href="/listings"
-                className="inline-block rounded-md bg-blue-600 px-5 py-2.5 font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-                Listings
-            </Link>
+            <div>
+                <button
+                    onClick={() => setIsModalOpen(true)}
+                    className="inline-block mr-3 rounded-md bg-blue-600 px-5 py-2.5 font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                    Add Listings
+                </button>
+
+                {isModalOpen && (
+                    <AddListingModal
+                        onClose={() => setIsModalOpen(false)}
+                        onSuccess={handleSuccess}
+                    />
+                )}
+
+
+                <Link
+                    href="/listings"
+                    className="inline-block rounded-md bg-blue-600 px-5 py-2.5 font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                >
+                    Listings
+                </Link>
+            </div>
         </div>
     );
 };

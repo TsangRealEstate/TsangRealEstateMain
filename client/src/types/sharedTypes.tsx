@@ -39,7 +39,7 @@ export interface Column {
 
 export interface DetailItemProps {
   label: string;
-  value: React.ReactNode; // ✅ Accept JSX like <input />, <span>, text, number, etc.
+  value: React.ReactNode;
   icon: React.ReactNode;
 }
 export interface AuthContextType {
@@ -113,4 +113,21 @@ export interface CardLabel2 {
 
 export interface LabelManagerProps {
   cardId: string;
+}
+
+export interface ListingFormData {
+  title: string;
+  destinationURL: string;
+}
+
+export interface ApiResponse {
+  message: string;
+  data?: {
+    id: string;
+    title: string;
+    destinationURL: string;
+    status: string;
+    createdAt: string;
+  };
+  error?: string;
 }

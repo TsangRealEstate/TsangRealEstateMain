@@ -11,6 +11,8 @@ const meetingRoutes = require("./routes/meetingRoutes");
 const movementRoutes = require("./routes/movementRoutes");
 const labelRoutes = require("./routes/labelRoutes");
 const listingRoutes = require("./routes/listingRoutes");
+const scrapeListRoutes = require('./routes/scrapeListRoutes');
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -25,6 +27,7 @@ app.use("/api/v1/meetings", meetingRoutes);
 app.use("/api/v1/movements", movementRoutes);
 app.use("/api/v1/labels", labelRoutes);
 app.use("/api/v1/listings", listingRoutes);
+app.use('/api/v1/scrape-list', scrapeListRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "Welcome. Server is up and running!" });
