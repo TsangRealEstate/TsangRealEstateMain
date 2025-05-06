@@ -1,5 +1,8 @@
 "use client"
 import axiosInstance from '@/api/axiosInstance';
+import { useAuth } from '@/context/AuthContext';
+import { Listing } from '@/types/sharedTypes';
+import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import {
     FaHome,
@@ -13,60 +16,23 @@ import {
     FaExternalLinkAlt,
     FaRulerCombined,
     FaTimes,
-    FaDollarSign
 } from 'react-icons/fa';
 import { FiRefreshCw } from 'react-icons/fi';
 
-interface Listing {
-    _id: string;
-    destinationURL: string;
-    lastScrapeInfo: string;
-    createdAt: string;
-    updatedAt: string;
-    rental_type: string;
-    available_units: AvailableUnit[] | null;
-}
 
-interface AvailableUnit {
-    id: number;
-    name: string;
-    bed: number;
-    bath: number;
-    sqft: number;
-    price: number;
-    units: Unit[];
-}
-
-interface Unit {
-    id: number;
-    name: string;
-    price: number;
-    sqft: number;
-    availability: string;
-    available_on: string;
-}
 
 const ApartmentListings = () => {
-    const [listings, setListings] = useState<Listing[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [error, setError] = useState<string | null>(null);
+    const {
+        fetchListings,
+        loading,
+        error,
+        listings,
+    } = useAuth();
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [sortBy, setSortBy] = useState<'default' | 'price' | 'date'>('default');
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
 
-    const fetchListings = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-            const response = await axiosInstance.get('/scrape-list');
-            setListings(response.data.data);
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'An unknown error occurred');
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const handleViewDetails = (listing: Listing) => {
         setSelectedListing(listing);
@@ -124,9 +90,7 @@ const ApartmentListings = () => {
         }
     };
 
-    useEffect(() => {
-        fetchListings();
-    }, []);
+
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -178,6 +142,16 @@ const ApartmentListings = () => {
                                 <FiRefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                                 Refresh
                             </button>
+
+                            <Link href={'/filter'} >
+                                <button
+                                    disabled={loading}
+                                    className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    {/* <FiRefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> */}
+                                    Apply Filters
+                                </button>
+                            </Link>
                         </div>
                     </div>
                 </div>

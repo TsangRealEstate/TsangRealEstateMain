@@ -1,6 +1,6 @@
 "use client"
-import React, { createContext, useContext, useState } from "react";
-import { AuthContextType, Column } from "@/types/sharedTypes";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { AuthContextType, Column, Listing } from "@/types/sharedTypes";
 import axiosInstance from "@/api/axiosInstance";
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
@@ -12,6 +12,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
     const [tenants, setTenants] = useState<any[]>([]);
     const [columns, setColumns] = useState<Column[]>([]);
+    const [listings, setListings] = useState<Listing[]>([]);
+    const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
 
     type Card = {
         id: string | number;
@@ -87,10 +89,41 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
         }
     };
 
+    const fetchListings = async () => {
+        try {
+            setLoading(true);
+            setError("");
+            const response = await axiosInstance.get('/scrape-list');
+            const listings = response.data.data;
+            setListings(listings);
+
+            // Extract neighborhoods directly from each listing
+            const allNeighborhoods = listings
+                .map((listing: any) => listing.neighborhood)
+                .filter((neighborhood: string | undefined): neighborhood is string => !!neighborhood);
+
+            // Get unique neighborhoods and filter out any undefined values
+            const uniqueNeighborhoods: string[] = [...new Set(allNeighborhoods)].filter((n): n is string => typeof n === "string");
+            setNeighborhoods(uniqueNeighborhoods);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An unknown error occurred');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (localStorage.getItem("authenticated") === "true") {
+            fetchListings()
+        }
+    }, [])
+
+
     return (
         <AuthContext.Provider
             value={{
                 authenticated,
+                fetchListings,
                 setAuthenticated,
                 password,
                 setPassword,
@@ -102,6 +135,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
                 setTenants,
                 columns,
                 setColumns,
+                listings,
+                neighborhoods
             }}
         >
             {children}

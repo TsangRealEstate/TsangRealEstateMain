@@ -1,3 +1,4 @@
+
 export interface TenantDashboardProps {
   tenants: Tenant[];
   currentCardIndex: number;
@@ -44,6 +45,7 @@ export interface DetailItemProps {
 }
 export interface AuthContextType {
   authenticated: boolean;
+  fetchListings: () => Promise<void>;
   setAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
   password: string;
   setPassword: React.Dispatch<React.SetStateAction<string>>;
@@ -52,6 +54,8 @@ export interface AuthContextType {
   error: string;
   isDataLoaded: boolean;
   tenants: any[];
+  listings: Listing[];
+  neighborhoods: string[];
   setTenants: React.Dispatch<React.SetStateAction<any[]>>;
   columns: any[];
   setColumns: React.Dispatch<React.SetStateAction<any[]>>;
@@ -130,4 +134,38 @@ export interface ApiResponse {
     createdAt: string;
   };
   error?: string;
+}
+
+
+
+export interface Listing {
+    _id: string;
+    destinationURL: string;
+    lastScrapeInfo: string;
+    createdAt: string;
+    updatedAt: string;
+    rental_type: string;
+    available_units: AvailableUnit[] | null;
+    Information?: {
+        neighborhood?: string;
+    };
+}
+
+interface AvailableUnit {
+    id: number;
+    name: string;
+    bed: number;
+    bath: number;
+    sqft: number;
+    price: number;
+    units: Unit[];
+}
+
+interface Unit {
+    id: number;
+    name: string;
+    price: number;
+    sqft: number;
+    availability: string;
+    available_on: string;
 }
