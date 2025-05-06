@@ -1,9 +1,8 @@
 "use client"
-import axiosInstance from '@/api/axiosInstance';
 import { useAuth } from '@/context/AuthContext';
 import { Listing } from '@/types/sharedTypes';
 import Link from 'next/link';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
     FaHome,
     FaMapMarkerAlt,
@@ -18,7 +17,6 @@ import {
     FaTimes,
 } from 'react-icons/fa';
 import { FiRefreshCw } from 'react-icons/fi';
-
 
 
 const ApartmentListings = () => {
@@ -137,7 +135,7 @@ const ApartmentListings = () => {
                             <button
                                 onClick={fetchListings}
                                 disabled={loading}
-                                className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`inline-flex items-center px-4 py-2 border border-transparent text-lg font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 <FiRefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                                 Refresh
@@ -146,9 +144,9 @@ const ApartmentListings = () => {
                             <Link href={'/filter'} >
                                 <button
                                     disabled={loading}
-                                    className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`inline-flex items-center px-4 py-2 border border-transparent text-lg font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
-                                    {/* <FiRefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} /> */}
+                                    <FaSortAmountDown className="h-5 w-5 text-white mr-2" />
                                     Apply Filters
                                 </button>
                             </Link>

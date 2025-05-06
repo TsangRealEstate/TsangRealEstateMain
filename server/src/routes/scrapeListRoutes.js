@@ -64,7 +64,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-// GET endpoint to list all URLs with simplified data 
+// GET endpoint to list all URLs with simplified data
 router.get("/", async (req, res) => {
   try {
     const entries = await ScrapeListModel.find({})

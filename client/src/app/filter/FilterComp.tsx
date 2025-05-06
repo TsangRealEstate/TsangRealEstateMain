@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import DatePicker from 'react-tailwindcss-datepicker';
 import axios from 'axios';
 import type { DateValueType } from 'react-tailwindcss-datepicker';
+import Link from 'next/link';
 
 interface Photo {
     type: string;
@@ -406,14 +407,15 @@ export default function FilterComp() {
                                                     {propertyGroup.Information.street_address}, {propertyGroup.Information.city}, {propertyGroup.Information.state} {propertyGroup.Information.zip}
                                                 </p>
                                             </div>
-                                            <a
-                                                href={propertyGroup.destinationURL}
+
+                                            <Link
+                                                href={`/listings/${propertyGroup._id}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                                             >
                                                 View Details
-                                            </a>
+                                            </Link>
                                         </div>
 
                                         {/* Available Units */}
