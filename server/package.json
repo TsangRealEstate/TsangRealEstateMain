@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "devStart": "nodemon src/index.js",
-    "build": "npm install", 
+    "start": "node src/index.js",
     "scrape:apartments": "node src/scraper/apartment-list-scraper.js"
   },
   "keywords": [],
