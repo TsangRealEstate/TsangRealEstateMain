@@ -133,7 +133,11 @@ const getAmenityIcon = (amenityName: string) => {
     }
 };
 
-export default function PropertyDetailPage({ params }: { params: { id: string } }) {
+interface PropertyDetailPageProps {
+    params: Promise<{ id: string }>;
+}
+
+export default function PropertyDetailPage({ params }: PropertyDetailPageProps) {
     const router = useRouter();
     const [property, setProperty] = useState<PropertyData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -142,7 +146,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
     useEffect(() => {
         const fetchProperty = async () => {
             try {
-                const { id } = params;
+                const { id } = await params;
                 const response = await axiosInstance.get(`/scrape-list/${id}`);
                 setProperty(response.data.data);
             } catch (err) {
