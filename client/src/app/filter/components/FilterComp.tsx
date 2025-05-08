@@ -194,7 +194,7 @@ export default function FilterComp() {
     return (
         <div className="p-6 bg-white my-6">
 
-            <div className='w-[50%] mx-auto'>
+            <div className='lg:w-[50%] mx-auto'>
                 <button
                     onClick={() => router.back()}
                     className="mb-10 flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-100 transition"
@@ -205,7 +205,7 @@ export default function FilterComp() {
             </div>
 
 
-            <h2 className="text-xl font-bold mb-6 w-[50%] mx-auto text-gray-800">FILTER PROPERTIES</h2>
+            <h2 className="text-xl font-bold mb-6 lg:w-[50%] mx-auto text-gray-800">FILTER PROPERTIES</h2>
 
             <section className='filter-properties-functionality lg:not-last:w-[50%] mx-auto'>
                 {/* Area Filter - Improved dropdown */}
@@ -383,7 +383,7 @@ export default function FilterComp() {
 
             </section>
 
-            <section className='result-data w-[80%] mx-auto'>
+            <section className='result-data lg:w-[80%] mx-auto'>
                 {/* Results Section */}
                 {loading && (
                     <div className="flex justify-center items-center p-8">
@@ -393,11 +393,11 @@ export default function FilterComp() {
 
                 {results && (
                     <div>
-                        <h2 className="text-xl font-bold mb-6 text-gray-800">
+                        <h2 className="text-xl font-bold my-6 text-gray-800">
                             {results.count} {results.count === 1 ? 'Property' : 'Properties'} Found
                         </h2>
 
-                        <div className="space-y-6 grid-cols-2 items-start gap-y-[20px] gap-x-[50px] grid">
+                        <div className="space-y-6 lg:grid-cols-2 items-start gap-y-[20px] gap-x-[50px] grid">
                             {results.data.map((propertyGroup, index) => (
                                 <div key={index} className="bg-white rounded-xl shadow-md overflow-hidden">
                                     {/* Property Header with Photo */}
@@ -425,7 +425,7 @@ export default function FilterComp() {
 
                                     {/* Property Details */}
                                     <div className="p-6">
-                                        <div className="flex justify-between items-center mb-4">
+                                        <div className="flex justify-between lg:flex-row flex-col lg:items-center mb-4">
                                             <div>
                                                 <p className="text-gray-600">
                                                     {propertyGroup.Information.street_address}, {propertyGroup.Information.city}, {propertyGroup.Information.state} {propertyGroup.Information.zip}
