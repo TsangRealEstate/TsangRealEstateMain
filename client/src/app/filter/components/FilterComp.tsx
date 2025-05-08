@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AiOutlineArrowLeft } from 'react-icons/ai';
 import FloorPlanGallery from './FloorPlanGallery';
+import axiosInstance from '@/api/axiosInstance';
 
 interface Photo {
     type: string;
@@ -172,7 +173,7 @@ export default function FilterComp() {
             }
 
             // Make API call
-            const response = await axios.get('http://localhost:5000/api/v1/scrape-list/filter', {
+            const response = await axiosInstance.get('/scrape-list/filter', {
                 params
             });
 
