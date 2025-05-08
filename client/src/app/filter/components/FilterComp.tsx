@@ -176,8 +176,7 @@ export default function FilterComp() {
                 params
             });
 
-            console.log("Params:", params)
-            console.log('Filtered results:', response.data);
+            // console.log('Filtered results:', response.data);
             setResults(response.data);
 
         } catch (err) {

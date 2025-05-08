@@ -28,7 +28,7 @@ router.post("/", async (req, res) => {
 
     // Create new entry
     const newEntry = await ScrapeListModel.create({
-      title: title || `Scrape - ${new Date().toLocaleDateString()}`,
+      title: title || `San Antonio Apartments`,
       destinationURL,
       lastScrapeInfo: "none",
     });
@@ -284,6 +284,57 @@ router.get("/:id", async (req, res) => {
               stack: error.stack,
             }
           : undefined,
+    });
+  }
+});
+
+// DELETE endpoint to remove a property by URL (encoded)
+router.delete("/url/:encodedUrl", async (req, res) => {
+  try {
+    const { encodedUrl } = req.params;
+    const destinationURL = decodeURIComponent(encodedUrl);
+
+    // Validate URL format
+    try {
+      new URL(
+        destinationURL.startsWith("http")
+          ? destinationURL
+          : `https://${destinationURL}`
+      );
+    } catch (err) {
+      return res.status(400).json({
+        error: "Invalid URL",
+        message: "Please provide a valid URL",
+      });
+    }
+
+    const deletedProperty = await ScrapeListModel.findOneAndDelete({
+      destinationURL: { $regex: destinationURL, $options: "i" },
+    });
+
+    if (!deletedProperty) {
+      return res.status(404).json({
+        error: "Not Found",
+        message: `No property found with URL: ${destinationURL}`,
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "Property deleted successfully",
+      data: {
+        id: deletedProperty._id,
+        title: deletedProperty.title,
+        destinationURL: deletedProperty.destinationURL,
+      },
+    });
+  } catch (error) {
+    console.error(`Error deleting property by URL:`, error);
+    res.status(500).json({
+      error: "Server Error",
+      message: "Failed to delete property",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
     });
   }
 });
