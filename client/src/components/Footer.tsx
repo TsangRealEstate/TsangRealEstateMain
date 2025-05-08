@@ -31,7 +31,7 @@ export function Footer() {
                 <div className="grid grid-cols-1">
                     <div className="relative py-16">
                         <div className="relative w-full">
-                            <div className="grid md:grid-cols-12 grid-cols-1 gap-[30px]">
+                            <div className="grid md:grid-cols-12 grid-cols-1 lg:px-0 px-[1rem] gap-[30px]">
                                 <div className="lg:col-span-4 md:col-span-12 flex flex-col px-2 md:px-0 items-center md:items-start">
                                     <Link
                                         href="/"
