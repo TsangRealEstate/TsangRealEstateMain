@@ -174,6 +174,8 @@ router.get("/filter", async (req, res) => {
           _id: 1,
           title: 1,
           destinationURL: 1,
+          "Information.specials": 1,
+          "Information.prices": 1,
           "Information.display_name": 1,
           "Information.street_address": 1,
           "Information.neighborhood": 1,

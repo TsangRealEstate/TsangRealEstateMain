@@ -224,20 +224,6 @@ const ApartmentListings = () => {
                                                     <FaTimes className="h-5 w-5" />
                                                 </button>
                                             </div>
-                                            <div className="mt-2">
-                                                <p className="text-sm text-gray-500 flex items-center">
-                                                    <FaMapMarkerAlt className="mr-1.5 h-3 w-3 text-gray-400" />
-                                                    {selectedListing.destinationURL}
-                                                </p>
-                                                <a
-                                                    href={selectedListing.destinationURL}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="mt-1 inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
-                                                >
-                                                    View on ApartmentList <FaExternalLinkAlt className="ml-1 h-3 w-3" />
-                                                </a>
-                                            </div>
 
                                             {selectedListing.available_units ? (
                                                 <div className="mt-6">
@@ -329,11 +315,6 @@ const ApartmentListings = () => {
                                             </div>
 
                                             <div className="mt-4">
-                                                <div className="flex items-center text-sm text-gray-500">
-                                                    <FaMapMarkerAlt className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-                                                    <p className="truncate">{listing.destinationURL}</p>
-                                                </div>
-
                                                 <div className="mt-2 flex items-center text-sm text-gray-500">
                                                     <FaClock className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
                                                     <p>Updated: {formatDate(listing.updatedAt)}</p>
@@ -355,7 +336,7 @@ const ApartmentListings = () => {
                                                     className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                                     disabled={!listing.available_units || listing.available_units.length === 0}
                                                 >
-                                                    View Details
+                                                    View Units
                                                 </button>
                                             </div>
                                         </div>

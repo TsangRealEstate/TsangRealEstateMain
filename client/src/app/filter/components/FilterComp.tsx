@@ -5,6 +5,9 @@ import DatePicker from 'react-tailwindcss-datepicker';
 import axios from 'axios';
 import type { DateValueType } from 'react-tailwindcss-datepicker';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { AiOutlineArrowLeft } from 'react-icons/ai';
+import FloorPlanGallery from './FloorPlanGallery';
 
 interface Photo {
     type: string;
@@ -53,6 +56,16 @@ interface PropertyInformation {
     first_photo: { id: string }[];
     destinationURL: string;
     _id: string;
+    specials?: Array<{
+        raw_text: string;
+        restrictions?: {
+            bed_count?: number[];
+            lease_length?: number[][];
+        };
+        created_at?: string;
+        updated_at?: string;
+        expires_at?: string;
+    }>;
 }
 
 interface PropertyData {
@@ -177,10 +190,22 @@ export default function FilterComp() {
     const getPhotoUrl = (propertyId: string) => {
         return `https://cdn.apartmentlist.com/image/upload/c_fill,dpr_auto,f_auto,g_center,h_415,q_auto,w_640/${propertyId}.jpg`;
     };
-
+    const router = useRouter();
     return (
         <div className="p-6 bg-white my-6">
-            <h2 className="text-xl font-bold mb-6 w-[50%] mx-auto  text-gray-800">FILTER PROPERTIES</h2>
+
+            <div className='w-[50%] mx-auto'>
+                <button
+                    onClick={() => router.back()}
+                    className="mb-10 flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-100 transition"
+                >
+                    <AiOutlineArrowLeft />
+                    Go Back
+                </button>
+            </div>
+
+
+            <h2 className="text-xl font-bold mb-6 w-[50%] mx-auto text-gray-800">FILTER PROPERTIES</h2>
 
             <section className='filter-properties-functionality lg:not-last:w-[50%] mx-auto'>
                 {/* Area Filter - Improved dropdown */}
@@ -359,7 +384,6 @@ export default function FilterComp() {
             </section>
 
             <section className='result-data w-[80%] mx-auto'>
-
                 {/* Results Section */}
                 {loading && (
                     <div className="flex justify-center items-center p-8">
@@ -408,14 +432,101 @@ export default function FilterComp() {
                                                 </p>
                                             </div>
 
+
                                             <Link
                                                 href={`/listings/${propertyGroup._id}`}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
                                                 className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                                             >
                                                 View Details
                                             </Link>
+                                        </div>
+
+                                        <div>
+                                            <h4 className="font-medium text-gray-800 mb-2">Market Rent</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                                {Object.entries(propertyGroup.Information.prices).map(([bedCount, prices]) => (
+                                                    <div key={bedCount} className="border border-gray-200 p-3 rounded">
+                                                        <p className="font-medium">
+                                                            {bedCount === '0' ? 'Studio' : `${bedCount} Bedroom`}
+                                                        </p>
+                                                        <p className="text-gray-600">
+                                                            ${Math.min(...prices)} - ${Math.max(...prices)}
+                                                        </p>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            {propertyGroup.Information.specials && propertyGroup.Information.specials.length > 0 && (
+                                                <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                                    <h4 className="font-medium text-blue-800 mb-2">Current Specials:</h4>
+                                                    <div className="space-y-3">
+                                                        {propertyGroup.Information.specials.map((special, index) => (
+                                                            <div key={index} className="border-b border-blue-100 pb-3 last:border-0 last:pb-0">
+                                                                <div className="flex items-start">
+                                                                    <div className="ml-3 flex-1">
+                                                                        <p className="text-sm font-medium text-blue-800">{special.raw_text}</p>
+
+                                                                        {/* Restrictions */}
+                                                                        {special.restrictions && (
+                                                                            <div className="mt-2">
+                                                                                <h5 className="text-xs font-medium text-blue-700 mb-1">Restrictions:</h5>
+                                                                                <div className="grid grid-cols-2 gap-2 text-xs">
+                                                                                    {special.restrictions.bed_count && (
+                                                                                        <div>
+                                                                                            <span className="text-blue-600">Bed Count:</span>
+                                                                                            <span className="ml-1 text-blue-800">
+                                                                                                {special.restrictions.bed_count.map(b => b === 0 ? 'Studio' : `${b} bed`).join(', ')}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    )}
+                                                                                    {special.restrictions.lease_length && (
+                                                                                        <div>
+                                                                                            <span className="text-blue-600">Lease Length:</span>
+                                                                                            <span className="ml-1 text-blue-800">
+                                                                                                {special.restrictions.lease_length.flat().map(l => `${l} months`).join(', ')}
+                                                                                            </span>
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            </div>
+                                                                        )}
+
+                                                                        {/* Dates */}
+                                                                        <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
+                                                                            {special.created_at && (
+                                                                                <div>
+                                                                                    <span className="text-blue-600">Created:</span>
+                                                                                    <span className="ml-1 text-blue-800">
+                                                                                        {new Date(special.created_at).toLocaleDateString()}
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+                                                                            {special.updated_at && (
+                                                                                <div>
+                                                                                    <span className="text-blue-600">Updated:</span>
+                                                                                    <span className="ml-1 text-blue-800">
+                                                                                        {new Date(special.updated_at).toLocaleDateString()}
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+                                                                            {special.expires_at && (
+                                                                                <div className="col-span-2">
+                                                                                    <span className="text-blue-600">Expires:</span>
+                                                                                    <span className="ml-1 text-blue-800">
+                                                                                        {new Date(special.expires_at).toLocaleDateString()}
+                                                                                    </span>
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Available Units */}
@@ -504,57 +615,18 @@ export default function FilterComp() {
                                                                                         <span className="ml-1 text-gray-700">{specificUnit.remote_listing_id}</span>
                                                                                     </div>
                                                                                 )}
-                                                                                {specificUnit.unit_rental_id && (
-                                                                                    <div className="col-span-2">
-                                                                                        <span className="text-gray-500">Rental ID:</span>
-                                                                                        <span className="ml-1 text-gray-700">{specificUnit.unit_rental_id}</span>
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
 
-                                                                            {specificUnit.apply_online_url && (
-                                                                                <div className="mt-3">
-                                                                                    <a
-                                                                                        href={specificUnit.apply_online_url}
-                                                                                        target="_blank"
-                                                                                        rel="noopener noreferrer"
-                                                                                        className="block text-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm"
-                                                                                    >
-                                                                                        Apply Online
-                                                                                    </a>
-                                                                                </div>
-                                                                            )}
+                                                                            </div>
                                                                         </div>
                                                                     ))}
                                                                 </div>
                                                             </div>
                                                         )}
-
-
-                                                        {/* {unit.photos && unit.photos.length > 0 && (
-                                                            <div className="mt-4 border-t pt-4">
-                                                                <h6 className="text-sm font-medium text-gray-700 mb-2">Photos:</h6>
-                                                                <div className="flex overflow-x-auto gap-2 pb-2">
-                                                                    {unit.photos.map((photo, index) => (
-                                                                        <img
-                                                                            key={index}
-                                                                            src={`https://cdn.apartmentlist.com/image/upload/c_fill,dpr_auto,f_auto,g_center,h_200,q_auto,w_300/${photo.id}.jpg`}
-                                                                            alt={`${unit.name} - Photo ${index + 1}`}
-                                                                            className="h-40 rounded-md object-cover"
-                                                                            onError={(e) => {
-                                                                                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x200?text=No+Image+Available';
-                                                                            }}
-                                                                        />
-                                                                    ))}
-                                                                </div>
-                                                            </div>
-                                                        )} */}
+                                                        <FloorPlanGallery unit={unit} />
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
-
-
                                     </div>
                                 </div>
                             ))}
