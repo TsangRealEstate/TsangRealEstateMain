@@ -23,6 +23,7 @@ import { FaElevator } from 'react-icons/fa6';
 import axiosInstance from '@/api/axiosInstance';
 import { AiOutlineArrowLeft } from 'react-icons/ai';
 import { useEffect, useState } from 'react';
+import FloorPlanGallery from '@/app/filter/components/FloorPlanGallery';
 
 interface Photo {
     type: string;
@@ -397,7 +398,7 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
                                                             <FaDollarSign className="inline mr-1" />
                                                             {specificUnit.price}
                                                         </p>
-                                                        <span className={`text-xs px-2 py-1 rounded-full ${specificUnit.availability === 'available'
+                                                        <span className={`text-xs px-2 py-1 hidden rounded-full ${specificUnit.availability === 'available'
                                                             ? 'bg-green-100 text-green-800'
                                                             : 'bg-yellow-100 text-yellow-800'
                                                             }`}>
@@ -405,9 +406,12 @@ export default function PropertyDetailPage({ params }: { params: { id: string } 
                                                         </span>
                                                     </div>
                                                 </div>
+                                                <FloorPlanGallery unit={unit} />
                                             </div>
                                         ))}
                                     </div>
+
+
                                 ) : (
                                     <p className="text-gray-500">No specific units currently available</p>
                                 )}

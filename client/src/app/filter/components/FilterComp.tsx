@@ -56,6 +56,7 @@ interface PropertyInformation {
     first_photo: { id: string }[];
     destinationURL: string;
     _id: string;
+    prices: Record<string, number[]>;
     specials?: Array<{
         raw_text: string;
         restrictions?: {
@@ -495,14 +496,6 @@ export default function FilterComp() {
 
                                                                         {/* Dates */}
                                                                         <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                                                                            {special.created_at && (
-                                                                                <div>
-                                                                                    <span className="text-blue-600">Created:</span>
-                                                                                    <span className="ml-1 text-blue-800">
-                                                                                        {new Date(special.created_at).toLocaleDateString()}
-                                                                                    </span>
-                                                                                </div>
-                                                                            )}
                                                                             {special.updated_at && (
                                                                                 <div>
                                                                                     <span className="text-blue-600">Updated:</span>
@@ -530,7 +523,7 @@ export default function FilterComp() {
                                         </div>
 
                                         {/* Available Units */}
-                                        <div className="border-t border-gray-200 pt-4">
+                                        <div className="border-t border-gray-200 pt-4 hidden">
                                             <h4 className="font-medium text-gray-700 mb-3">
                                                 Available Units ({propertyGroup.Information.available_units.length})
                                             </h4>
