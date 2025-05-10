@@ -112,106 +112,81 @@ router.get("/filter", async (req, res) => {
       yard,
     } = req.query;
 
-    // Build the filter object
-    const filter = {};
+    // Build the initial filter for top-level properties
+    const propertyFilter = {};
 
-    // Area filter (assuming 'neighborhood' field in the database)
+    // Area filter
     if (area) {
       const areas = area.split("&").map((a) => a.trim());
-      filter["Information.neighborhood"] = { $in: areas };
-    }
-
-    // Price range filter
-    if (minPrice || maxPrice) {
-      filter["Information.available_units.price"] = {};
-      if (minPrice)
-        filter["Information.available_units.price"].$gte = Number(minPrice);
-      if (maxPrice)
-        filter["Information.available_units.price"].$lte = Number(maxPrice);
-    }
-
-    // Bedrooms filter
-    if (beds) {
-      filter["Information.available_units.bed"] = Number(beds);
-    }
-
-    // Bathrooms filter
-    if (baths) {
-      filter["Information.available_units.bath"] = Number(baths);
-    }
-
-    // Move-in date range filter
-    if (earliestMoveInDate || latestMoveInDate) {
-      filter["Information.available_units.available_on"] = {};
-      if (earliestMoveInDate) {
-        filter["Information.available_units.available_on"].$gte = new Date(
-          earliestMoveInDate
-        ).toISOString();
-      }
-      if (latestMoveInDate) {
-        filter["Information.available_units.available_on"].$lte = new Date(
-          latestMoveInDate
-        ).toISOString();
-      }
+      propertyFilter["Information.neighborhood"] = { $in: areas };
     }
 
     // Amenities filters
     if (inUnitLaundry) {
-      filter["Information.unit_amenities.display_name"] = "In unit laundry";
+      propertyFilter["Information.unit_amenities.display_name"] =
+        "In unit laundry";
     }
     if (balcony) {
-      filter["Information.unit_amenities.display_name"] = "Balcony";
+      propertyFilter["Information.unit_amenities.display_name"] = "Balcony";
     }
     if (yard) {
-      filter["Information.unit_amenities.display_name"] = "Yard";
+      propertyFilter["Information.unit_amenities.display_name"] = "Yard";
     }
 
-    // Query the database with filters
-    const properties = await ScrapeListModel.aggregate([
-      { $match: filter },
-      {
-        $project: {
-          _id: 1,
-          title: 1,
-          destinationURL: 1,
-          "Information.specials": 1,
-          "Information.prices": 1,
-          "Information.display_name": 1,
-          "Information.street_address": 1,
-          "Information.neighborhood": 1,
-          "Information.city": 1,
-          "Information.state": 1,
-          "Information.zip": 1,
-          "Information.description": 1,
-          "Information.first_photo": 1,
-          "Information.available_units": {
+    // Build the aggregation pipeline
+    const pipeline = [
+      { $match: propertyFilter },
+      { $unwind: "$Information.available_units" },
+    ];
+
+    // Add unit-level filters
+    const unitMatch = {};
+
+    // Bedrooms filter
+    if (beds) {
+      unitMatch["Information.available_units.bed"] = Number(beds);
+    }
+
+    // Bathrooms filter
+    if (baths) {
+      unitMatch["Information.available_units.bath"] = Number(baths);
+    }
+
+    // Price range filter
+    if (minPrice || maxPrice) {
+      unitMatch["Information.available_units.price"] = {};
+      if (minPrice)
+        unitMatch["Information.available_units.price"].$gte = Number(minPrice);
+      if (maxPrice)
+        unitMatch["Information.available_units.price"].$lte = Number(maxPrice);
+    }
+
+    if (Object.keys(unitMatch).length > 0) {
+      pipeline.push({ $match: unitMatch });
+    }
+
+    // Handle nested units filtering
+    if (earliestMoveInDate || latestMoveInDate) {
+      pipeline.push({
+        $addFields: {
+          "Information.available_units.units": {
             $filter: {
-              input: "$Information.available_units",
-              as: "unit",
+              input: "$Information.available_units.units",
+              as: "specificUnit",
               cond: {
                 $and: [
-                  minPrice
-                    ? { $gte: ["$$unit.price", Number(minPrice)] }
-                    : true,
-                  maxPrice
-                    ? { $lte: ["$$unit.price", Number(maxPrice)] }
-                    : true,
-                  beds ? { $eq: ["$$unit.bed", Number(beds)] } : true,
-                  baths ? { $eq: ["$$unit.bath", Number(baths)] } : true,
+                  { $ifNull: ["$$specificUnit.available_on", false] },
                   earliestMoveInDate
                     ? {
                         $gte: [
-                          "$$unit.available_on",
-                          new Date(earliestMoveInDate).toISOString(),
+                          "$$specificUnit.available_on",
+                          earliestMoveInDate,
                         ],
                       }
                     : true,
                   latestMoveInDate
                     ? {
-                        $lte: [
-                          "$$unit.available_on",
-                          new Date(latestMoveInDate).toISOString(),
-                        ],
+                        $lte: ["$$specificUnit.available_on", latestMoveInDate],
                       }
                     : true,
                 ].filter((cond) => cond !== true),
@@ -219,8 +194,57 @@ router.get("/filter", async (req, res) => {
             },
           },
         },
+      });
+    }
+
+    // Filter out units with empty units array
+    pipeline.push({
+      $match: {
+        "Information.available_units.units.0": { $exists: true },
       },
-    ]);
+    });
+
+    // Group back the results
+    pipeline.push({
+      $group: {
+        _id: "$_id",
+        title: { $first: "$title" },
+        destinationURL: { $first: "$destinationURL" },
+        Information: { $first: "$Information" },
+        available_units: { $push: "$Information.available_units" },
+      },
+    });
+
+    // Final projection
+    pipeline.push({
+      $project: {
+        _id: 1,
+        title: 1,
+        destinationURL: 1,
+        Information: {
+          specials: "$Information.specials",
+          prices: "$Information.prices",
+          display_name: "$Information.display_name",
+          street_address: "$Information.street_address",
+          neighborhood: "$Information.neighborhood",
+          city: "$Information.city",
+          state: "$Information.state",
+          zip: "$Information.zip",
+          description: "$Information.description",
+          first_photo: "$Information.first_photo",
+          available_units: "$available_units",
+        },
+      },
+    });
+
+    // Filter out properties with no available units
+    pipeline.push({
+      $match: {
+        "Information.available_units.0": { $exists: true },
+      },
+    });
+
+    const properties = await ScrapeListModel.aggregate(pipeline);
 
     res.json({
       count: properties.length,
