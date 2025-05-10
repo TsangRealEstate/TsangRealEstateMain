@@ -1,6 +1,7 @@
 "use client"
 import { useAuth } from '@/context/AuthContext';
 import { Listing } from '@/types/sharedTypes';
+import { formatAvailabilityDate } from '@/utils/dateUtils';
 import Link from 'next/link';
 import React, { useState } from 'react';
 import {
@@ -87,8 +88,6 @@ const ApartmentListings = () => {
             return url;
         }
     };
-
-
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
@@ -230,35 +229,61 @@ const ApartmentListings = () => {
                                                     <h4 className="text-md font-medium text-gray-900 mb-3">
                                                         Available Units ({selectedListing.available_units.reduce((acc, unit) => acc + (unit.units?.length || 0), 0)})
                                                     </h4>
-                                                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 max-h-[400px] overflow-y-auto">
-                                                        {selectedListing.available_units.map((unit) => (
-                                                            unit.units.map((subUnit, index) => (
-                                                                <div key={`${unit.id}-${index}`} className="border border-blue-600 rounded-lg p-4 hover:shadow-md transition-shadow">
-                                                                    <h5 className="font-medium text-gray-900">{unit.name}</h5>
-                                                                    <p className="text-sm text-gray-500 mb-2">{subUnit.name}</p>
+                                                    <div className="grid gap-6 max-h-[400px] overflow-y-auto">
+                                                        {/* Group units by their parent name */}
+                                                        {selectedListing.available_units
+                                                            // Sort parent units by earliest available date
+                                                            .sort((a, b) => {
+                                                                const dateA = new Date(a.units[0]?.available_on || 0);
+                                                                const dateB = new Date(b.units[0]?.available_on || 0);
+                                                                return dateA.getTime() - dateB.getTime();
+                                                            })
+                                                            .map((unit) => (
+                                                                <div key={unit.id} className="space-y-3">
+                                                                    <h3 className="text-lg font-semibold text-gray-900">{unit.name}</h3>
+                                                                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                                                        {unit.units
+                                                                            .sort((a, b) => {
+                                                                                // First sort by price
+                                                                                const priceDiff = a.price - b.price;
+                                                                                if (priceDiff !== 0) return priceDiff;
 
-                                                                    <div className="flex items-center text-sm text-gray-600 mb-1">
-                                                                        <FaBed className="mr-2 text-gray-400" />
-                                                                        {unit.bed} beds
-                                                                    </div>
-                                                                    <div className="flex items-center text-sm text-gray-600 mb-1">
-                                                                        <FaBath className="mr-2 text-gray-400" />
-                                                                        {unit.bath} baths
-                                                                    </div>
-                                                                    <div className="flex items-center text-sm text-gray-600 mb-1">
-                                                                        <FaRulerCombined className="mr-2 text-gray-400" />
-                                                                        {unit.sqft} sqft
-                                                                    </div>
-                                                                    <div className="flex items-center text-sm text-gray-600">
-                                                                        <FaCalendarAlt className="mr-2 text-gray-400" />
-                                                                        Available {subUnit.available_on}
-                                                                    </div>
-                                                                    <div className="mt-3 font-medium text-blue-600 flex items-center">
-                                                                        {formatPrice(subUnit.price)}
+                                                                                // If prices are equal, sort by date
+                                                                                const dateA = new Date(a.available_on);
+                                                                                const dateB = new Date(b.available_on);
+                                                                                return dateA.getTime() - dateB.getTime();
+                                                                            })
+                                                                            .map((subUnit) => (
+                                                                                <div
+                                                                                    key={`${unit.id}-${subUnit.id}`}
+                                                                                    className="border border-blue-600 rounded-lg p-4 hover:shadow-md transition-shadow"
+                                                                                >
+                                                                                    <p className="text-sm text-gray-500 mb-2">{subUnit.name}</p>
+
+                                                                                    <div className="flex items-center text-sm text-gray-600 mb-1">
+                                                                                        <FaBed className="mr-2 text-gray-400" />
+                                                                                        {unit.bed} beds
+                                                                                    </div>
+                                                                                    <div className="flex items-center text-sm text-gray-600 mb-1">
+                                                                                        <FaBath className="mr-2 text-gray-400" />
+                                                                                        {unit.bath} baths
+                                                                                    </div>
+                                                                                    <div className="flex items-center text-sm text-gray-600 mb-1">
+                                                                                        <FaRulerCombined className="mr-2 text-gray-400" />
+                                                                                        {unit.sqft} sqft
+                                                                                    </div>
+                                                                                    <div className="flex items-center text-sm text-gray-600">
+                                                                                        <FaCalendarAlt className="mr-2 text-gray-400" />
+                                                                                        Availability: {formatAvailabilityDate(subUnit.available_on)}
+                                                                                    </div>
+                                                                                    <div className="mt-3 font-medium text-blue-600">
+                                                                                        {formatPrice(subUnit.price)}
+                                                                                    </div>
+                                                                                </div>
+                                                                            ))}
                                                                     </div>
                                                                 </div>
-                                                            ))
-                                                        ))}
+                                                            ))}
                                                     </div>
                                                 </div>
                                             ) : (
@@ -338,6 +363,19 @@ const ApartmentListings = () => {
                                                 >
                                                     View Units
                                                 </button>
+
+                                                <Link
+                                                    href={`/listings/${listing._id}`}
+                                                >
+                                                    <button
+                                                        type="button"
+                                                        className="inline-flex ml-3 items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                        disabled={!listing.available_units || listing.available_units.length === 0}
+                                                    >
+                                                        View Details
+                                                        <FaExternalLinkAlt className="ml-2 h-4 w-4" />
+                                                    </button>
+                                                </Link>
                                             </div>
                                         </div>
                                     </div>

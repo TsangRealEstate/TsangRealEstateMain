@@ -24,6 +24,7 @@ import axiosInstance from '@/api/axiosInstance';
 import { AiOutlineArrowLeft } from 'react-icons/ai';
 import { useEffect, useState } from 'react';
 import FloorPlanGallery from '@/app/filter/components/FloorPlanGallery';
+import { formatAvailabilityDate } from '@/utils/dateUtils';
 
 interface Photo {
     type: string;
@@ -372,10 +373,10 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                 <h2 className="text-2xl font-semibold mb-4">Available Units</h2>
                 <div className="space-y-6">
                     {property.Information.available_units.map((unit) => (
-                        <div key={unit.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                            {/* Unit Header */}
+                        <div key={unit.id} className="border border-gray-200 rounded-lg overflow-hidden mb-6">
+                            {/* Unit Header - Common for all units */}
                             <div className="bg-gray-50 p-4 border-b border-gray-200">
-                                <h3 className="text-xl font-medium">{unit.name}</h3>
+                                <h3 className="text-xl text-gray-500"> Unit Id: <span className='font-medium text-black'>{unit.id}</span> </h3>
                                 <div className="flex space-x-4 text-gray-600 mt-1">
                                     <span><FaBed className="inline mr-1" /> {unit.bed} {unit.bed === 1 ? 'bed' : 'beds'}</span>
                                     <span><FaBath className="inline mr-1" /> {unit.bath} {unit.bath === 1 ? 'bath' : 'baths'}</span>
@@ -383,18 +384,23 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                                 </div>
                             </div>
 
-                            {/* Unit Details */}
+                            {/* Unit Details - Individual units */}
                             <div className="p-4">
                                 {unit.units.length > 0 ? (
                                     <div className="space-y-4">
                                         {unit.units.map((specificUnit) => (
                                             <div key={specificUnit.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                                                <div className="mb-2">
+                                                    <span className="text-gray-500">Unit Name:</span>
+                                                    <span className="ml-1 font-medium">{unit.name}</span>
+                                                </div>
+
                                                 <div className="flex justify-between items-start">
                                                     <div>
                                                         <h4 className="font-medium">{specificUnit.display_name}</h4>
-                                                        <p className="text-gray-600 text-sm">
-                                                            Available: <FaCalendarAlt className="inline mr-1" />
-                                                            {new Date(specificUnit.available_on).toLocaleDateString()}
+                                                        <p className="text-gray-600 text-sm mt-3">
+                                                            Availability: <FaCalendarAlt className="inline mr-1" />
+                                                            {formatAvailabilityDate(specificUnit.available_on)}
                                                         </p>
                                                     </div>
                                                     <div className="text-right">
@@ -414,8 +420,6 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                                             </div>
                                         ))}
                                     </div>
-
-
                                 ) : (
                                     <p className="text-gray-500">No specific units currently available</p>
                                 )}
