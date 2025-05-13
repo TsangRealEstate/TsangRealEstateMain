@@ -232,12 +232,8 @@ const ApartmentListings = () => {
                                                     <div className="grid gap-6 max-h-[400px] overflow-y-auto">
                                                         {/* Group units by their parent name */}
                                                         {selectedListing.available_units
-                                                            // Sort parent units by earliest available date
-                                                            .sort((a, b) => {
-                                                                const dateA = new Date(a.units[0]?.available_on || 0);
-                                                                const dateB = new Date(b.units[0]?.available_on || 0);
-                                                                return dateA.getTime() - dateB.getTime();
-                                                            })
+                                                            // Sort parent units alphabetically by name
+                                                            .sort((a, b) => a.name.localeCompare(b.name))
                                                             .map((unit) => (
                                                                 <div key={unit.id} className="space-y-3">
                                                                     <h3 className="text-lg font-semibold text-gray-900">{unit.name}</h3>
