@@ -1,14 +1,13 @@
 "use client"
 import { useAuth } from '@/context/AuthContext';
 import React, { useState } from 'react';
-import DatePicker from 'react-tailwindcss-datepicker';
-import axios from 'axios';
-import type { DateValueType } from 'react-tailwindcss-datepicker';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AiOutlineArrowLeft } from 'react-icons/ai';
 import FloorPlanGallery from './FloorPlanGallery';
 import axiosInstance from '@/api/axiosInstance';
+import { formatAvailabilityDate } from '@/utils/dateUtils';
+import { FaBed, FaBath, FaRulerCombined, FaCalendarAlt } from 'react-icons/fa';
 
 interface Photo {
     type: string;
@@ -88,8 +87,8 @@ export default function FilterComp() {
         maxPrice: '',
         beds: '',
         baths: '',
-        earliestMoveInDate: null as DateValueType,
-        latestMoveInDate: null as DateValueType,
+        earliestMoveInDate: "",
+        latestMoveInDate: "",
         amenities: [] as string[],
     });
     const [loading, setLoading] = useState(false);
@@ -115,7 +114,7 @@ export default function FilterComp() {
         setFilters({ ...filters, [name]: value });
     };
 
-    const handleDateChange = (value: DateValueType, field: string) => {
+    const handleDateChange = (value: string, field: string) => {
         setFilters({ ...filters, [field]: value });
     };
 
@@ -126,8 +125,8 @@ export default function FilterComp() {
             maxPrice: '',
             beds: '',
             baths: '',
-            earliestMoveInDate: null,
-            latestMoveInDate: null,
+            earliestMoveInDate: "",
+            latestMoveInDate: "",
             amenities: [],
         });
     };
@@ -149,15 +148,15 @@ export default function FilterComp() {
             if (filters.baths) params.append('baths', filters.baths);
 
             // Convert DateValueType to date strings
-            if (filters.earliestMoveInDate?.startDate) {
-                const rawDate = filters.earliestMoveInDate.startDate;
-                const date = new Date(typeof rawDate === 'string' ? rawDate : rawDate.toISOString());
+            if (filters.earliestMoveInDate) {
+                const rawDate = filters.earliestMoveInDate;
+                const date = new Date(typeof rawDate === 'string' ? rawDate : (rawDate as Date).toISOString());
                 params.append('earliestMoveInDate', date.toISOString().split('T')[0]);
             }
 
-            if (filters.latestMoveInDate?.startDate) {
-                const rawDate = filters.latestMoveInDate.startDate;
-                const date = new Date(typeof rawDate === 'string' ? rawDate : rawDate.toISOString());
+            if (filters.latestMoveInDate) {
+                const rawDate = filters.latestMoveInDate;
+                const date = new Date(typeof rawDate === 'string' ? rawDate : (rawDate as Date).toISOString());
                 params.append('latestMoveInDate', date.toISOString().split('T')[0]);
             }
 
@@ -177,7 +176,7 @@ export default function FilterComp() {
                 params
             });
 
-            // console.log('Filtered results:', response.data);
+            //console.log('Filtered results:', response.data);
             setResults(response.data);
 
         } catch (err) {
@@ -310,24 +309,22 @@ export default function FilterComp() {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Earliest Move-in</label>
-                            <DatePicker
+                            <input
+                                type="date"
                                 value={filters.earliestMoveInDate}
-                                onChange={(value) => handleDateChange(value, 'earliestMoveInDate')}
-                                inputClassName="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                onChange={(e) => handleDateChange(e.target.value, 'earliestMoveInDate')}
+                                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Select date"
-                                asSingle
-                                useRange={false}
                             />
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">Latest Move-in</label>
-                            <DatePicker
+                            <input
+                                type="date"
                                 value={filters.latestMoveInDate}
-                                onChange={(value) => handleDateChange(value, 'latestMoveInDate')}
-                                inputClassName="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                                onChange={(e) => handleDateChange(e.target.value, 'latestMoveInDate')}
+                                className="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Select date"
-                                asSingle
-                                useRange={false}
                             />
                         </div>
                     </div>
@@ -426,20 +423,21 @@ export default function FilterComp() {
 
                                     {/* Property Details */}
                                     <div className="p-6">
-                                        <div className="flex justify-between lg:flex-row flex-col lg:items-center mb-4">
+                                        <div className="flex justify-between flex-col mb-4">
                                             <div>
                                                 <p className="text-gray-600">
                                                     {propertyGroup.Information.street_address}, {propertyGroup.Information.city}, {propertyGroup.Information.state} {propertyGroup.Information.zip}
                                                 </p>
                                             </div>
 
-
-                                            <Link
-                                                href={`/listings/${propertyGroup._id}`}
-                                                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-                                            >
-                                                View Details
-                                            </Link>
+                                            <span className='mt-2'>
+                                                <Link
+                                                    href={`/listings/${propertyGroup._id}`}
+                                                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                                                >
+                                                    View Details
+                                                </Link>
+                                            </span>
                                         </div>
 
                                         <div>
@@ -523,7 +521,7 @@ export default function FilterComp() {
                                         </div>
 
                                         {/* Available Units */}
-                                        <div className="border-t border-gray-200 pt-4 hidden">
+                                        <div className="border-t border-gray-200 pt-4">
                                             <h4 className="font-medium text-gray-700 mb-3">
                                                 Available Units ({propertyGroup.Information.available_units.length})
                                             </h4>
@@ -560,7 +558,7 @@ export default function FilterComp() {
                                                                             <div className="flex justify-between">
                                                                                 <div>
                                                                                     <p className="font-medium text-gray-800">
-                                                                                        {specificUnit.display_name || specificUnit.name}
+                                                                                        Unit Id:  {specificUnit.display_name || specificUnit.name}
                                                                                     </p>
                                                                                     {specificUnit.sqft && (
                                                                                         <p className="text-sm text-gray-600">
@@ -575,7 +573,7 @@ export default function FilterComp() {
                                                                                         </p>
                                                                                     )}
                                                                                     {specificUnit.availability && (
-                                                                                        <span className={`text-xs px-2 py-1 rounded-full ${specificUnit.availability === 'available'
+                                                                                        <span className={`text-xs px-2 py-1 rounded-full hidden ${specificUnit.availability === 'available'
                                                                                             ? 'bg-green-100 text-green-800'
                                                                                             : 'bg-yellow-100 text-yellow-800'
                                                                                             }`}>
@@ -588,9 +586,9 @@ export default function FilterComp() {
                                                                             <div className="grid grid-cols-2 gap-2 text-sm mt-2">
                                                                                 {specificUnit.available_on && (
                                                                                     <div>
-                                                                                        <span className="text-gray-500">Available:</span>
+                                                                                        <span className="text-gray-500">Availability:</span>
                                                                                         <span className="ml-1 text-gray-700">
-                                                                                            {new Date(specificUnit.available_on).toLocaleDateString()}
+                                                                                            {formatAvailabilityDate(specificUnit.available_on)}
                                                                                         </span>
                                                                                     </div>
                                                                                 )}
@@ -598,12 +596,13 @@ export default function FilterComp() {
                                                                                     <div>
                                                                                         <span className="text-gray-500">Updated:</span>
                                                                                         <span className="ml-1 text-gray-700">
-                                                                                            {new Date(specificUnit.updated_at).toLocaleDateString()}
+
+                                                                                            {formatAvailabilityDate(specificUnit.updated_at)}
                                                                                         </span>
                                                                                     </div>
                                                                                 )}
                                                                                 {specificUnit.remote_listing_id && (
-                                                                                    <div className="col-span-2">
+                                                                                    <div className="col-span-2 hidden">
                                                                                         <span className="text-gray-500">Unit ID:</span>
                                                                                         <span className="ml-1 text-gray-700">{specificUnit.remote_listing_id}</span>
                                                                                     </div>
@@ -625,6 +624,8 @@ export default function FilterComp() {
                             ))}
                         </div>
                     </div>
+
+
                 )}
             </section>
 

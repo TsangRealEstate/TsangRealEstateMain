@@ -373,10 +373,10 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                 <h2 className="text-2xl font-semibold mb-4">Available Units</h2>
                 <div className="space-y-6">
                     {property.Information.available_units.map((unit) => (
-                        <div key={unit.id} className="border border-gray-200 rounded-lg overflow-hidden mb-6">
-                            {/* Unit Header - Common for all units */}
+                        <div key={unit.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                            {/* Unit Header */}
                             <div className="bg-gray-50 p-4 border-b border-gray-200">
-                                <h3 className="text-xl text-gray-500"> Unit Id: <span className='font-medium text-black'>{unit.id}</span> </h3>
+                                <h3 className="text-xl font-medium">Unit Name: {unit.name}</h3>
                                 <div className="flex space-x-4 text-gray-600 mt-1">
                                     <span><FaBed className="inline mr-1" /> {unit.bed} {unit.bed === 1 ? 'bed' : 'beds'}</span>
                                     <span><FaBath className="inline mr-1" /> {unit.bath} {unit.bath === 1 ? 'bath' : 'baths'}</span>
@@ -384,21 +384,17 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                                 </div>
                             </div>
 
-                            {/* Unit Details - Individual units */}
+                            {/* Unit Details */}
                             <div className="p-4">
                                 {unit.units.length > 0 ? (
                                     <div className="space-y-4">
                                         {unit.units.map((specificUnit) => (
                                             <div key={specificUnit.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                                                <div className="mb-2">
-                                                    <span className="text-gray-500">Unit Name:</span>
-                                                    <span className="ml-1 font-medium">{unit.name}</span>
-                                                </div>
-
                                                 <div className="flex justify-between items-start">
                                                     <div>
-                                                        <h4 className="font-medium">{specificUnit.display_name}</h4>
-                                                        <p className="text-gray-600 text-sm mt-3">
+                                                        <h4 className="font-medium">Unit ID: {specificUnit.display_name}</h4>
+                                                        {/* <p>rentalId: {specificUnit.unit_rental_id}</p> */}
+                                                        <p className="text-gray-600 text-sm">
                                                             Availability: <FaCalendarAlt className="inline mr-1" />
                                                             {formatAvailabilityDate(specificUnit.available_on)}
                                                         </p>
