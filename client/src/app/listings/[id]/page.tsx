@@ -25,6 +25,7 @@ import { AiOutlineArrowLeft } from 'react-icons/ai';
 import { useEffect, useState } from 'react';
 import FloorPlanGallery from '@/app/filter/components/FloorPlanGallery';
 import { formatAvailabilityDate } from '@/utils/dateUtils';
+import PropertySpecials from '../components/PropertySpecials';
 
 interface Photo {
     type: string;
@@ -168,6 +169,20 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
         notFound();
     }
 
+    const handleSpecialsUpdate = (updatedSpecials: any) => {
+        setProperty(prev => {
+            if (!prev) return null;
+
+            return {
+                ...prev,
+                Information: {
+                    ...prev.Information,
+                    specials: updatedSpecials
+                }
+            };
+        });
+    };
+
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div>
@@ -243,73 +258,10 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
 
                     <div>
                         {property.Information.specials && property.Information.specials.length > 0 && (
-                            <div className="mt-3 bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                <h4 className="font-medium text-blue-800 mb-2">Current Specials:</h4>
-                                <div className="space-y-3">
-                                    {property.Information.specials.map((special, index) => (
-                                        <div key={index} className="border-b border-blue-100 pb-3 last:border-0 last:pb-0">
-                                            <div className="flex items-start">
-                                                <div className="ml-3 flex-1">
-                                                    <p className="text-sm font-medium text-blue-800">{special.raw_text}</p>
-
-                                                    {/* Restrictions */}
-                                                    {special.restrictions && (
-                                                        <div className="mt-2">
-                                                            <h5 className="text-xs font-medium text-blue-700 mb-1">Restrictions:</h5>
-                                                            <div className="grid grid-cols-2 gap-2 text-xs">
-                                                                {special.restrictions.bed_count && (
-                                                                    <div>
-                                                                        <span className="text-blue-600">Bed Count:</span>
-                                                                        <span className="ml-1 text-blue-800">
-                                                                            {special.restrictions.bed_count.map(b => b === 0 ? 'Studio' : `${b} bed`).join(', ')}
-                                                                        </span>
-                                                                    </div>
-                                                                )}
-                                                                {special.restrictions.lease_length && (
-                                                                    <div>
-                                                                        <span className="text-blue-600">Lease Length:</span>
-                                                                        <span className="ml-1 text-blue-800">
-                                                                            {special.restrictions.lease_length.flat().map(l => `${l} months`).join(', ')}
-                                                                        </span>
-                                                                    </div>
-                                                                )}
-                                                            </div>
-                                                        </div>
-                                                    )}
-
-                                                    {/* Dates */}
-                                                    <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
-                                                        {special.created_at && (
-                                                            <div>
-                                                                <span className="text-blue-600">Created:</span>
-                                                                <span className="ml-1 text-blue-800">
-                                                                    {new Date(special.created_at).toLocaleDateString()}
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                        {special.updated_at && (
-                                                            <div>
-                                                                <span className="text-blue-600">Updated:</span>
-                                                                <span className="ml-1 text-blue-800">
-                                                                    {new Date(special.updated_at).toLocaleDateString()}
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                        {special.expires_at && (
-                                                            <div className="col-span-2">
-                                                                <span className="text-blue-600">Expires:</span>
-                                                                <span className="ml-1 text-blue-800">
-                                                                    {new Date(special.expires_at).toLocaleDateString()}
-                                                                </span>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
+                            <PropertySpecials
+                                property={property}
+                                onUpdate={handleSpecialsUpdate}
+                            />
                         )}
                     </div>
                 </div>

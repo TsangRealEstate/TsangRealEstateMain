@@ -6,7 +6,7 @@
     "devStart": "nodemon src/index.js",
     "start": "node src/index.js",
     "scrape:apartments": "node src/scraper/apartment-list-scraper.js",
-    "scrape:newapartments": "nodemon src/app.js"
+    "scrape:newapartments": "node src/app.js"
   },
   "keywords": [],
   "author": "",

@@ -260,7 +260,7 @@ router.get("/filter", async (req, res) => {
   }
 });
 
-//Getting all the propertys from the database
+//Getting all the properties from the database
 router.get("/", async (req, res) => {
   try {
     const entries = await ScrapeListModel.find({})
@@ -301,6 +301,55 @@ router.get("/:id", async (req, res) => {
     console.error(`Error fetching property ${req.params.id}:`, error);
     res.status(500).json({
       error: "Failed to fetch property",
+      details:
+        process.env.NODE_ENV === "development"
+          ? {
+              message: error.message,
+              stack: error.stack,
+            }
+          : undefined,
+    });
+  }
+});
+
+// Update property specials endpoint
+router.put("/:id/specials", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { specials } = req.body;
+
+    // Validate input
+    if (!Array.isArray(specials)) {
+      return res.status(400).json({
+        error: "Invalid input",
+        message: "Specials must be an array",
+      });
+    }
+
+    const updatedProperty = await ScrapeListModel.findByIdAndUpdate(
+      id,
+      { "Information.specials": specials },
+      { new: true, runValidators: true }
+    ).lean();
+
+    if (!updatedProperty) {
+      return res.status(404).json({
+        error: "Property not found",
+        message: `No property found with ID: ${id}`,
+      });
+    }
+
+    res.json({
+      success: true,
+      data: updatedProperty.Information.specials,
+    });
+  } catch (error) {
+    console.error(
+      `Error updating specials for property ${req.params.id}:`,
+      error
+    );
+    res.status(500).json({
+      error: "Failed to update specials",
       details:
         process.env.NODE_ENV === "development"
           ? {
