@@ -7,8 +7,6 @@ import { AiOutlineArrowLeft } from 'react-icons/ai';
 import FloorPlanGallery from './FloorPlanGallery';
 import axiosInstance from '@/api/axiosInstance';
 import { formatAvailabilityDate } from '@/utils/dateUtils';
-import { FaBed, FaBath, FaRulerCombined, FaCalendarAlt } from 'react-icons/fa';
-
 interface Photo {
     type: string;
     id: string;
@@ -94,6 +92,7 @@ export default function FilterComp() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [results, setResults] = useState<PropertyData | null>(null);
+    const [isUnitsModalOpen, setIsUnitsModalOpen] = useState(false);
 
     const handleAreaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const options = Array.from(e.target.selectedOptions, option => option.value);
@@ -193,7 +192,6 @@ export default function FilterComp() {
     const router = useRouter();
     return (
         <div className="p-6 bg-white my-6">
-
             <div className='lg:w-[50%] mx-auto'>
                 <button
                     onClick={() => router.back()}
@@ -203,7 +201,6 @@ export default function FilterComp() {
                     Go Back
                 </button>
             </div>
-
 
             <h2 className="text-xl font-bold mb-6 lg:w-[50%] mx-auto text-gray-800">FILTER PROPERTIES</h2>
 
@@ -437,6 +434,13 @@ export default function FilterComp() {
                                                 >
                                                     View Details
                                                 </Link>
+
+                                                <button
+                                                    onClick={() => setIsUnitsModalOpen(true)}
+                                                    className="px-4 py-2 ml-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+                                                >
+                                                    View Filtered Units
+                                                </button>
                                             </span>
                                         </div>
 
@@ -520,105 +524,116 @@ export default function FilterComp() {
                                             )}
                                         </div>
 
-                                        {/* Available Units */}
-                                        <div className="border-t border-gray-200 pt-4">
-                                            <h4 className="font-medium text-gray-700 mb-3">
-                                                Available Units ({propertyGroup.Information.available_units.length})
-                                            </h4>
-                                            <div className="grid grid-cols-1 max-h-[400px] overflow-y-scroll gap-4">
-                                                {propertyGroup.Information.available_units.map((unit) => (
-                                                    <div key={unit.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                                                        {/* Unit Header */}
-                                                        <div className="flex justify-between items-start mb-3">
-                                                            <div>
-                                                                <h5 className="font-medium text-gray-800">{unit.name}</h5>
-                                                                <p className="text-sm text-gray-600">
-                                                                    {unit.bed} {unit.bed === 1 ? 'bed' : 'beds'}, {unit.bath} {unit.bath === 1 ? 'bath' : 'baths'} • {unit.sqft?.toLocaleString()} sqft
-                                                                </p>
-                                                            </div>
-                                                            <div className="text-right">
-                                                                {unit.price && (
-                                                                    <p className="font-medium text-gray-800">
-                                                                        ${unit.price.toLocaleString()}
-                                                                        {unit.price_max && unit.price_max > unit.price && (
-                                                                            <span className="text-sm text-gray-500"> - ${unit.price_max.toLocaleString()}</span>
-                                                                        )}
-                                                                    </p>
-                                                                )}
-                                                            </div>
-                                                        </div>
+                                        {/* Units Modal */}
+                                        {isUnitsModalOpen && (
+                                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75">
+                                                <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
+                                                    {/* Modal Header */}
+                                                    <div className="flex justify-between items-center border-b border-gray-200 p-4">
+                                                        <h3 className="text-lg font-semibold">
+                                                            Available Units ({propertyGroup.Information.available_units.length})
+                                                        </h3>
+                                                        <button
+                                                            onClick={() => setIsUnitsModalOpen(false)}
+                                                            className="text-gray-500 hover:text-gray-700"
+                                                        >
+                                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
 
-                                                        {/* Nested Units */}
-                                                        {unit.units && unit.units.length > 0 && (
-                                                            <div className="mt-4 border-t pt-4">
-                                                                <h6 className="text-sm font-medium text-gray-700 mb-2">Specific Units:</h6>
-                                                                <div className="space-y-3">
-                                                                    {unit.units.map((specificUnit) => (
-                                                                        <div key={specificUnit.id} className="bg-gray-50 p-3 rounded-md">
-                                                                            <div className="flex justify-between">
-                                                                                <div>
-                                                                                    <p className="font-medium text-gray-800">
-                                                                                        Unit Id:  {specificUnit.display_name || specificUnit.name}
-                                                                                    </p>
-                                                                                    {specificUnit.sqft && (
-                                                                                        <p className="text-sm text-gray-600">
-                                                                                            {specificUnit.sqft.toLocaleString()} sqft
-                                                                                        </p>
+
+                                                    <div className="p-4 overflow-y-auto max-h-[calc(90vh-60px)]">
+                                                        <div className="grid grid-cols-1 gap-4">
+                                                            {propertyGroup.Information.available_units.map((unit) => (
+                                                                <div key={unit.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                                                                    {/* Unit Header */}
+                                                                    <div className="flex justify-between items-start mb-3">
+                                                                        <div>
+                                                                            <h5 className="font-medium text-gray-800">{unit.name}</h5>
+                                                                            <p className="text-sm text-gray-600">
+                                                                                {unit.bed} {unit.bed === 1 ? 'bed' : 'beds'}, {unit.bath} {unit.bath === 1 ? 'bath' : 'baths'} • {unit.sqft?.toLocaleString()} sqft
+                                                                            </p>
+                                                                        </div>
+                                                                        <div className="text-right">
+                                                                            {unit.price && (
+                                                                                <p className="font-medium text-gray-800">
+                                                                                    ${unit.price.toLocaleString()}
+                                                                                    {unit.price_max && unit.price_max > unit.price && (
+                                                                                        <span className="text-sm text-gray-500"> - ${unit.price_max.toLocaleString()}</span>
                                                                                     )}
-                                                                                </div>
-                                                                                <div className="text-right">
-                                                                                    {specificUnit.price && (
-                                                                                        <p className="font-medium text-gray-800">
-                                                                                            ${specificUnit.price.toLocaleString()}
-                                                                                        </p>
-                                                                                    )}
-                                                                                    {specificUnit.availability && (
-                                                                                        <span className={`text-xs px-2 py-1 rounded-full hidden ${specificUnit.availability === 'available'
-                                                                                            ? 'bg-green-100 text-green-800'
-                                                                                            : 'bg-yellow-100 text-yellow-800'
-                                                                                            }`}>
-                                                                                            {specificUnit.availability}
-                                                                                        </span>
-                                                                                    )}
-                                                                                </div>
-                                                                            </div>
+                                                                                </p>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
 
-                                                                            <div className="grid grid-cols-2 gap-2 text-sm mt-2">
-                                                                                {specificUnit.available_on && (
-                                                                                    <div>
-                                                                                        <span className="text-gray-500">Availability:</span>
-                                                                                        <span className="ml-1 text-gray-700">
-                                                                                            {formatAvailabilityDate(specificUnit.available_on)}
-                                                                                        </span>
-                                                                                    </div>
-                                                                                )}
-                                                                                {specificUnit.updated_at && (
-                                                                                    <div>
-                                                                                        <span className="text-gray-500">Updated:</span>
-                                                                                        <span className="ml-1 text-gray-700">
+                                                                    {/* Nested Units */}
+                                                                    {unit.units && unit.units.length > 0 && (
+                                                                        <div className="mt-4 border-t pt-4">
+                                                                            <h6 className="text-sm font-medium text-gray-700 mb-2">Specific Units:</h6>
+                                                                            <div className="space-y-3">
+                                                                                {unit.units.map((specificUnit) => (
+                                                                                    <div key={specificUnit.id} className="bg-gray-50 p-3 rounded-md">
+                                                                                        <div className="flex justify-between">
+                                                                                            <div>
+                                                                                                <p className="font-medium text-gray-800">
+                                                                                                    Unit Id: {specificUnit.display_name || specificUnit.name}
+                                                                                                </p>
+                                                                                                {specificUnit.sqft && (
+                                                                                                    <p className="text-sm text-gray-600">
+                                                                                                        {specificUnit.sqft.toLocaleString()} sqft
+                                                                                                    </p>
+                                                                                                )}
+                                                                                            </div>
+                                                                                            <div className="text-right">
+                                                                                                {specificUnit.price && (
+                                                                                                    <p className="font-medium text-gray-800">
+                                                                                                        ${specificUnit.price.toLocaleString()}
+                                                                                                    </p>
+                                                                                                )}
+                                                                                                {specificUnit.availability && (
+                                                                                                    <span className={`text-xs hidden px-2 py-1 rounded-full ${specificUnit.availability === 'available'
+                                                                                                        ? 'bg-green-100 text-green-800'
+                                                                                                        : 'bg-yellow-100 text-yellow-800'
+                                                                                                        }`}>
+                                                                                                        {specificUnit.availability}
+                                                                                                    </span>
+                                                                                                )}
+                                                                                            </div>
+                                                                                        </div>
 
-                                                                                            {formatAvailabilityDate(specificUnit.updated_at)}
-                                                                                        </span>
+                                                                                        <div className="grid grid-cols-2 gap-2 text-sm mt-2">
+                                                                                            {specificUnit.available_on && (
+                                                                                                <div>
+                                                                                                    <span className="text-gray-500">Availability:</span>
+                                                                                                    <span className="ml-1 text-gray-700">
+                                                                                                        {formatAvailabilityDate(specificUnit.available_on)}
+                                                                                                    </span>
+                                                                                                </div>
+                                                                                            )}
+                                                                                            {specificUnit.updated_at && (
+                                                                                                <div>
+                                                                                                    <span className="text-gray-500">Updated:</span>
+                                                                                                    <span className="ml-1 text-gray-700">
+                                                                                                        {formatAvailabilityDate(specificUnit.updated_at)}
+                                                                                                    </span>
+                                                                                                </div>
+                                                                                            )}
+                                                                                        </div>
                                                                                     </div>
-                                                                                )}
-                                                                                {specificUnit.remote_listing_id && (
-                                                                                    <div className="col-span-2 hidden">
-                                                                                        <span className="text-gray-500">Unit ID:</span>
-                                                                                        <span className="ml-1 text-gray-700">{specificUnit.remote_listing_id}</span>
-                                                                                    </div>
-                                                                                )}
-
+                                                                                ))}
                                                                             </div>
                                                                         </div>
-                                                                    ))}
+                                                                    )}
+                                                                    <FloorPlanGallery unit={unit} />
                                                                 </div>
-                                                            </div>
-                                                        )}
-                                                        <FloorPlanGallery unit={unit} />
+                                                            ))}
+                                                        </div>
                                                     </div>
-                                                ))}
+                                                </div>
                                             </div>
-                                        </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}

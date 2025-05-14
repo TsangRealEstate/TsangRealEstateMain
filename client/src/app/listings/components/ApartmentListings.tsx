@@ -232,19 +232,25 @@ const ApartmentListings = () => {
                                                     <div className="grid gap-6 max-h-[400px] overflow-y-auto">
                                                         {/* Group units by their parent name */}
                                                         {selectedListing.available_units
-                                                            // Sort parent units alphabetically by name
-                                                            .sort((a, b) => a.name.localeCompare(b.name))
+                                                            // First sort parent units by sqft (smallest to largest)
+                                                            .sort((a, b) => a.sqft - b.sqft)
                                                             .map((unit) => (
                                                                 <div key={unit.id} className="space-y-3">
-                                                                    <h3 className="text-lg font-semibold text-gray-900">{unit.name}</h3>
+                                                                    <h3 className="text-lg font-semibold text-gray-900">
+                                                                        {unit.name} - {unit.sqft} sqft
+                                                                    </h3>
                                                                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                                                         {unit.units
                                                                             .sort((a, b) => {
-                                                                                // First sort by price
+                                                                                // First sort by sqft (smallest to largest)
+                                                                                const sqftDiff = a.sqft - b.sqft;
+                                                                                if (sqftDiff !== 0) return sqftDiff;
+
+                                                                                // If sqft is equal, sort by price
                                                                                 const priceDiff = a.price - b.price;
                                                                                 if (priceDiff !== 0) return priceDiff;
 
-                                                                                // If prices are equal, sort by date
+                                                                                // If both sqft and price are equal, sort by date
                                                                                 const dateA = new Date(a.available_on);
                                                                                 const dateB = new Date(b.available_on);
                                                                                 return dateA.getTime() - dateB.getTime();

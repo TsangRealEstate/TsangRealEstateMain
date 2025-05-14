@@ -376,7 +376,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                         <div key={unit.id} className="border border-gray-200 rounded-lg overflow-hidden">
                             {/* Unit Header */}
                             <div className="bg-gray-50 p-4 border-b border-gray-200">
-                                <h3 className="text-xl font-medium">Unit Name: {unit.name}</h3>
+                                <h3 className="text-xl font-medium">Floor Name: {unit.name}</h3>
                                 <div className="flex space-x-4 text-gray-600 mt-1">
                                     <span><FaBed className="inline mr-1" /> {unit.bed} {unit.bed === 1 ? 'bed' : 'beds'}</span>
                                     <span><FaBath className="inline mr-1" /> {unit.bath} {unit.bath === 1 ? 'bath' : 'baths'}</span>
@@ -392,7 +392,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                                             <div key={specificUnit.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                                                 <div className="flex justify-between items-start">
                                                     <div>
-                                                        <h4 className="font-medium">Unit ID: {specificUnit.display_name}</h4>
+                                                        <h4 className="font-medium">Unit Number: {specificUnit.display_name}</h4>
                                                         {/* <p>rentalId: {specificUnit.unit_rental_id}</p> */}
                                                         <p className="text-gray-600 text-sm">
                                                             Availability: <FaCalendarAlt className="inline mr-1" />
@@ -412,9 +412,10 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                                                         </span>
                                                     </div>
                                                 </div>
-                                                <FloorPlanGallery unit={unit} />
+
                                             </div>
                                         ))}
+                                        <FloorPlanGallery unit={unit} />
                                     </div>
                                 ) : (
                                     <p className="text-gray-500">No specific units currently available</p>
