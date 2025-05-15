@@ -1,19 +1,18 @@
 import { useState } from 'react';
 import axiosInstance from '@/api/axiosInstance';
 
-// TypeScript interfaces
 interface Restriction {
-    bed_count?: number[];
-    lease_length?: number[][];
+    bed_count?: number[] | null;
+    lease_length?: number[][] | null;
 }
 
 interface Special {
     _id?: string;
     raw_text: string;
     restrictions?: Restriction;
-    created_at: string;
-    updated_at: string;
-    expires_at?: string;
+    created_at: string | null;
+    updated_at: string | null;
+    expires_at?: string | null;
 }
 
 interface PropertyInformation {
@@ -103,7 +102,7 @@ const PropertySpecials = ({ property, onUpdate }: PropertySpecialsProps) => {
     };
 
 
-    const formatDate = (dateString?: string) => {
+    const formatDate = (dateString: string | null | undefined) => {
         if (!dateString) return 'N/A';
         return new Date(dateString).toLocaleDateString('en-US', {
             year: 'numeric',
@@ -287,7 +286,7 @@ const PropertySpecials = ({ property, onUpdate }: PropertySpecialsProps) => {
                                                 {editing ? (
                                                     <input
                                                         type="date"
-                                                        value={new Date(special.updated_at).toISOString().split('T')[0]}
+                                                        value={special.updated_at ? new Date(special.updated_at).toISOString().split('T')[0] : ''}
                                                         onChange={(e) => handleSpecialChange(index, 'updated_at', e.target.value)}
                                                         className="w-full p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                                                     />
