@@ -4,6 +4,7 @@ import "./globals.css";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { AuthProvider } from "@/context/AuthContext";
+import BackToTopButton from "@/components/BackToTopButton";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default function RootLayout({
         <AuthProvider>
           <Header />
           {children}
+          <BackToTopButton />
           <Footer />
         </AuthProvider>
       </body>

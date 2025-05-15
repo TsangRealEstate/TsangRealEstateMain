@@ -75,7 +75,7 @@ export default function Home() {
             <div className="mt-10 lg:mt-0 relative">
               <div className="relative overflow-hidden rounded-2xl shadow-2xl">
                 <img
-                  src="https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=1280&auto=format&fit=crop&ixlib=rb-4.0.3"
+                  src="/tsangbgimageherosection.avif"
                   alt="Beautiful modern home"
                   className="aspect-[6/5] w-full object-cover transition-transform duration-500 hover:scale-105"
                 />

@@ -400,7 +400,7 @@ export default function FilterComp() {
                                         <img
                                             src={propertyGroup.Information.first_photo[0]?.id
                                                 ? getPhotoUrl(propertyGroup.Information.first_photo[0].id)
-                                                : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?q=80&w=1280&auto=format&fit=crop&ixlib=rb-4.0.3'}
+                                                : '/tsangbgimageherosection.avif'}
 
                                             alt={propertyGroup.Information.display_name}
                                             className="w-full h-64 object-cover"
