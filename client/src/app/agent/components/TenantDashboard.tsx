@@ -144,7 +144,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             }}
         >
             <div className="bg-white relative rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-start mb-4 Top_CTA_BTNS">
+                <div className="flex justify-between flex-col lg:flex-row items-start mb-4 Top_CTA_BTNS">
                     <span>
                         <h2 className="text-2xl font-semibold capitalize text-blue-500">
                             {tenant.firstName.charAt(0).toUpperCase() + tenant.firstName.slice(1)}{" "}
@@ -169,7 +169,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     </span>
 
 
-                    <div>
+                    <div className="mt-6 lg:mt-0">
                         <button
                             onClick={handleDelete}
                             className="bg-red-600 mr-3 text-white px-4 py-2 rounded-lg hover:bg-red-700"

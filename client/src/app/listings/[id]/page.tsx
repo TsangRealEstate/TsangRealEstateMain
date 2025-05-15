@@ -346,6 +346,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                                                     <div>
                                                         <h4 className="font-medium">Unit Number: {specificUnit.display_name}</h4>
                                                         {/* <p>rentalId: {specificUnit.unit_rental_id}</p> */}
+                                                        <p className='my-3'>Sqft: {specificUnit.sqft}</p>
                                                         <p className="text-gray-600 text-sm">
                                                             Availability: <FaCalendarAlt className="inline mr-1" />
                                                             {formatAvailabilityDate(specificUnit.available_on)}

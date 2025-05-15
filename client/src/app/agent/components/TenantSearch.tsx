@@ -48,10 +48,10 @@ const TenantSearch: React.FC<TenantSearchProps> = ({
     };
 
     return (
-        <div className="justify-between search-func px-8 flex items-center py-8">
+        <div className="justify-between lg:flex-row flex-col search-func px-8 flex items-center py-8">
             <h1 className="text-3xl font-bold text-gray-800 text-center">Agent Dashboard</h1>
 
-            <div className="w-[350px] relative">
+            <div className="w-[350px] lg:my-0 my-5 relative">
                 <div className="relative">
                     <input
                         ref={inputRef}

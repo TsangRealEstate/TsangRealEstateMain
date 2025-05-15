@@ -36,7 +36,7 @@ const ApartmentListings = () => {
     const handleViewDetails = (listing: Listing) => {
         setSelectedListing(listing);
         setModalOpen(true);
-        console.log(listing.available_units)
+        // console.log(listing.available_units)
     };
 
     const closeModal = () => {
@@ -118,7 +118,7 @@ const ApartmentListings = () => {
                             />
                         </div>
 
-                        <div className="flex items-center space-x-4">
+                        <div className="flex flex-col lg:flex-row lg:items-center space-x-4">
                             <div className="flex items-center">
                                 <FaSortAmountDown className="h-5 w-5 text-gray-400 mr-2" />
                                 <select
@@ -135,7 +135,7 @@ const ApartmentListings = () => {
                             <button
                                 onClick={fetchListings}
                                 disabled={loading}
-                                className={`inline-flex items-center px-4 py-2 border border-transparent text-lg font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`inline-flex mt-4 lg:mt-0 w-fit items-center px-4 py-2 border border-transparent text-lg font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 <FiRefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                                 Refresh
@@ -144,7 +144,7 @@ const ApartmentListings = () => {
                             <Link href={'/filter'} >
                                 <button
                                     disabled={loading}
-                                    className={`inline-flex items-center px-4 py-2 border border-transparent text-lg font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`inline-flex mt-3  w-fit lg:mt-0 items-center px-4 py-2 border border-transparent text-lg font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <FaSortAmountDown className="h-5 w-5 text-white mr-2" />
                                     Apply Filters
@@ -209,10 +209,10 @@ const ApartmentListings = () => {
                                 <div className="absolute inset-0" onClick={closeModal}></div>
                             </div>
 
-                            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle lg:w-4xl w-full">
                                 <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                                     <div className="sm:flex sm:items-start">
-                                        <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                                        <div className="mt-3 sm:mt-0 sm:text-left w-full">
                                             <div className="flex justify-between items-center">
                                                 <h3 className="text-lg leading-6 font-medium text-gray-900">
                                                     {getPropertyNameFromUrl(selectedListing.destinationURL)}
@@ -281,7 +281,7 @@ const ApartmentListings = () => {
                                                                                         Available: {formatAvailabilityDate(subUnit.available_on)}
                                                                                     </div>
                                                                                     <div className="mt-3 font-medium text-blue-600">
-                                                                                        {formatPrice(subUnit.price)}/month
+                                                                                        {formatPrice(subUnit.price)}
                                                                                     </div>
                                                                                 </div>
                                                                             ))}
