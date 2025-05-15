@@ -168,4 +168,5 @@ interface Unit {
     sqft: number;
     availability: string;
     available_on: string;
+    display_name: string;
 }

@@ -36,6 +36,7 @@ const ApartmentListings = () => {
     const handleViewDetails = (listing: Listing) => {
         setSelectedListing(listing);
         setModalOpen(true);
+        console.log(listing.available_units)
     };
 
     const closeModal = () => {
@@ -230,14 +231,15 @@ const ApartmentListings = () => {
                                                         Available Units ({selectedListing.available_units.reduce((acc, unit) => acc + (unit.units?.length || 0), 0)})
                                                     </h4>
                                                     <div className="grid gap-6 max-h-[400px] overflow-y-auto">
-                                                        {/* Group units by their parent name */}
+                                                        {/* Filter out units that have no available subunits */}
                                                         {selectedListing.available_units
+                                                            .filter(unit => unit.units && unit.units.length > 0)
                                                             // First sort parent units by sqft (smallest to largest)
                                                             .sort((a, b) => a.sqft - b.sqft)
                                                             .map((unit) => (
                                                                 <div key={unit.id} className="space-y-3">
                                                                     <h3 className="text-lg font-semibold text-gray-900">
-                                                                        {unit.name} - {unit.sqft} sqft
+                                                                        {unit.name} - {unit.bed} bed, {unit.bath} bath - {unit.sqft} sqft
                                                                     </h3>
                                                                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                                                         {unit.units
@@ -260,26 +262,26 @@ const ApartmentListings = () => {
                                                                                     key={`${unit.id}-${subUnit.id}`}
                                                                                     className="border border-blue-600 rounded-lg p-4 hover:shadow-md transition-shadow"
                                                                                 >
-                                                                                    <p className="text-sm text-gray-500 mb-2">{subUnit.name}</p>
+                                                                                    <p className="text-sm text-gray-500 mb-2">Unit {subUnit.display_name || subUnit.name}</p>
 
                                                                                     <div className="flex items-center text-sm text-gray-600 mb-1">
                                                                                         <FaBed className="mr-2 text-gray-400" />
-                                                                                        {unit.bed} beds
+                                                                                        {unit.bed} {unit.bed === 1 ? 'bed' : 'beds'}
                                                                                     </div>
                                                                                     <div className="flex items-center text-sm text-gray-600 mb-1">
                                                                                         <FaBath className="mr-2 text-gray-400" />
-                                                                                        {unit.bath} baths
+                                                                                        {unit.bath} {unit.bath === 1 ? 'bath' : 'baths'}
                                                                                     </div>
                                                                                     <div className="flex items-center text-sm text-gray-600 mb-1">
                                                                                         <FaRulerCombined className="mr-2 text-gray-400" />
-                                                                                        {unit.sqft} sqft
+                                                                                        {subUnit.sqft} sqft
                                                                                     </div>
                                                                                     <div className="flex items-center text-sm text-gray-600">
                                                                                         <FaCalendarAlt className="mr-2 text-gray-400" />
-                                                                                        Availability: {formatAvailabilityDate(subUnit.available_on)}
+                                                                                        Available: {formatAvailabilityDate(subUnit.available_on)}
                                                                                     </div>
                                                                                     <div className="mt-3 font-medium text-blue-600">
-                                                                                        {formatPrice(subUnit.price)}
+                                                                                        {formatPrice(subUnit.price)}/month
                                                                                     </div>
                                                                                 </div>
                                                                             ))}
