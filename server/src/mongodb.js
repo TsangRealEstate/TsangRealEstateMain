@@ -18,7 +18,7 @@ class MongoDBConnector {
       ...options,
     };
 
-    const mongoDBURI = mongoURI ?? "";
+    const mongoDBURI = mongoURI;
     const mongoHost = new url.URL(mongoDBURI).host;
 
     mongoose.set("strictQuery", true);
