@@ -7,6 +7,7 @@ import { BsCheckLg } from "react-icons/bs";
 import { FiSearch, FiHome, FiCalendar, FiMapPin, FiAlertCircle, FiXCircle } from "react-icons/fi";
 import DetailItem from "./DetailItem";
 import ActivityLog from "./ActivityLog";
+import ResultsModal from "@/app/listings/components/ResultsModal";
 
 interface TenantModalProps {
     tenant: any;
@@ -20,8 +21,19 @@ interface Movement {
 }
 
 const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
+    const [modal, setModal] = useState({
+        show: false,
+        title: '',
+        message: '',
+        hasResults: false,
+        results: [],
+        tenantId: '',
+        tenantName: ''
+    });
     const [editField, setEditField] = useState<string | null>(null);
     const [editedValue, setEditedValue] = useState<string>('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
     const { setTenants, setColumns } = useAuth();
     const [movements, setMovements] = useState<Movement[]>([]);
     if (!tenant) return null;
@@ -119,6 +131,115 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
         }
     };
 
+    const handleApplyFilters = async () => {
+        try {
+            setLoading(true);
+            setError('');
+
+            // Prepare query parameters
+            const params = new URLSearchParams();
+
+            // Handle budget range (e.g., "$1400 - $1500") with cleaning
+            if (tenant.budget) {
+                const cleanedBudget = tenant.budget
+                    .replace(/\$/g, '')
+                    .replace(/,/g, '') // Remove commas if present
+                    .trim();
+
+                const budgetRange = cleanedBudget.split('-')
+                    .map((part: string) => parseInt(part.trim(), 10))
+                    .filter((num: number) => !isNaN(num));
+
+                if (budgetRange.length === 2) {
+                    params.append('minPrice', budgetRange[0].toString());
+                    params.append('maxPrice', budgetRange[1].toString());
+                } else if (budgetRange.length === 1) {
+                    //If single value, use it for both min and max
+                    params.append('minPrice', budgetRange[0].toString());
+                    params.append('maxPrice', budgetRange[0].toString());
+                }
+            }
+
+            // Add beds and baths with cleaning
+            // if (tenant.bedrooms) {
+            //     const cleanedBedrooms = tenant.bedrooms.toString().replace(/\D/g, '');
+            //     if (cleanedBedrooms) params.append('beds', cleanedBedrooms);
+            // }
+
+            // if (tenant.bathrooms) {
+            //     const cleanedBathrooms = tenant.bathrooms.toString().replace(/\D/g, '');
+            //     if (cleanedBathrooms) params.append('baths', cleanedBathrooms);
+            // }
+
+            // Handle move-in dates with validation
+            // if (tenant.leaseEndDate) {
+            //     try {
+            //         const leaseEndDate = new Date(tenant.leaseEndDate);
+            //         if (!isNaN(leaseEndDate.getTime())) {
+            //             // Set earliest to today
+            //             // const today = new Date();
+            //             // params.append('earliestMoveInDate', today.toISOString().split('T')[0]);
+            //             // Set latest to lease end date
+            //             params.append('latestMoveInDate', leaseEndDate.toISOString().split('T')[0]);
+            //         }
+            //     } catch (error) {
+            //         console.error('Error processing lease dates:', error);
+            //     }
+            // }
+
+            // Add amenities with cleaning
+            // if (tenant.nonNegotiables?.length > 0) {
+            //     const cleanedAmenities = tenant.nonNegotiables
+            //         .map(amenity => amenity.trim().toLowerCase())
+            //         .filter(amenity => amenity.length > 0);
+
+            //     if (cleanedAmenities.includes('in-unit laundry')) params.append('inUnitLaundry', 'true');
+            //     if (cleanedAmenities.includes('balcony')) params.append('balcony', 'true');
+            //     if (cleanedAmenities.includes('yard')) params.append('yard', 'true');
+            // }
+
+            // Add areas with cleaning (as before)
+            if (tenant.desiredLocation?.length > 0) {
+                const cleanedAreas = tenant.desiredLocation
+                    .flatMap((area: string) => area.split(','))
+                    .map((area: string) => area.trim())
+                    .filter((area: string | any[]) => area.length > 0);
+
+                params.append('area', cleanedAreas.join('&'));
+            }
+
+            const response = await axiosInstance.get('/scrape-list/filter', { params });
+            if (response.data.count === 0) {
+                setModal({
+                    show: true,
+                    title: "No Results Found",
+                    message: "No listings match your current filters.",
+                    hasResults: false,
+                    results: [],
+                    tenantName: tenant.firstName || "",
+                    tenantId: ""
+                });
+            } else {
+                setModal({
+                    tenantId: tenant._id,
+                    show: true,
+                    title: "Results Found!",
+                    message: `We found ${response.data.count} matching properties.`,
+                    hasResults: true,
+                    results: response.data.data,
+                    tenantName: `${tenant.firstName} ${tenant.lastName}`.trim()
+                });
+            }
+
+
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'An unknown error occurred');
+            console.error('Filter error:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const fetchMovements = async () => {
         try {
             const res = await axiosInstance.get(`/movements/${tenant._id}`);
@@ -171,11 +292,19 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
 
                     <div className="mt-6 lg:mt-0">
                         <button
+                            onClick={handleApplyFilters}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                        >
+                            Search
+                        </button>
+
+                        <button
                             onClick={handleDelete}
-                            className="bg-red-600 mr-3 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                            className="bg-red-600 mx-3 text-white px-4 py-2 rounded-lg hover:bg-red-700"
                         >
                             Delete
                         </button>
+
                         <button
                             onClick={onClose}
                             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -224,6 +353,17 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     userDisplayName="Alex Tsang"
                     showHeader={false}
                     className="mt-8"
+                />
+
+                <ResultsModal
+                    show={modal.show}
+                    title={modal.title}
+                    message={modal.message}
+                    hasResults={modal.hasResults}
+                    results={modal.results}
+                    tenantName={modal.tenantName}
+                    tenantId={modal.tenantId}
+                    onClose={() => setModal({ ...modal, show: false })}
                 />
 
             </div>

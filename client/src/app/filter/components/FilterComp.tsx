@@ -551,7 +551,7 @@ export default function FilterComp() {
                                                                     {/* Unit Header */}
                                                                     <div className="flex justify-between items-start mb-3">
                                                                         <div>
-                                                                            <h5 className="font-medium text-gray-800">{unit.name}</h5>
+                                                                            <h5 className="font-medium text-gray-800">Floor Name: {unit.name}</h5>
                                                                             <p className="text-sm text-gray-600">
                                                                                 {unit.bed} {unit.bed === 1 ? 'bed' : 'beds'}, {unit.bath} {unit.bath === 1 ? 'bath' : 'baths'} • {unit.sqft?.toLocaleString()} sqft
                                                                             </p>
@@ -578,7 +578,7 @@ export default function FilterComp() {
                                                                                         <div className="flex justify-between">
                                                                                             <div>
                                                                                                 <p className="font-medium text-gray-800">
-                                                                                                    Unit Id: {specificUnit.display_name || specificUnit.name}
+                                                                                                    Unit Number: {specificUnit.display_name || specificUnit.name}
                                                                                                 </p>
                                                                                                 {specificUnit.sqft && (
                                                                                                     <p className="text-sm text-gray-600">
