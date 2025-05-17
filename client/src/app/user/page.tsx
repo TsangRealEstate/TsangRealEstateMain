@@ -160,7 +160,7 @@ export default function TenantListingsPage() {
                                         <div className="flex justify-between border-b pb-4 mb-4 flex-col lg:flex-row lg:items-center">
                                             <div>
                                                 <h2 className="text-xl font-bold text-gray-800">
-                                                    {group.propertyArea} - {group.propertyName}
+                                                    {group.propertyArea}
                                                 </h2>
                                             </div>
 
@@ -185,7 +185,7 @@ export default function TenantListingsPage() {
 
                                                         <div className="ml-4 flex-1">
                                                             <h3 className="text-lg font-semibold text-gray-800">
-                                                                {unit.unitName}
+                                                                Unit: {unit.unitName}
                                                             </h3>
 
                                                             <div className="mt-4 grid grid-cols-2 gap-3">
