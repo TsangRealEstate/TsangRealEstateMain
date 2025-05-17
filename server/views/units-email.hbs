@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: #2b2d42;
+            background-color: #f8f9ff;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.07);
+        }
+
+        .header {
+            background-color: #4361ee;
+            padding: 35px 20px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .greeting {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .intro-text {
+            font-size: 16px;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .area-list {
+            margin-bottom: 25px;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .area-item {
+            padding: 14px 18px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .area-item:last-child {
+            border-bottom: none;
+        }
+
+        .area-item:hover {
+            background-color: #f1f3f5;
+        }
+
+        .property-count {
+            display: inline-block;
+            background-color: #f1f3f5;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            margin-left: 8px;
+        }
+
+        .view-link {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 14px 28px;
+            background-color: #4361ee;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        a {
+            color: #ffffff important;
+        }
+
+        .view-link:hover {
+            background-color: #3f37c9;
+        }
+
+        .footer {
+            background-color: #f8f9fa;
+            padding: 18px 20px;
+            border-top: 1px solid #e9ecef;
+            text-align: center;
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        @media screen and (max-width: 620px) {
+            body {
+                padding: 20px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Your Personalized Property Matches</h2>
+        </div>
+        <div class="content">
+            <p class="greeting">Hello {{firstName}},</p>
+            <p class="intro-text">
+                Here are the property areas that match your preferences. We've carefully selected these based on your
+                search criteria and saved selections.
+            </p>
+
+            <h3>Your Matching Areas <span class="property-count">{{count}}</span></h3>
+            <div class="area-list">
+                {{#each areas}}
+                <div class="area-item">
+                    <strong>{{this}}</strong>
+                </div>
+                {{/each}}
+            </div>
+
+            <a href="{{tenantLink}}" class="view-link" target="_blank">View All Property Details</a>
+
+            <p style="margin-top: 25px;">Our team is reviewing your preferences and will contact you soon with
+                personalized recommendations.</p>
+        </div>
+        <div class="footer">
+            <p>This email was sent on {{date}}. Please do not reply to this message.</p>
+        </div>
+    </div>
+</body>
+
+</html>
