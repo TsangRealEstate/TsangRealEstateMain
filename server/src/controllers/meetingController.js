@@ -94,7 +94,7 @@ const sendUnitsToTenant = async (tenantId) => {
     const tenantFullName = `${tenant.firstName} ${tenant.lastName}`.trim();
     const tenantLink = `${
       process.env.CLIENT_URL
-    }/listings/Tenant/${encodeURIComponent(tenantFullName)}`;
+    }/user?tenant=${encodeURIComponent(tenantFullName)}&userId=${tenant._id}`;
 
     // 5. Prepare email content
     const template = await fs.promises.readFile(unitsTemplatePath, "utf8");
