@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { FaBed, FaBath, FaRulerCombined, FaCalendarAlt, FaHome, FaClock } from 'react-icons/fa';
+import { FaBed, FaBath, FaRulerCombined, FaCalendarAlt, FaHome, FaClock, FaTimes } from 'react-icons/fa';
 import SavedUnitsModal from './SavedUnitsModal';
 import axiosInstance from '@/api/axiosInstance';
 
@@ -239,7 +239,7 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
         }, Infinity);
 
         return (
-            <div className="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-300">
+            <div className="bg-white overflow-hidden hover:shadow-xl rounded-lg shadow-lg transition-shadow duration-300">
                 <div className="px-4 py-5 sm:p-6">
                     <div className="flex items-center">
                         <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
@@ -307,9 +307,17 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
 
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-6">
-                {results.count} Results for {tenantName}
-            </h1>
+            <div className='flex items-center justify-between my-8'>
+                <h1 className="text-2xl font-bold">
+                    {results.count} Results for {tenantName}
+                </h1>
+                <button
+                    onClick={() => setShowSavedUnits(true)}
+                    className=" py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white transition-colorse font-medium rounded-lg transition-colors"
+                >
+                    <span>View Saved Units</span>
+                </button>
+            </div>
 
             {/* Modal */}
             {modalOpen && selectedListing && (
@@ -327,12 +335,8 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
                                             <h3 className="text-lg leading-6 font-medium text-gray-900">
                                                 {selectedListing.display_name}
                                             </h3>
-                                            <button
-                                                onClick={closeModal}
-                                                className="text-gray-400 hover:text-gray-500 focus:outline-none"
-                                            >
-                                                <span className="sr-only">Close</span>
-                                                <span className="h-6 w-6">×</span>
+                                            <button onClick={closeModal} className="text-gray-500 hover:text-gray-700" aria-label="Close">
+                                                <FaTimes size={24} />
                                             </button>
                                         </div>
                                         <p className="text-sm text-gray-500 mt-1">{selectedListing.street_address}</p>
@@ -413,12 +417,6 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
                     {results.listings.map((listing, index) => (
                         <PropertyCard key={index} listing={listing} />
                     ))}
-                    <button
-                        onClick={() => setShowSavedUnits(true)}
-                        className="flex items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors"
-                    >
-                        <span className="text-blue-600 font-medium">View Saved Units</span>
-                    </button>
                 </div>
             )}
 
