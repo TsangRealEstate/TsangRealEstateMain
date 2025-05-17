@@ -163,6 +163,7 @@ export default function TenantListingsPage() {
                                                     {group.propertyArea} - {group.propertyName}
                                                 </h2>
                                             </div>
+
                                             <Link href={`/listings/${group.scrapeListId}`}>
                                                 <button
                                                     type="button"
@@ -181,10 +182,12 @@ export default function TenantListingsPage() {
                                                         <div className="flex-shrink-0 bg-blue-500 rounded-lg p-3 text-white">
                                                             <FaHome className="h-5 w-5" />
                                                         </div>
+
                                                         <div className="ml-4 flex-1">
                                                             <h3 className="text-lg font-semibold text-gray-800">
                                                                 {unit.unitName}
                                                             </h3>
+
                                                             <div className="mt-4 grid grid-cols-2 gap-3">
                                                                 <div className="flex items-center">
                                                                     <FaBed className="text-gray-400 mr-2" />
@@ -209,8 +212,17 @@ export default function TenantListingsPage() {
                                                                     </span>
                                                                 </div>
                                                             </div>
-                                                            <div className="mt-4 text-lg font-bold text-blue-600">
-                                                                {formatPrice(unit.price)}
+
+                                                            <div className="mt-4 flex justify-between items-center">
+                                                                <span className="text-xl font-bold text-blue-600">
+                                                                    {formatPrice(unit.price)}
+                                                                </span>
+                                                                {sortBy === 'price' &&
+                                                                    unit.price === Math.min(...savedUnits.map((u) => u.price)) && (
+                                                                        <span className="text-xs px-2 py-1 bg-blue-50 text-blue-600 rounded-full">
+                                                                            Best Value
+                                                                        </span>
+                                                                    )}
                                                             </div>
                                                         </div>
                                                     </div>
