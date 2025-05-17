@@ -1,5 +1,6 @@
 const Tenant = require("../models/Tenant");
 const { sendMeetingInvite } = require("./meetingController");
+const TenantSearchResult = require("../models/TenantSearchResult");
 
 // ✅ Create a Tenant
 const createOrUpdateTenant = async (req, res) => {
@@ -101,9 +102,64 @@ const deleteTenant = async (req, res) => {
   }
 };
 
+const saveSearchResults = async (req, res) => {
+  try {
+    const { tenantId, tenantName, count, listings } = req.body;
+
+    // Check if results already exist for this tenant
+    const existingResult = await TenantSearchResult.findOne({ tenantId });
+
+    let result;
+    if (existingResult) {
+      // Update existing record
+      existingResult.count = count;
+      existingResult.listings = listings;
+      result = await existingResult.save();
+    } else {
+      // Create new record
+      result = await TenantSearchResult.create({
+        tenantId,
+        tenantName,
+        count,
+        listings,
+      });
+    }
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getSearchResultsByTenantName = async (req, res) => {
+  try {
+    const { tenantName } = req.params;
+
+    const result = await TenantSearchResult.findOne({ tenantName })
+      .sort({ timestamp: -1 })
+      .exec();
+
+    if (!result) {
+      return res
+        .status(404)
+        .json({ message: "No results found for this tenant" });
+    }
+
+    res.status(200).json({
+      count: result.count,
+      listings: result.listings,
+      tenantId: result.tenantId,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createOrUpdateTenant,
   getAllTenants,
   updateTenant,
   deleteTenant,
+  saveSearchResults,
+  getSearchResultsByTenantName,
 };

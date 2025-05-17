@@ -8,6 +8,7 @@ import { FiSearch, FiHome, FiCalendar, FiMapPin, FiAlertCircle, FiXCircle } from
 import DetailItem from "./DetailItem";
 import ActivityLog from "./ActivityLog";
 import ResultsModal from "@/app/listings/components/ResultsModal";
+import Link from "next/link";
 
 interface TenantModalProps {
     tenant: any;
@@ -297,6 +298,14 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         >
                             Search
                         </button>
+
+                        <Link href={`/listings/Tenant/${encodeURIComponent(`${tenant.firstName} ${tenant.lastName}`.trim() || '')}`} target="_blank">
+                            <button
+                                className="bg-blue-600 ml-3 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                            >
+                                Searched Units
+                            </button>
+                        </Link>
 
                         <button
                             onClick={handleDelete}

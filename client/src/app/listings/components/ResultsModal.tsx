@@ -1,3 +1,5 @@
+import axiosInstance from "@/api/axiosInstance";
+
 interface ModalProps {
     show: boolean;
     title: string;
@@ -22,9 +24,9 @@ export default function ResultsModal({
 
     if (!show) return null;
 
-    const handleNavigate = () => {
+    const handleNavigate = async () => {
         const simplifiedResults = results?.map((listing: any) => ({
-            _id: listing._id,
+            scrapeListId: listing._id,
             display_name: listing.Information.display_name,
             street_address: listing.Information.street_address,
             available_units: listing.Information.available_units.map((unit: any) => ({
@@ -49,14 +51,21 @@ export default function ResultsModal({
             }))
         }));
 
-        localStorage.setItem('tenantResults', JSON.stringify({
-            count: results?.length,
-            listings: simplifiedResults,
-            tenantId: tenantId,
-        }));
+        try {
+            const payload = {
+                tenantId,
+                tenantName,
+                count: results?.length || 0,
+                listings: simplifiedResults || []
+            };
 
-        const url = `/listings/Tenant/${encodeURIComponent(tenantName ?? '')}`;
-        window.open(url, '_blank', 'noopener,noreferrer');
+            await axiosInstance.post('/tenants/search-results', payload);
+
+            const url = `/listings/Tenant/${encodeURIComponent(tenantName ?? '')}`;
+            window.open(url, '_blank', 'noopener,noreferrer');
+        } catch (error) {
+            console.error('Error saving search results:', error);
+        }
     };
 
     return (

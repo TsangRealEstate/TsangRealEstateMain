@@ -339,36 +339,40 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                             {/* Unit Details */}
                             <div className="p-4">
                                 {unit.units.length > 0 ? (
-                                    <div className="space-y-4">
-                                        {unit.units.map((specificUnit) => (
-                                            <div key={specificUnit.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                                                <div className="flex justify-between items-start">
-                                                    <div>
-                                                        <h4 className="font-medium">Unit Number: {specificUnit.display_name}</h4>
-                                                        {/* <p>rentalId: {specificUnit.unit_rental_id}</p> */}
-                                                        <p className='my-3'>Sqft: {specificUnit.sqft}</p>
-                                                        <p className="text-gray-600 text-sm">
-                                                            Availability: <FaCalendarAlt className="inline mr-1" />
-                                                            {formatAvailabilityDate(specificUnit.available_on)}
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="font-bold text-lg">
-                                                            <FaDollarSign className="inline mr-1" />
-                                                            {specificUnit.price}
-                                                        </p>
-                                                        <span className={`text-xs px-2 py-1 hidden rounded-full ${specificUnit.availability === 'available'
-                                                            ? 'bg-green-100 text-green-800'
-                                                            : 'bg-yellow-100 text-yellow-800'
-                                                            }`}>
-                                                            {specificUnit.availability}
-                                                        </span>
-                                                    </div>
-                                                </div>
-
-                                            </div>
-                                        ))}
+                                    <div>
                                         <FloorPlanGallery unit={unit} />
+
+                                        <div className="space-y-4">
+                                            {unit.units.map((specificUnit) => (
+                                                <div key={specificUnit.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                                                    <div className="flex justify-between items-start">
+                                                        <div>
+                                                            <h4 className="font-medium">Unit Number: {specificUnit.display_name}</h4>
+                                                            {/* <p>rentalId: {specificUnit.unit_rental_id}</p> */}
+                                                            <p className='my-3'>Sqft: {specificUnit.sqft}</p>
+                                                            <p className="text-gray-600 text-sm">
+                                                                Availability: <FaCalendarAlt className="inline mr-1" />
+                                                                {formatAvailabilityDate(specificUnit.available_on)}
+                                                            </p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="font-bold text-lg">
+                                                                <FaDollarSign className="inline mr-1" />
+                                                                {specificUnit.price}
+                                                            </p>
+                                                            <span className={`text-xs px-2 py-1 hidden rounded-full ${specificUnit.availability === 'available'
+                                                                ? 'bg-green-100 text-green-800'
+                                                                : 'bg-yellow-100 text-yellow-800'
+                                                                }`}>
+                                                                {specificUnit.availability}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            ))}
+
+                                        </div>
                                     </div>
                                 ) : (
                                     <p className="text-gray-500">No specific units currently available</p>

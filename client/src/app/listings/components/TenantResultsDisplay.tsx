@@ -2,6 +2,24 @@
 
 import { useEffect, useState } from 'react';
 import { FaBed, FaBath, FaRulerCombined, FaCalendarAlt, FaHome, FaClock } from 'react-icons/fa';
+import SavedUnitsModal from './SavedUnitsModal';
+import axiosInstance from '@/api/axiosInstance';
+
+// Interfaces
+interface Photo {
+    type: string;
+    id: string;
+    caption?: string | null;
+}
+
+interface SubUnit {
+    id: number;
+    name: string;
+    display_name: string;
+    price: number;
+    sqft: number;
+    available_on?: string;
+}
 
 interface Unit {
     id: number;
@@ -14,65 +32,93 @@ interface Unit {
     price: number;
     price_max?: number;
     available_on?: string;
-    photos?: Array<{
-        type: string;
-        id: string;
-        caption?: string | null;
-    }>;
-    units?: Array<{
-        id: number;
-        name: string;
-        display_name: string;
-        price: number;
-        sqft: number;
-        available_on?: string;
-    }>;
+    photos?: Photo[];
+    units?: SubUnit[];
 }
 
 interface Listing {
     _id: string;
+    scrapeListId: string;
     display_name: string;
     street_address: string;
     available_units: Unit[];
     updatedAt?: string;
 }
 
-export default function TenantResultsDisplay({
-    tenantName
-}: {
-    tenantName: string;
-}) {
-    const [results, setResults] = useState<{
-        count: number;
-        listings: Listing[];
-        tenantId?: string;
-    } | null>(null);
+interface SelectedUnit {
+    unitId: string;
+    propertyId: string;
+    propertyName: string;
+    unitName: string;
+    price: number;
+    sqft: number;
+    availableDate: string;
+    scrapeListId: string;
+}
+
+interface ResultsData {
+    count: number;
+    listings: Listing[];
+    tenantId?: string;
+}
+
+// Helper functions
+const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 0
+    }).format(price);
+};
+
+const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString();
+};
+
+const formatAvailabilityDate = (dateString?: string) => {
+    if (!dateString) return 'Available now';
+    return new Date(dateString).toLocaleDateString();
+};
+
+export default function TenantResultsDisplay({ tenantName }: { tenantName: string }) {
+    const [results, setResults] = useState<ResultsData | null>(null);
     const [loading, setLoading] = useState(true);
     const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
-    const [selectedUnits, setSelectedUnits] = useState<Array<{
-        unitId: string;
-        propertyId: string;
-        propertyName: string;
-        unitName: string;
-        price: number;
-        sqft: number;
-        availableDate: string;
-    }>>([]);
+    const [showSavedUnits, setShowSavedUnits] = useState(false);
+    const [selectedUnits, setSelectedUnits] = useState<SelectedUnit[]>([]);
 
     useEffect(() => {
-        const savedResults = localStorage.getItem('tenantResults');
-        if (savedResults) {
-            setResults(JSON.parse(savedResults));
-            console.log(savedResults);
-        }
-        setLoading(false);
-    }, []);
+        const fetchResults = async () => {
+            try {
+                const response = await axiosInstance.get(
+                    `/tenants/search-results/${encodeURIComponent(tenantName ?? '')}`
+                );
 
+                const data = response.data;
+                setResults({
+                    count: data.count,
+                    listings: data.listings,
+                    tenantId: data.tenantId
+                });
+            } catch (error) {
+                console.error('Fetch error:', error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (tenantName) {
+            fetchResults();
+        }
+    }, [tenantName]);
+
+    // Handlers
     const handleViewDetails = (listing: Listing) => {
         setSelectedListing(listing);
         setModalOpen(true);
-        setSelectedUnits([])
+        setSelectedUnits([]);
     };
 
     const closeModal = () => {
@@ -80,67 +126,169 @@ export default function TenantResultsDisplay({
         setSelectedListing(null);
     };
 
-    const handleUnitSelection = (unit: Unit['units'][0], propertyId: string, propertyName: string) => {
+    const handleUnitSelection = (unit: Unit, subUnit?: SubUnit) => {
+        if (!selectedListing) return;
+
         setSelectedUnits(prev => {
-            const unitId = `${propertyId}-${unit.id}`;
+
+            const unitId = `${subUnit?.id}`
             const isSelected = prev.some(u => u.unitId === unitId);
 
             if (isSelected) {
                 return prev.filter(u => u.unitId !== unitId);
-            } else {
-                return [
-                    ...prev,
-                    {
-                        unitId,
-                        propertyId,
-                        propertyName,
-                        unitName: unit.display_name || unit.name,
-                        price: unit.price,
-                        sqft: unit.sqft,
-                        availableDate: unit.available_on || ''
-                    }
-                ];
             }
+
+            return [
+                ...prev,
+                {
+                    unitId,
+                    propertyId: selectedListing._id,
+                    propertyArea: selectedListing.display_name,
+                    propertyName: unit.display_name || unit.name,
+                    unitName: subUnit?.name || unit.display_name || unit.name,
+                    price: subUnit?.price || unit.price,
+                    sqft: subUnit?.sqft || unit.sqft,
+                    availableDate: subUnit?.available_on || unit.available_on || '',
+                    scrapeListId: selectedListing.scrapeListId,
+                    bed: unit.bed,
+                    bath: unit.bath
+                }
+            ];
         });
     };
 
-    const handleSaveSelected = () => {
+    const handleSaveSelected = async () => {
         if (selectedUnits.length === 0) {
             alert('Please select at least one unit');
             return;
         }
 
-        const savedData = {
-            tenantId: results?.tenantId,
-            tenantName,
-            selectedUnits,
-            timestamp: new Date().toISOString()
-        };
+        try {
+            const payload = {
+                tenantId: results?.tenantId,
+                tenantName,
+                selectedUnits,
+                timestamp: new Date().toISOString()
+            };
 
-        console.log('Saved units:', savedData);
-        // Here you would typically send this data to your backend
-        alert(`${selectedUnits.length} units saved successfully!`);
-        closeModal();
+            const response = await axiosInstance.post('/saved-units', payload);
+
+            alert(`${selectedUnits.length} units saved successfully!`);
+            setSelectedUnits([]);
+            closeModal();
+        } catch (error: any) {
+            console.error('Error saving units:', error);
+            const errorMessage =
+                error.response?.data?.error || 'Failed to save units. Please try again.';
+            alert(errorMessage);
+        }
     };
 
-    const formatPrice = (price: number) => {
-        return new Intl.NumberFormat('en-US', {
-            style: 'currency',
-            currency: 'USD',
-            minimumFractionDigits: 0
-        }).format(price);
+    // Components
+    const UnitCard = ({ unit, subUnit }: { unit: Unit; subUnit: SubUnit }) => {
+        // Create the same composite ID used in handleUnitSelection
+        const unitId = `${subUnit.id}`;
+        const isSelected = selectedUnits.some(u => u.unitId === unitId);
+
+        return (
+            <div
+                className={`border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer ${isSelected ? 'border-blue-600 bg-blue-50' : 'border-gray-200'
+                    }`}
+                onClick={() => handleUnitSelection(unit, subUnit)}
+            >
+                <div className="flex items-start">
+                    <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleUnitSelection(unit, subUnit)}
+                        className="h-4 w-4 mt-1 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        onClick={(e) => e.stopPropagation()}
+                    />
+                    <div className="ml-2">
+                        <p className="text-sm text-gray-500 mb-2">Unit {subUnit.display_name || subUnit.name}</p>
+                        <div className="flex items-center text-sm text-gray-600 mb-1">
+                            <FaBed className="mr-2 text-gray-400" />
+                            {unit.bed} {unit.bed === 1 ? 'bed' : 'beds'}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600 mb-1">
+                            <FaBath className="mr-2 text-gray-400" />
+                            {unit.bath} {unit.bath === 1 ? 'bath' : 'baths'}
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600 mb-1">
+                            <FaRulerCombined className="mr-2 text-gray-400" />
+                            {subUnit.sqft} sqft
+                        </div>
+                        <div className="flex items-center text-sm text-gray-600">
+                            <FaCalendarAlt className="mr-2 text-gray-400" />
+                            Available: {formatAvailabilityDate(subUnit.available_on)}
+                        </div>
+                        <div className="mt-3 font-medium text-blue-600">
+                            {formatPrice(subUnit.price)}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
-    const formatDate = (dateString?: string) => {
-        if (!dateString) return 'N/A';
-        return new Date(dateString).toLocaleDateString();
+    const PropertyCard = ({ listing }: { listing: Listing }) => {
+        const lowestPrice = listing.available_units?.reduce((min, unit) => {
+            const unitMin = unit.units?.reduce((unitMin, subUnit) =>
+                Math.min(unitMin, subUnit.price), Infinity) || Infinity;
+            return Math.min(min, unitMin);
+        }, Infinity);
+
+        return (
+            <div className="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-300">
+                <div className="px-4 py-5 sm:p-6">
+                    <div className="flex items-center">
+                        <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
+                            <FaHome className="h-6 w-6 text-white" />
+                        </div>
+                        <div className="ml-4">
+                            <h3 className="text-lg leading-6 font-medium text-gray-900">{listing.display_name}</h3>
+                            <p className="text-sm text-gray-500">{listing.street_address}</p>
+                            {isFinite(lowestPrice) && (
+                                <p className="text-sm text-blue-600 font-medium mt-1">
+                                    From {formatPrice(lowestPrice)}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="mt-4">
+                        {listing.updatedAt && (
+                            <div className="mt-2 flex items-center text-sm text-gray-500">
+                                <FaClock className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                                <p>Updated: {formatDate(listing.updatedAt)}</p>
+                            </div>
+                        )}
+
+                        {listing.available_units && (
+                            <div className="mt-2 flex items-center text-sm text-gray-500">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                    {listing.available_units.reduce((acc, unit) => acc + (unit.units?.length || 0), 0)} units
+                                </span>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="mt-5">
+                        <button
+                            onClick={() => handleViewDetails(listing)}
+                            type="button"
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            disabled={!listing.available_units || listing.available_units.length === 0}
+                        >
+                            View Units
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
     };
 
-    const formatAvailabilityDate = (dateString?: string) => {
-        if (!dateString) return 'Available now';
-        return new Date(dateString).toLocaleDateString();
-    };
-
+    // Render
     if (loading) {
         return (
             <div className="container mx-auto p-4">
@@ -163,7 +311,7 @@ export default function TenantResultsDisplay({
                 {results.count} Results for {tenantName}
             </h1>
 
-            {/* Modal for viewing unit details */}
+            {/* Modal */}
             {modalOpen && selectedListing && (
                 <div className="fixed bg-black/15 z-50 inset-0">
                     <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -192,14 +340,14 @@ export default function TenantResultsDisplay({
                                         {selectedListing.available_units ? (
                                             <div className="mt-6">
                                                 <h4 className="text-md font-medium text-gray-900 mb-3">
-                                                    Available Units
-                                                    {selectedListing.available_units.reduce((acc, unit) => acc + (unit.units?.length || 0), 0)}
+                                                    Available Units ({selectedListing.available_units.reduce((acc, unit) => acc + (unit.units?.length || 0), 0)})
                                                     {selectedUnits.length > 0 && (
                                                         <span className="ml-2 text-sm text-blue-600">
                                                             ({selectedUnits.length} selected)
                                                         </span>
                                                     )}
                                                 </h4>
+
                                                 <div className="grid gap-6 max-h-[400px] overflow-y-auto">
                                                     {selectedListing.available_units
                                                         .filter(unit => unit.units && unit.units.length > 0)
@@ -220,51 +368,9 @@ export default function TenantResultsDisplay({
                                                                             const dateB = new Date(b.available_on || '');
                                                                             return dateA.getTime() - dateB.getTime();
                                                                         })
-                                                                        .map((subUnit) => {
-                                                                            const unitId = `${selectedListing._id}-${subUnit.id}`;
-                                                                            const isSelected = selectedUnits.some(u => u.unitId === unitId);
-
-                                                                            return (
-                                                                                <div
-                                                                                    key={`${unit.id}-${subUnit.id}`}
-                                                                                    className={`border rounded-lg p-4 hover:shadow-md transition-shadow ${isSelected ? 'border-blue-600 bg-blue-50' : 'border-gray-200'}`}
-                                                                                    onClick={() => handleUnitSelection(subUnit, selectedListing._id, selectedListing.display_name)}
-                                                                                >
-                                                                                    <div className="flex items-start">
-                                                                                        <input
-                                                                                            type="checkbox"
-                                                                                            checked={isSelected}
-                                                                                            onChange={() => handleUnitSelection(subUnit, selectedListing._id, selectedListing.display_name)}
-                                                                                            className="h-4 w-4 mt-1 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                                                                                            onClick={(e) => e.stopPropagation()}
-                                                                                        />
-                                                                                        <div className="ml-2">
-                                                                                            <p className="text-sm text-gray-500 mb-2">Unit {subUnit.display_name || subUnit.name}</p>
-
-                                                                                            <div className="flex items-center text-sm text-gray-600 mb-1">
-                                                                                                <FaBed className="mr-2 text-gray-400" />
-                                                                                                {unit.bed} {unit.bed === 1 ? 'bed' : 'beds'}
-                                                                                            </div>
-                                                                                            <div className="flex items-center text-sm text-gray-600 mb-1">
-                                                                                                <FaBath className="mr-2 text-gray-400" />
-                                                                                                {unit.bath} {unit.bath === 1 ? 'bath' : 'baths'}
-                                                                                            </div>
-                                                                                            <div className="flex items-center text-sm text-gray-600 mb-1">
-                                                                                                <FaRulerCombined className="mr-2 text-gray-400" />
-                                                                                                {subUnit.sqft} sqft
-                                                                                            </div>
-                                                                                            <div className="flex items-center text-sm text-gray-600">
-                                                                                                <FaCalendarAlt className="mr-2 text-gray-400" />
-                                                                                                Available: {formatAvailabilityDate(subUnit.available_on)}
-                                                                                            </div>
-                                                                                            <div className="mt-3 font-medium text-blue-600">
-                                                                                                {formatPrice(subUnit.price)}
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                </div>
-                                                                            );
-                                                                        })}
+                                                                        .map((subUnit) => (
+                                                                            <UnitCard key={`${unit.id}-${subUnit.id}`} unit={unit} subUnit={subUnit} />
+                                                                        ))}
                                                                 </div>
                                                             </div>
                                                         ))}
@@ -304,63 +410,24 @@ export default function TenantResultsDisplay({
                 <p>No matching properties found.</p>
             ) : (
                 <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {results.listings.map((listing) => {
-                        const lowestPrice = listing.available_units?.reduce((min, unit) => {
-                            const unitMin = unit.units?.reduce((unitMin, subUnit) =>
-                                Math.min(unitMin, subUnit.price), Infinity) || Infinity;
-                            return Math.min(min, unitMin);
-                        }, Infinity);
-
-                        return (
-                            <div key={listing._id} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-300">
-                                <div className="px-4 py-5 sm:p-6">
-                                    <div className="flex items-center">
-                                        <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">
-                                            <FaHome className="h-6 w-6 text-white" />
-                                        </div>
-                                        <div className="ml-4">
-                                            <h3 className="text-lg leading-6 font-medium text-gray-900">{listing.display_name}</h3>
-                                            <p className="text-sm text-gray-500">{listing.street_address}</p>
-                                            {isFinite(lowestPrice) && (
-                                                <p className="text-sm text-blue-600 font-medium mt-1">
-                                                    From {formatPrice(lowestPrice)}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-
-                                    <div className="mt-4">
-                                        {listing.updatedAt && (
-                                            <div className="mt-2 flex items-center text-sm text-gray-500">
-                                                <FaClock className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
-                                                <p>Updated: {formatDate(listing.updatedAt)}</p>
-                                            </div>
-                                        )}
-
-                                        {listing.available_units && (
-                                            <div className="mt-2 flex items-center text-sm text-gray-500">
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                    {listing.available_units.reduce((acc, unit) => acc + (unit.units?.length || 0), 0)} units
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="mt-5">
-                                        <button
-                                            onClick={() => handleViewDetails(listing)}
-                                            type="button"
-                                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                            disabled={!listing.available_units || listing.available_units.length === 0}
-                                        >
-                                            View Units
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        );
-                    })}
+                    {results.listings.map((listing, index) => (
+                        <PropertyCard key={index} listing={listing} />
+                    ))}
+                    <button
+                        onClick={() => setShowSavedUnits(true)}
+                        className="flex items-center justify-center p-6 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 transition-colors"
+                    >
+                        <span className="text-blue-600 font-medium">View Saved Units</span>
+                    </button>
                 </div>
+            )}
+
+            {showSavedUnits && results?.tenantId && (
+                <SavedUnitsModal
+                    tenantId={results.tenantId}
+                    tenantName={tenantName}
+                    onClose={() => setShowSavedUnits(false)}
+                />
             )}
         </div>
     );
