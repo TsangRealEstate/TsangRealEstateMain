@@ -9,6 +9,7 @@ import { useState } from "react";
 const schema = yup.object().shape({
     instagram: yup.string().required("Instagram value is not valid"),
     leaseEndDate: yup.string().required("Select lease end date"),
+    leaseStartDate: yup.string().required("Select lease start date"),
     propertyOwnerName: yup.string().required("property owner name is not valid"),
     bedrooms: yup.string().required("bedrooms is not valid"),
     bathrooms: yup.string().required("bathrooms is not valid"),
@@ -266,6 +267,42 @@ export function StepThree({ callBack, goBack }: stepProps) {
                         {/* instagram */}
                         <TextInput formState={formState} field={formFields.instagram} />
 
+                        {/* leaseStartDate */}
+                        <div className="mt-4">
+                            <label
+                                htmlFor="leaseStartDate"
+                                className="text-sm font-semibold leading-6 text-gray-900"
+                            >
+                                What is the ideal lease start date?
+                            </label>
+                            <div className={inputContainerClass}>
+                                <Controller
+                                    control={control}
+                                    name="leaseStartDate"
+                                    rules={{ required: true }}
+                                    render={({ field, fieldState: { invalid, error } }) => {
+                                        // Convert Date object to YYYY-MM-DD format for input
+                                        const value = field.value ? new Date(field.value).toISOString().split('T')[0] : '';
+
+                                        return (
+                                            <input
+                                                type="date"
+                                                id="leaseStartDate"
+                                                min={new Date().toISOString().split('T')[0]} // Set min date to today
+                                                className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
+                                                    }`}
+                                                value={value}
+                                                onChange={(e) => {
+                                                    // Convert back to Date object when value changes
+                                                    field.onChange(e.target.value ? new Date(e.target.value) : null);
+                                                }}
+                                            />
+                                        );
+                                    }}
+                                />
+                            </div>
+                        </div>
+
                         {/* leaseEndDate */}
                         <div className="mt-4">
                             <label
@@ -274,26 +311,25 @@ export function StepThree({ callBack, goBack }: stepProps) {
                             >
                                 When does your current lease end?
                             </label>
-                            <div className={inputContainerClass}
-                            >
+                            <div className={inputContainerClass}>
                                 <Controller
                                     control={control}
                                     name="leaseEndDate"
                                     rules={{ required: true }}
                                     render={({ field, fieldState: { invalid, error } }) => {
+                                        const value = field.value ? new Date(field.value).toISOString().split('T')[0] : '';
+
                                         return (
-                                            <Datepicker
-                                                inputId="leaseEndDate"
-                                                useRange={false}
-                                                minDate={new Date()}
-                                                asSingle={true}
-                                                value={{ startDate: new Date(field.value), endDate: new Date(field.value) }}
-                                                onChange={(newValue: DateValueType, option) => {
-                                                    field.onChange(newValue?.startDate, option);
-                                                }}
-                                                placeholder={"Lease end date"}
-                                                inputClassName={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
+                                            <input
+                                                type="date"
+                                                id="leaseEndDate"
+                                                min={new Date().toISOString().split('T')[0]}
+                                                className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
                                                     }`}
+                                                value={value}
+                                                onChange={(e) => {
+                                                    field.onChange(e.target.value ? new Date(e.target.value) : null);
+                                                }}
                                             />
                                         );
                                     }}
@@ -305,7 +341,6 @@ export function StepThree({ callBack, goBack }: stepProps) {
                         <TextInput
                             formState={formState}
                             field={formFields.propertyOwnerName}
-
                         />
 
                         {/* bedrooms */}

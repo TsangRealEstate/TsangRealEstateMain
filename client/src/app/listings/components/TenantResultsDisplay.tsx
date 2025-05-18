@@ -5,7 +5,6 @@ import { FaBed, FaBath, FaRulerCombined, FaCalendarAlt, FaHome, FaClock, FaTimes
 import SavedUnitsModal from './SavedUnitsModal';
 import axiosInstance from '@/api/axiosInstance';
 
-// Interfaces
 interface Photo {
     type: string;
     id: string;

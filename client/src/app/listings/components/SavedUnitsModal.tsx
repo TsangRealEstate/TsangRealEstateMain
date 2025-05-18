@@ -9,6 +9,7 @@ import {
     FaBath,
     FaRulerCombined,
     FaCalendarAlt,
+    FaTrash,
 } from 'react-icons/fa';
 import { formatAvailabilityDate } from '@/utils/dateUtils';
 
@@ -76,6 +77,21 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
         sortBy === 'price' ? a.price - b.price : a.sqft - b.sqft
     );
 
+    const handleDeleteUnit = async (unitId: string) => {
+        if (!window.confirm('Are you sure you want to remove this unit?')) return;
+
+        try {
+            await axiosInstance.delete(`/saved-units/${tenantId}`, {
+                data: { unitIds: [unitId] }
+            });
+
+            setSavedUnits(prevUnits => prevUnits.filter(unit => unit.unitId !== unitId));
+        } catch (err) {
+            console.error('Error deleting unit:', err);
+            alert('Failed to delete unit. Please try again.');
+        }
+    };
+
     const groupedUnits = sortedUnits.reduce<Record<string, SavedUnit[]>>((acc, unit) => {
         acc[unit.propertyArea] = acc[unit.propertyArea] || [];
         acc[unit.propertyArea].push(unit);
@@ -136,8 +152,17 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
                                         {units.map((unit) => (
                                             <div
                                                 key={unit.unitId}
-                                                className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all hover:border-blue-200"
+                                                className="border relative border-gray-200 rounded-xl p-5 hover:shadow-md transition-all hover:border-blue-200"
                                             >
+                                                <button
+                                                    onClick={() => handleDeleteUnit(unit.unitId)}
+                                                    className="absolute top-3 right-3 text-gray-400 hover:text-red-500 transition-colors"
+                                                    title="Remove unit"
+                                                    aria-label="Remove unit"
+                                                >
+                                                    <FaTrash className="h-4 w-4" />
+                                                </button>
+
                                                 <div className="flex items-start">
                                                     <div className="flex-shrink-0 bg-blue-500 rounded-lg p-3 text-white">
                                                         <FaHome className="h-6 w-6" />

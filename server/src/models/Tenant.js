@@ -23,6 +23,7 @@ const tenantSchema = new mongoose.Schema(
     grossIncome: { type: String, required: true },
     instagram: { type: String },
     leaseEndDate: { type: String, required: true },
+    leaseStartDate: { type: String, required: true },
     nonNegotiables: { type: [String], default: [] },
     propertyOwnerName: { type: String, required: true },
   },

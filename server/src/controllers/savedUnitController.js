@@ -1,4 +1,3 @@
-// Save selected units
 const SavedUnit = require("../models/SavedUnit");
 
 exports.saveSelectedUnits = async (req, res) => {
@@ -69,5 +68,71 @@ exports.getSavedUnitsByTenant = async (req, res) => {
     res.status(200).json(savedUnits);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+};
+
+// Delete saved units by tenant (optionally delete specific units)
+exports.deleteSavedUnits = async (req, res) => {
+  try {
+    const { tenantId } = req.params;
+    const { unitIds } = req.body;
+
+    if (!tenantId) {
+      return res.status(400).json({ error: "Tenant ID is required" });
+    }
+
+    const savedUnitDoc = await SavedUnit.findOne({ tenantId });
+
+    if (!savedUnitDoc) {
+      return res
+        .status(404)
+        .json({ error: "No saved units found for this tenant" });
+    }
+
+    if (unitIds && unitIds.length > 0) {
+      // Delete specific units
+      const initialCount = savedUnitDoc.selectedUnits.length;
+      savedUnitDoc.selectedUnits = savedUnitDoc.selectedUnits.filter(
+        (unit) => !unitIds.includes(unit.unitId)
+      );
+
+      if (savedUnitDoc.selectedUnits.length === initialCount) {
+        return res.status(404).json({
+          error: "None of the specified unit IDs were found in saved units",
+          data: savedUnitDoc,
+        });
+      }
+
+      // If no units left after deletion, delete the entire document
+      if (savedUnitDoc.selectedUnits.length === 0) {
+        await SavedUnit.deleteOne({ tenantId });
+        return res.status(200).json({
+          message: "All units deleted successfully, document removed",
+          count: 0,
+          data: null,
+        });
+      }
+
+      // Save the document with remaining units
+      const updatedDoc = await savedUnitDoc.save();
+      return res.status(200).json({
+        message: "Selected units deleted successfully",
+        count: updatedDoc.selectedUnits.length,
+        data: updatedDoc,
+      });
+    } else {
+      // Delete all saved units for this tenant
+      await SavedUnit.deleteOne({ tenantId });
+      return res.status(200).json({
+        message: "All saved units deleted successfully",
+        count: 0,
+        data: null,
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to delete saved units",
+      details: error.message,
+    });
   }
 };

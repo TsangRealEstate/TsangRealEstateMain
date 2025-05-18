@@ -173,20 +173,18 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             // }
 
             // Handle move-in dates with validation
-            // if (tenant.leaseEndDate) {
-            //     try {
-            //         const leaseEndDate = new Date(tenant.leaseEndDate);
-            //         if (!isNaN(leaseEndDate.getTime())) {
-            //             // Set earliest to today
-            //             // const today = new Date();
-            //             // params.append('earliestMoveInDate', today.toISOString().split('T')[0]);
-            //             // Set latest to lease end date
-            //             params.append('latestMoveInDate', leaseEndDate.toISOString().split('T')[0]);
-            //         }
-            //     } catch (error) {
-            //         console.error('Error processing lease dates:', error);
-            //     }
-            // }
+            if (tenant.leaseEndDate && tenant.leaseStartDate) {
+                try {
+                    const leaseEndDate = new Date(tenant.leaseEndDate);
+                    const leaseStartDate = new Date(tenant.leaseStartDate)
+                    if (!isNaN(leaseEndDate.getTime())) {
+                        params.append('earliestMoveInDate', leaseStartDate.toISOString().split('T')[0]);
+                        params.append('latestMoveInDate', leaseEndDate.toISOString().split('T')[0]);
+                    }
+                } catch (error) {
+                    console.error('Error processing lease dates:', error);
+                }
+            }
 
             // Add amenities with cleaning
             // if (tenant.nonNegotiables?.length > 0) {
@@ -210,6 +208,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             }
 
             const response = await axiosInstance.get('/scrape-list/filter', { params });
+
             if (response.data.count === 0) {
                 setModal({
                     show: true,
@@ -330,6 +329,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     {renderDetailItem("Budget", "budget", tenant.budget, <AiOutlineDollarCircle className="text-blue-500" />)}
                     {renderDetailItem("Bedrooms", "bedrooms", tenant.bedrooms, <FiHome className="text-blue-500" />)}
                     {renderDetailItem("Bathrooms", "bathrooms", tenant.bathrooms, <FiHome className="text-blue-500" />)}
+                    {renderDetailItem("Lease Start Date", "leaseStartDate", tenant.leaseStartDate, <FiCalendar className="text-blue-500" />)}
                     {renderDetailItem("Lease End Date", "leaseEndDate", tenant.leaseEndDate, <FiCalendar className="text-blue-500" />)}
                     {renderDetailItem(
                         "Desired Location",
