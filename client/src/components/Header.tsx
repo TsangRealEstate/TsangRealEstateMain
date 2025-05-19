@@ -21,13 +21,13 @@ function MobileNavigation({ isOpen, toggleMenu }: { isOpen: boolean; toggleMenu:
                 <Link href="/" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
                     Home
                 </Link>
-                <Link href="/how" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
+                <Link href="/how-is-this-free" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
                     How is this free?
                 </Link>
                 <Link href="#buy" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
                     Buy / Sell
                 </Link>
-                <Link href="#contact" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
+                <Link href="/about-us" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
                     About us
                 </Link>
                 <div className="mt-8 flex flex-col space-y-4">
@@ -81,7 +81,7 @@ export function Header() {
                         <Link href="/" className="font-medium hover:text-blue-600">
                             Home
                         </Link>
-                        <Link href="/how" className="font-medium hover:text-blue-600">
+                        <Link href="/how-is-this-free" className="font-medium hover:text-blue-600">
                             How is this free?
                         </Link>
                         <Link href="#buy" className="font-medium hover:text-blue-600">

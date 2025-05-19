@@ -19,14 +19,14 @@ const AboutPage = () => {
                     <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
                         About <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">Tsang Real Estate</span>
                     </h1>
-                    <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
+                    <p className="text-xl md:text-2xl text-gray-600 max-w-xl mx-auto">
                         Where exceptional service meets unicorn magic in San Antonio real estate
                     </p>
                 </div>
             </section>
 
             {/* Content Sections */}
-            <div className="max-w-7xl mt-10 mx-auto px-4 sm:px-6 lg:px-8 pb-20 space-y-20">
+            <div className="max-w-7xl mt-14 mx-auto px-4 sm:px-6 lg:px-8 pb-20 space-y-20">
                 {/* Origin Story */}
                 <section className="grid md:grid-cols-2 gap-12 items-center">
                     <div className="space-y-6">
