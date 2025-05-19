@@ -9,6 +9,7 @@ import DetailItem from "./DetailItem";
 import ActivityLog from "./ActivityLog";
 import ResultsModal from "@/app/listings/components/ResultsModal";
 import Link from "next/link";
+import { FaCheck, FaTimes, FaUsers } from "react-icons/fa";
 
 interface TenantModalProps {
     tenant: any;
@@ -351,6 +352,17 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         <FiXCircle className="text-blue-500" />
                     )}
                     {renderDetailItem("Gross Income", "grossIncome", tenant.grossIncome, <AiOutlineDollarCircle className="text-blue-500" />)}
+                    {renderDetailItem(
+                        "Other-OnLease",
+                        "OtherOnLease",
+                        tenant.OtherOnLease,
+                        tenant.OtherOnLease === "yes"
+                            ? <FaCheck className="text-green-500" />
+                            : <FaTimes className="text-red-500" />
+                    )}
+                    {renderDetailItem("Other-OnLease Value", "othersOnLeasevalue",
+                        tenant.othersOnLeasevalue, <FaUsers className="text-blue-500"
+                    />)}
                 </div>
 
                 <LabelManager cardId={tenant._id} />
