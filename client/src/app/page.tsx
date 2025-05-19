@@ -89,7 +89,7 @@ export default function Home() {
 
       <div className="container max-w-7xl mx-auto mt-20 px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-6 gap-16 mt-12">
-          <div className="col md:col-span-2 md:col-start-2 md:mx-0 mx-10 shadow-[5px_10px_20px_1px_rgba(152,152,152,0.15)] text-center rounded-lg border border-blue-50 border-b-4 hover:border-blue-600">
+          <div className="col md:col-span-2 md:col-start-2 md:mx-0 shadow-[5px_10px_20px_1px_rgba(152,152,152,0.15)] text-center rounded-lg border border-blue-50 border-b-4 hover:border-blue-600">
             <Link href="/apply">
               <div className="bg-white size-20 mx-auto mt-14 flex justify-center items-center rounded-full shadow-[5px_10px_20px_1px_rgba(152,152,152,0.15)]">
                 <svg
@@ -110,7 +110,7 @@ export default function Home() {
               <div className="text-blue-600 text-2xl mt-12">
                 Lease An Apartment or Home
               </div>
-              <div className="px-8 text-sm mt-4 text-slate-500">
+              <div className="lg:px-8 px-4 text-sm mt-4 text-slate-500">
                 Over thousands of apartments, townhomes, condos, and single-family
                 homes available, we will be able to find the best fit for your
                 household.
@@ -121,7 +121,7 @@ export default function Home() {
             </Link>
           </div>
 
-          <div className="col md:col-span-2 md:mx-0 mx-10 shadow-[5px_10px_20px_1px_rgba(152,152,152,0.15)] text-center rounded-lg border border-blue-50 border-b-4 hover:border-blue-600">
+          <div className="col md:col-span-2 md:mx-0 shadow-[5px_10px_20px_1px_rgba(152,152,152,0.15)] text-center rounded-lg border border-blue-50 border-b-4 hover:border-blue-600">
             <Link href="/apply">
               <div className="bg-white size-20 mx-auto mt-14 flex justify-center items-center rounded-full shadow-[5px_10px_20px_1px_rgba(152,152,152,0.15)]">
                 <svg
@@ -142,7 +142,7 @@ export default function Home() {
               <div className="text-blue-600 text-2xl mt-12">
                 Buy or Sell A Property
               </div>
-              <div className="px-8 text-sm mt-4 text-slate-500">
+              <div className="lg:px-8 px-4 text-sm mt-4 text-slate-500">
                 We are licensed real estate agents that can help guide you to the
                 best path for your purchase or listing.
               </div>
@@ -166,7 +166,7 @@ export default function Home() {
                   {++index}
                 </div>
                 <div className="text-blue-500 text-xl mb-2">{item.title}</div>
-                <div className="px-14">
+                <div className="lg:px-14">
                   {item.description}
                   {index === 6 && (
                     <div className="mt-4">
