@@ -144,7 +144,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             if (tenant.budget) {
                 const cleanedBudget = tenant.budget
                     .replace(/\$/g, '')
-                    .replace(/,/g, '') // Remove commas if present
+                    .replace(/,/g, '')
                     .trim();
 
                 const budgetRange = cleanedBudget.split('-')
@@ -155,22 +155,21 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     params.append('minPrice', budgetRange[0].toString());
                     params.append('maxPrice', budgetRange[1].toString());
                 } else if (budgetRange.length === 1) {
-                    //If single value, use it for both min and max
                     params.append('minPrice', budgetRange[0].toString());
                     params.append('maxPrice', budgetRange[0].toString());
                 }
             }
 
             // Add beds and baths with cleaning
-            // if (tenant.bedrooms) {
-            //     const cleanedBedrooms = tenant.bedrooms.toString().replace(/\D/g, '');
-            //     if (cleanedBedrooms) params.append('beds', cleanedBedrooms);
-            // }
+            if (tenant.bedrooms) {
+                const cleanedBedrooms = tenant.bedrooms.toString().replace(/\D/g, '');
+                if (cleanedBedrooms) params.append('beds', cleanedBedrooms);
+            }
 
-            // if (tenant.bathrooms) {
-            //     const cleanedBathrooms = tenant.bathrooms.toString().replace(/\D/g, '');
-            //     if (cleanedBathrooms) params.append('baths', cleanedBathrooms);
-            // }
+            if (tenant.bathrooms) {
+                const cleanedBathrooms = tenant.bathrooms.toString().replace(/\D/g, '');
+                if (cleanedBathrooms) params.append('baths', cleanedBathrooms);
+            }
 
             // Handle move-in dates with validation
             if (tenant.leaseEndDate && tenant.leaseStartDate) {
@@ -208,6 +207,8 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             }
 
             const response = await axiosInstance.get('/scrape-list/filter', { params });
+
+            console.log("Created Params:", params.toString())
 
             if (response.data.count === 0) {
                 setModal({
