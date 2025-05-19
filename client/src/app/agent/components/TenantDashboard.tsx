@@ -296,8 +296,9 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         <button
                             onClick={handleApplyFilters}
                             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                            disabled={loading}
                         >
-                            Search
+                            {loading ? 'Searching...' : 'Search'}
                         </button>
 
                         <Link href={`/listings/Tenant/${encodeURIComponent(`${tenant.firstName} ${tenant.lastName}`.trim() || '')}`} target="_blank">
