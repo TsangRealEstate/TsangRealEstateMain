@@ -87,7 +87,7 @@ export function Header() {
                         <Link href="#buy" className="font-medium hover:text-blue-600">
                             Buy / Sell
                         </Link>
-                        <Link href="#contact" className="font-medium hover:text-blue-600">
+                        <Link href="/about-us" className="font-medium hover:text-blue-600">
                             About us
                         </Link>
                     </div>
