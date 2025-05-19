@@ -290,7 +290,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     </span>
 
 
-                    <div className="mt-6 lg:mt-0">
+                    <div className="mt-6 lg:mt-0 flex flex-wrap gap-2">
                         <button
                             onClick={handleApplyFilters}
                             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -300,24 +300,24 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
 
                         <Link href={`/listings/Tenant/${encodeURIComponent(`${tenant.firstName} ${tenant.lastName}`.trim() || '')}`} target="_blank">
                             <button
-                                className="bg-blue-600 ml-3 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                             >
                                 Searched Units
                             </button>
                         </Link>
 
                         <button
-                            onClick={handleDelete}
-                            className="bg-red-600 mx-3 text-white px-4 py-2 rounded-lg hover:bg-red-700"
-                        >
-                            Delete
-                        </button>
-
-                        <button
                             onClick={onClose}
                             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                         >
                             Close
+                        </button>
+
+                        <button
+                            onClick={handleDelete}
+                            className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+                        >
+                            Delete
                         </button>
                     </div>
                 </div>
