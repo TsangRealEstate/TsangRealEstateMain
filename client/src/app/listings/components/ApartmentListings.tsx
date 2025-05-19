@@ -1,4 +1,5 @@
 "use client"
+import axiosInstance from '@/api/axiosInstance';
 import { useAuth } from '@/context/AuthContext';
 import { Listing } from '@/types/sharedTypes';
 import { formatAvailabilityDate } from '@/utils/dateUtils';
@@ -16,6 +17,7 @@ import {
     FaExternalLinkAlt,
     FaRulerCombined,
     FaTimes,
+    FaTrash,
 } from 'react-icons/fa';
 import { FiRefreshCw } from 'react-icons/fi';
 
@@ -26,6 +28,7 @@ const ApartmentListings = () => {
         loading,
         error,
         listings,
+        setListings,
     } = useAuth();
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [sortBy, setSortBy] = useState<'default' | 'price' | 'date'>('default');
@@ -87,6 +90,27 @@ const ApartmentListings = () => {
                 .join(' ');
         } catch {
             return url;
+        }
+    };
+
+    const handleDeleteListing = async (url: string) => {
+        if (!window.confirm('Are you sure you want to delete this property?')) {
+            return;
+        }
+
+        try {
+            const encodedUrl = encodeURIComponent(url);
+            const response = await axiosInstance.delete(`/scrape-list/url/${encodedUrl}`);
+
+            alert(response.data.message);
+            setListings(prevListings => prevListings.filter(listing => listing.destinationURL !== url));
+
+        } catch (error: any) {
+            console.error('Error deleting property:', error);
+            const errorMessage = error.response?.data?.message ||
+                error.message ||
+                'Error deleting property. Please try again.';
+            alert(errorMessage);
         }
     };
 
@@ -325,7 +349,16 @@ const ApartmentListings = () => {
                                 }, Infinity);
 
                                 return (
-                                    <div key={listing._id} className="bg-white overflow-hidden shadow rounded-lg hover:shadow-lg transition-shadow duration-300">
+                                    <div key={listing._id} className="bg-white overflow-hidden relative shadow rounded-lg hover:shadow-lg transition-shadow duration-300">
+                                        {/* Delete button in top-right corner */}
+                                        <button
+                                            onClick={() => handleDeleteListing(listing.destinationURL)}
+                                            className="absolute top-2 right-2 p-2 text-gray-400 hover:text-red-500 transition-colors duration-200"
+                                            title="Delete listing"
+                                        >
+                                            <FaTrash className="h-4 w-4" />
+                                        </button>
+                                        {/* Initial Listing details before modal */}
                                         <div className="px-4 py-5 sm:p-6">
                                             <div className="flex items-center">
                                                 <div className="flex-shrink-0 bg-blue-500 rounded-md p-3">

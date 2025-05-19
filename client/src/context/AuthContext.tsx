@@ -136,7 +136,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
                 columns,
                 setColumns,
                 listings,
-                neighborhoods
+                neighborhoods,
+                setListings,
             }}
         >
             {children}

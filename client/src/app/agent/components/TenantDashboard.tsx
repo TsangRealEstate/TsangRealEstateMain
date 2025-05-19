@@ -177,7 +177,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                 try {
                     const leaseEndDate = new Date(tenant.leaseEndDate);
                     const leaseStartDate = new Date(tenant.leaseStartDate)
-                    if (!isNaN(leaseEndDate.getTime())) {
+                    if (!isNaN(leaseEndDate.getTime()) && !isNaN(leaseStartDate.getTime())) {
                         params.append('earliestMoveInDate', leaseStartDate.toISOString().split('T')[0]);
                         params.append('latestMoveInDate', leaseEndDate.toISOString().split('T')[0]);
                     }
@@ -187,15 +187,15 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             }
 
             // Add amenities with cleaning
-            // if (tenant.nonNegotiables?.length > 0) {
-            //     const cleanedAmenities = tenant.nonNegotiables
-            //         .map(amenity => amenity.trim().toLowerCase())
-            //         .filter(amenity => amenity.length > 0);
+            if (tenant.nonNegotiables?.length > 0) {
+                const cleanedAmenities = tenant.nonNegotiables
+                    .map((amenity: string) => amenity.trim().toLowerCase())
+                    .filter((amenity: string | any[]) => amenity.length > 0);
 
-            //     if (cleanedAmenities.includes('in-unit laundry')) params.append('inUnitLaundry', 'true');
-            //     if (cleanedAmenities.includes('balcony')) params.append('balcony', 'true');
-            //     if (cleanedAmenities.includes('yard')) params.append('yard', 'true');
-            // }
+                if (cleanedAmenities.includes('in-unit laundry')) params.append('inUnitLaundry', 'true');
+                if (cleanedAmenities.includes('balcony')) params.append('balcony', 'true');
+                if (cleanedAmenities.includes('yard')) params.append('yard', 'true');
+            }
 
             // Add areas with cleaning (as before)
             if (tenant.desiredLocation?.length > 0) {

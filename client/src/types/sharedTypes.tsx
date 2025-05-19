@@ -55,6 +55,7 @@ export interface AuthContextType {
   isDataLoaded: boolean;
   tenants: any[];
   listings: Listing[];
+  setListings: React.Dispatch<React.SetStateAction<Listing[]>>;
   neighborhoods: string[];
   setTenants: React.Dispatch<React.SetStateAction<any[]>>;
   columns: any[];

@@ -14,6 +14,7 @@ const tenantSchema = new mongoose.Schema(
     email: { type: String, required: true },
     searchType: { type: String, enum: ["rent", "purchase"], required: true },
     OtherOnLease: { type: String, enum: ["yes", "no"], required: true },
+    othersOnLeasevalue: { type: String, required: false },
     bathrooms: { type: String, required: true },
     bedrooms: { type: String, required: true },
     brokenLease: { type: [String], default: [] },
