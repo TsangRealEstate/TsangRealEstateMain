@@ -4,13 +4,16 @@ import { StepOne } from "./components/step1";
 import { StepTwo } from "./components/step2";
 import { StepThree } from "./components/step3";
 import axiosInstance from "@/api/axiosInstance";
+import { useAuth } from "@/context/AuthContext";
 
 
 export default function Apply() {
     const [step, setSetp] = useState(1);
+    const { loading, setLoading } = useAuth();
     const [formData, setFormData] = useState({});
 
     const submitFormData = async (email: string, informations: any) => {
+        setLoading(true);
         try {
             const payload = {
                 ...informations,
@@ -19,14 +22,14 @@ export default function Apply() {
 
             const response = await axiosInstance.post('/tenants', payload);
 
-            console.log("Response:", response.data.message);
-
             alert(`${response.data.message} ${email}`);
 
             setSetp(4);
         } catch (error: any) {
             console.error("Error posting data:", error.response?.data || error.message);
             alert(`Failed to submit: ${error.response?.data?.error || error.message}`);
+        } finally {
+            setLoading(false);
         }
     };
 

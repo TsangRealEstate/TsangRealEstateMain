@@ -1,10 +1,10 @@
 import * as yup from "yup";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import Datepicker, { DateValueType } from "react-tailwindcss-datepicker";
 import { TextInput } from "./TextInput";
 import { OptionInput } from "./Options";
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 const schema = yup.object().shape({
     instagram: yup.string().required("Instagram value is not valid"),
@@ -230,6 +230,7 @@ const formFields = {
 };
 
 export function StepThree({ callBack, goBack }: stepProps) {
+    const { loading } = useAuth()
     const [isConsentChecked, setIsConsentChecked] = useState(false);
 
     const formState = useForm({
@@ -401,13 +402,13 @@ export function StepThree({ callBack, goBack }: stepProps) {
                 </button>
                 <button
                     type="submit"
-                    disabled={!isConsentChecked}
-                    className={`rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-offset-2 ${isConsentChecked
+                    disabled={!isConsentChecked || loading}
+                    className={`rounded-md px-3 py-2 text-sm font-semibold shadow-sm focus-visible:outline focus-visible:outline-offset-2 ${isConsentChecked || loading
                         ? 'bg-blue-600 text-white hover:bg-blue-500 focus-visible:outline-blue-600'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                         }`}
                 >
-                    Submit
+                    {loading ? 'Submiting...' : 'Submit'}
                 </button>
             </div>
         </form>

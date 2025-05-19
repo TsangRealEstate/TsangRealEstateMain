@@ -51,6 +51,7 @@ export interface AuthContextType {
   setPassword: React.Dispatch<React.SetStateAction<string>>;
   fetchTenants: (adminPassword: string) => Promise<void>;
   loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   error: string;
   isDataLoaded: boolean;
   tenants: any[];
@@ -140,34 +141,34 @@ export interface ApiResponse {
 
 
 export interface Listing {
-    _id: string;
-    destinationURL: string;
-    lastScrapeInfo: string;
-    createdAt: string;
-    updatedAt: string;
-    rental_type: string;
-    available_units: AvailableUnit[] | null;
-    Information?: {
-        neighborhood?: string;
-    };
+  _id: string;
+  destinationURL: string;
+  lastScrapeInfo: string;
+  createdAt: string;
+  updatedAt: string;
+  rental_type: string;
+  available_units: AvailableUnit[] | null;
+  Information?: {
+    neighborhood?: string;
+  };
 }
 
 interface AvailableUnit {
-    id: number;
-    name: string;
-    bed: number;
-    bath: number;
-    sqft: number;
-    price: number;
-    units: Unit[];
+  id: number;
+  name: string;
+  bed: number;
+  bath: number;
+  sqft: number;
+  price: number;
+  units: Unit[];
 }
 
 interface Unit {
-    id: number;
-    name: string;
-    price: number;
-    sqft: number;
-    availability: string;
-    available_on: string;
-    display_name: string;
+  id: number;
+  name: string;
+  price: number;
+  sqft: number;
+  availability: string;
+  available_on: string;
+  display_name: string;
 }
