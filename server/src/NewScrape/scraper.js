@@ -177,31 +177,111 @@ class ApartmentListScraper {
   }
   // Add this method inside your class, just before the module.exports
   cleanUnitData(propertyData) {
-    return propertyData.map((property) => {
-      if (property.available_units && Array.isArray(property.available_units)) {
-        property.available_units = property.available_units.map((unit) => {
-          if (unit.units && Array.isArray(unit.units)) {
-            unit.units = unit.units.map((subUnit) => {
-              // Check if name is not all digits
-              if (subUnit.name && !/^\d+$/.test(subUnit.name)) {
-                subUnit.name = unit.remote_listing_id.replace(/\D/g, "");
-              }
+    if (!Array.isArray(propertyData)) {
+      console.error(
+        "Invalid propertyData: Expected array, received",
+        typeof propertyData
+      );
+      return [];
+    }
 
-              // Check if display_name is not all digits
-              if (subUnit.display_name && !/^\d+$/.test(subUnit.display_name)) {
-                subUnit.display_name = unit.remote_listing_id.replace(
-                  /\D/g,
-                  ""
+    return propertyData.map((property, propertyIndex) => {
+      try {
+        if (
+          !property.available_units ||
+          !Array.isArray(property.available_units)
+        ) {
+          console.log(
+            `Property ${propertyIndex}: No available_units array found`
+          );
+          return property;
+        }
+
+        const cleanedProperty = { ...property };
+        cleanedProperty.available_units = property.available_units.map(
+          (unit, unitIndex) => {
+            try {
+              if (!unit.units || !Array.isArray(unit.units)) {
+                console.log(
+                  `Property ${propertyIndex}, Unit ${unitIndex}: No units array found`
                 );
+                return unit;
               }
 
-              return subUnit;
-            });
+              const cleanedUnit = { ...unit };
+              cleanedUnit.units = unit.units.map((subUnit, subUnitIndex) => {
+                try {
+                  const cleanedSubUnit = { ...subUnit };
+                  let changesMade = false;
+
+                  // Clean name field
+                  if (subUnit.name && !/^\d+$/.test(subUnit.name)) {
+                    const originalName = subUnit.name;
+                    cleanedSubUnit.name =
+                      unit.remote_listing_id?.replace(/\D/g, "") || "N/A";
+                    changesMade = true;
+                    console.log(
+                      `Cleaned name at Property ${propertyIndex}, Unit ${unitIndex}, SubUnit ${subUnitIndex}:`,
+                      {
+                        original: originalName,
+                        cleaned: cleanedSubUnit.name,
+                      }
+                    );
+                  }
+
+                  // Clean display_name field
+                  if (
+                    subUnit.display_name &&
+                    !/^\d+$/.test(subUnit.display_name)
+                  ) {
+                    const originalDisplayName = subUnit.display_name;
+                    cleanedSubUnit.display_name =
+                      unit.remote_listing_id?.replace(/\D/g, "") || "N/A";
+                    changesMade = true;
+                    console.log(
+                      `Cleaned display_name at Property ${propertyIndex}, Unit ${unitIndex}, SubUnit ${subUnitIndex}:`,
+                      {
+                        original: originalDisplayName,
+                        cleaned: cleanedSubUnit.display_name,
+                      }
+                    );
+                  }
+
+                  if (!changesMade) {
+                    console.log(
+                      `No changes needed at Property ${propertyIndex}, Unit ${unitIndex}, SubUnit ${subUnitIndex}`
+                    );
+                  }
+
+                  return cleanedSubUnit;
+                } catch (subUnitError) {
+                  console.error(
+                    `Error processing subUnit at Property ${propertyIndex}, Unit ${unitIndex}, SubUnit ${subUnitIndex}:`,
+                    subUnitError
+                  );
+                  return subUnit; // Return original if error occurs
+                }
+              });
+
+              return cleanedUnit;
+            } catch (unitError) {
+              console.error(
+                `Error processing unit at Property ${propertyIndex}, Unit ${unitIndex}:`,
+                unitError
+              );
+              return unit; // Return original if error occurs
+            }
           }
-          return unit;
-        });
+        );
+
+        return cleanedProperty;
+      } catch (propertyError) {
+        console.error(
+          `Error processing property at index ${propertyIndex}:`,
+          propertyError
+        );
+        return property; // Return original if error occurs
       }
-      return property;
     });
   }
 }
