@@ -18,7 +18,7 @@ const HowIsThisFreePage = () => {
                     </h1>
 
                     <div className="bg-white inline-block px-6 py-3 rounded-full shadow-md mb-6">
-                        <p className="text-xl md:text-2xl font-semibold text-gray-700 flex items-center justify-center gap-3">
+                        <p className="text-xl md:text-2xl font-semibold text-gray-700 flex items-center lg:flex-row flex-col justify-center gap-3">
                             <FaQuestionCircle className="text-blue-500 w-6 h-6" />
                             No Hidden Costs • No Compromises
                         </p>
