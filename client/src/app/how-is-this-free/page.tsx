@@ -6,7 +6,7 @@ import { GiHouseKeys } from 'react-icons/gi';
 
 const HowIsThisFreePage = () => {
     return (
-        <main className="bg-gradient-to-b from-blue-50 to-white min-h-screen">
+        <main>
             {/* Hero Section */}
             <section className="relative py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-blue-400/10 -rotate-1 transform scale-110 rounded-b-3xl"></div>

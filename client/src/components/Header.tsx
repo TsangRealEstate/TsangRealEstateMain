@@ -16,20 +16,24 @@ function MobileNavigation({ isOpen, toggleMenu }: { isOpen: boolean; toggleMenu:
                     className="absolute right-6 top-6 text-2xl text-gray-700"
                     aria-label="Close menu"
                 >
-                    <FiX size={24} />
+                    <FiX size={30} />
                 </button>
                 <Link href="/" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
                     Home
                 </Link>
-                <Link href="/how-is-this-free" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
-                    How is this free?
-                </Link>
-                <Link href="#buy" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
-                    Buy / Sell
-                </Link>
+
                 <Link href="/about-us" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
                     About us
                 </Link>
+
+                <Link href="#buy" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
+                    Buy / Sell
+                </Link>
+
+                <Link href="/how-is-this-free" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
+                    How is this free?
+                </Link>
+
                 <div className="mt-8 flex flex-col space-y-4">
                     <Link
                         href="/apply"
@@ -81,15 +85,19 @@ export function Header() {
                         <Link href="/" className="font-medium hover:text-blue-600">
                             Home
                         </Link>
-                        <Link href="/how-is-this-free" className="font-medium hover:text-blue-600">
-                            How is this free?
-                        </Link>
-                        <Link href="#buy" className="font-medium hover:text-blue-600">
-                            Buy / Sell
-                        </Link>
+
                         <Link href="/about-us" className="font-medium hover:text-blue-600">
                             About us
                         </Link>
+
+                        <Link href="#buy" className="font-medium hover:text-blue-600">
+                            Buy / Sell
+                        </Link>
+
+                        <Link href="/how-is-this-free" className="font-medium hover:text-blue-600">
+                            How is this free?
+                        </Link>
+
                     </div>
 
                     {/* Desktop Buttons */}
@@ -114,7 +122,7 @@ export function Header() {
                         className="text-gray-700 focus:outline-none md:hidden"
                         aria-label="Open menu"
                     >
-                        <FiMenu size={24} />
+                        <FiMenu size={30} />
                     </button>
                 </nav>
             </div>
