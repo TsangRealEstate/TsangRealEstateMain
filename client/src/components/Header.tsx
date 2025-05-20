@@ -1,10 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 
 function MobileNavigation({ isOpen, toggleMenu }: { isOpen: boolean; toggleMenu: () => void }) {
+    const pathname = usePathname();
+
     return (
         <div
             className={`fixed inset-0 z-40 bg-white transition-all duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"
@@ -18,33 +21,56 @@ function MobileNavigation({ isOpen, toggleMenu }: { isOpen: boolean; toggleMenu:
                 >
                     <FiX size={30} />
                 </button>
-                <Link href="/" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
+
+                <Link
+                    href="/"
+                    className={`text-xl font-medium hover:text-blue-600 ${pathname === "/" ? "text-blue-600 font-semibold" : "text-gray-700"
+                        }`}
+                    onClick={toggleMenu}
+                >
                     Home
                 </Link>
 
-                <Link href="/about-us" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
+                <Link
+                    href="/about-us"
+                    className={`text-xl font-medium hover:text-blue-600 ${pathname === "/about-us" ? "text-blue-600 font-semibold" : "text-gray-700"
+                        }`}
+                    onClick={toggleMenu}
+                >
                     About us
                 </Link>
 
-                <Link href="#buy" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
+                <Link
+                    href="#buy"
+                    className={`text-xl font-medium hover:text-blue-600 ${pathname === "/buy" ? "text-blue-600 font-semibold" : "text-gray-700"
+                        }`}
+                    onClick={toggleMenu}
+                >
                     Buy / Sell
                 </Link>
 
-                <Link href="/how-is-this-free" className="text-xl font-medium hover:text-blue-600" onClick={toggleMenu}>
+                <Link
+                    href="/how-is-this-free"
+                    className={`text-xl font-medium hover:text-blue-600 ${pathname === "/how-is-this-free" ? "text-blue-600 font-semibold" : "text-gray-700"
+                        }`}
+                    onClick={toggleMenu}
+                >
                     How is this free?
                 </Link>
 
-                <div className="mt-8 flex flex-col space-y-4">
+                <div className="mt-8 flex flex-col space-y-4 w-fit">
                     <Link
                         href="/apply"
-                        className="rounded-md bg-blue-600 px-6 py-3 text-center font-medium text-white hover:bg-blue-500"
+                        className={`rounded-md px-6 py-3 text-center font-medium text-white hover:bg-blue-500 ${pathname === "/apply" ? "bg-blue-700" : "bg-blue-600"
+                            }`}
                         onClick={toggleMenu}
                     >
                         Get Started
                     </Link>
                     <Link
                         href="/agent"
-                        className="rounded-md bg-blue-600 px-6 py-3 text-center font-medium text-white hover:bg-blue-500"
+                        className={`rounded-md px-6 py-3 text-center font-medium text-white hover:bg-blue-500 ${pathname === "/agent" ? "bg-blue-700" : "bg-blue-600"
+                            }`}
                         onClick={toggleMenu}
                     >
                         Agent
@@ -57,6 +83,7 @@ function MobileNavigation({ isOpen, toggleMenu }: { isOpen: boolean; toggleMenu:
 
 export function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const pathname = usePathname();
 
     const toggleMenu = () => {
         setIsMenuOpen(!isMenuOpen);
@@ -81,36 +108,54 @@ export function Header() {
                     </Link>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden items-center space-x-6 md:flex">
-                        <Link href="/" className="font-medium hover:text-blue-600">
+                    <div className="hidden items-center space-x-8 md:flex">
+                        <Link
+                            href="/"
+                            className={`font-medium transition-colors hover:text-blue-600 ${pathname === "/" ? "text-blue-600 font-semibold" : "text-gray-700"
+                                }`}
+                        >
                             Home
                         </Link>
 
-                        <Link href="/about-us" className="font-medium hover:text-blue-600">
+                        <Link
+                            href="/about-us"
+                            className={`font-medium transition-colors hover:text-blue-600 ${pathname === "/about-us" ? "text-blue-600 font-semibold" : "text-gray-700"
+                                }`}
+                        >
                             About us
                         </Link>
 
-                        <Link href="#buy" className="font-medium hover:text-blue-600">
+                        <Link
+                            href="#buy"
+                            className={`font-medium transition-colors hover:text-blue-600 ${pathname === "/buy" ? "text-blue-600 font-semibold" : "text-gray-700"
+                                }`}
+                        >
                             Buy / Sell
                         </Link>
 
-                        <Link href="/how-is-this-free" className="font-medium hover:text-blue-600">
+                        <Link
+                            href="/how-is-this-free"
+                            className={`font-medium transition-colors hover:text-blue-600 ${pathname === "/how-is-this-free" ? "text-blue-600 font-semibold" : "text-gray-700"
+                                }`}
+                        >
                             How is this free?
                         </Link>
-
                     </div>
 
                     {/* Desktop Buttons */}
                     <div className="hidden items-center space-x-4 md:flex">
                         <Link
                             href="/apply"
-                            className="rounded-md bg-blue-600 px-5 py-2.5 font-medium text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                            className={`rounded-md px-5 py-2.5 font-medium text-white shadow-sm transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${pathname === "/apply" ? "bg-blue-700" : "bg-blue-600"
+                                }`}
                         >
                             Get Started
                         </Link>
+
                         <Link
                             href="/agent"
-                            className="rounded-md bg-blue-600 px-5 py-2.5 font-medium text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+                            className={`rounded-md px-5 py-2.5 font-medium text-white shadow-sm transition-colors hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${pathname === "/agent" ? "bg-blue-700" : "bg-blue-600"
+                                }`}
                         >
                             Agent
                         </Link>
