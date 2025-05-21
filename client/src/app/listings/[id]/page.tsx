@@ -139,11 +139,26 @@ interface PropertyDetailPageProps {
     params: Promise<{ id: string }>;
 }
 
+interface VideoChangeEvent extends React.ChangeEvent<HTMLInputElement> { }
+interface SelectedVideos {
+    [unitId: number]: File;
+}
+interface HandleUploadParams {
+    unitId: number;
+}
+
+interface VideoUploadResponse {
+    success: boolean;
+    message: string;
+    data?: any;
+}
+
 export default function PropertyDetailPage({ params }: PropertyDetailPageProps) {
     const router = useRouter();
     const [property, setProperty] = useState<PropertyData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+    const [selectedVideos, setSelectedVideos] = useState<SelectedVideos>({}); // unitId -> File
 
     useEffect(() => {
         const fetchProperty = async () => {
@@ -181,6 +196,44 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                 }
             };
         });
+    };
+
+    const handleVideoChange = (e: VideoChangeEvent, unitId: number) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+            setSelectedVideos((prev: SelectedVideos) => ({
+                ...prev,
+                [unitId]: file,
+            }));
+        }
+    };
+
+    const handleUpload = async ({ unitId }: HandleUploadParams): Promise<void> => {
+        const videoFile = selectedVideos[unitId];
+        if (!videoFile) return alert("No video selected");
+
+        const formData = new FormData();
+        formData.append("video", videoFile);
+        formData.append("propertyId", property!._id);
+        formData.append("videounitid", unitId.toString());
+
+        try {
+            const res = await axiosInstance.post<VideoUploadResponse>(
+                `/properties/${property!._id}/video`,
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
+
+            alert("Video uploaded successfully");
+            console.log(res.data);
+        } catch (err) {
+            console.error(err);
+            alert("Video upload failed");
+        }
     };
 
     return (
@@ -334,6 +387,32 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                                     <span><FaBath className="inline mr-1" /> {unit.bath} {unit.bath === 1 ? 'bath' : 'baths'}</span>
                                     <span><FaRulerCombined className="inline mr-1" /> {unit.sqft} sqft</span>
                                 </div>
+
+                                {/* Video Upload Controls */}
+                                <div className="mt-4">
+                                    <input
+                                        type="file"
+                                        accept="video/*"
+                                        onChange={(e) => handleVideoChange(e, unit.id)}
+                                    />
+                                    <button
+                                        onClick={() => handleUpload({ unitId: unit.id })}
+                                        className="ml-2 px-4 py-1 bg-blue-600 text-white rounded"
+                                    >
+                                        Upload Video
+                                    </button>
+                                </div>
+
+                                {/* <iframe
+                                    src="https://player.cloudinary.com/embed/?cloud_name=dozvjuoio&public_id=property_videos%2Fs16b3wek1pvgztx0ykse&profile=cld-default"
+                                    width="640"
+                                    height="360"
+                                    style={{ height: 'auto', width: '100%', aspectRatio: '640 / 360' }}
+                                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                                    allowFullScreen
+                                    frameBorder="0"
+                                ></iframe> */}
+
                             </div>
 
                             {/* Unit Details */}
