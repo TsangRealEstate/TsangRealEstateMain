@@ -425,75 +425,75 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                                     <span><FaRulerCombined className="inline mr-1" /> {unit.sqft} sqft</span>
                                 </div>
 
-                                {/* Video Upload Controls */}
-                                <div className="mt-4 flex items-center gap-4">
-                                    <input
-                                        type="file"
-                                        accept="video/mp4,video/quicktime,video/x-m4v"
-                                        onChange={(e) => handleVideoChange(e, unit.id)}
-                                        className="text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
-                                    />
+                                {/* Check if a video exists for the unit */}
+                                {videos.some(v => v.videounitid === unit.id) ? (
+                                    <div className="mt-4 video-container">
+                                        <h4 className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                            <FaVideo /> Uploaded Video : {videos
+                                                .filter(v => v.videounitid === unit.id)
+                                                .map(video => (
+                                                    <button
+                                                        key={video.cloudinary_id}
+                                                        onClick={() => openModal(video.cloudinary_url)}
+                                                        className="text-sm text-blue-600 underline flex items-center gap-1 hover:text-blue-800"
+                                                    >
+                                                        <FaPlay className="text-xs" />
+                                                        Watch Video
+                                                    </button>
+                                                ))}
+                                        </h4>
+                                    </div>
+                                ) : (
+                                    <>
+                                        {/* Video Upload Controls */}
+                                        <div className="mt-4 flex items-center gap-4">
+                                            <input
+                                                type="file"
+                                                accept="video/mp4,video/quicktime,video/x-m4v"
+                                                onChange={(e) => handleVideoChange(e, unit.id)}
+                                                className="text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
+                                            />
 
-                                    <button
-                                        onClick={() => handleUpload({ unitId: unit.id })}
-                                        disabled={uploadingUnitId === unit.id.toString()}
-                                        className={`flex items-center gap-2 px-4 py-1 rounded text-white transition ${uploadingUnitId === unit.id.toString()
-                                            ? "bg-blue-400 cursor-not-allowed"
-                                            : "bg-blue-600 hover:bg-blue-700"
-                                            }`}
-                                    >
-                                        {uploadingUnitId === unit.id.toString() ? (
-                                            <svg
-                                                className="animate-spin h-4 w-4 text-white"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                xmlns="http://www.w3.org/2000/svg"
+                                            <button
+                                                onClick={() => handleUpload({ unitId: unit.id })}
+                                                disabled={uploadingUnitId === unit.id.toString()}
+                                                className={`flex items-center gap-2 px-4 py-1 rounded text-white transition ${uploadingUnitId === unit.id.toString()
+                                                    ? "bg-blue-400 cursor-not-allowed"
+                                                    : "bg-blue-600 hover:bg-blue-700"
+                                                    }`}
                                             >
-                                                <circle
-                                                    className="opacity-25"
-                                                    cx="12"
-                                                    cy="12"
-                                                    r="10"
-                                                    stroke="currentColor"
-                                                    strokeWidth="4"
-                                                ></circle>
-                                                <path
-                                                    className="opacity-75"
-                                                    fill="currentColor"
-                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                                ></path>
-                                            </svg>
-                                        ) : (
-                                            <>
-                                                <FaUpload className="text-white" />
-                                                Upload
-                                            </>
-                                        )}
-                                    </button>
-                                </div>
+                                                {uploadingUnitId === unit.id.toString() ? (
+                                                    <svg
+                                                        className="animate-spin h-4 w-4 text-white"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <circle
+                                                            className="opacity-25"
+                                                            cx="12"
+                                                            cy="12"
+                                                            r="10"
+                                                            stroke="currentColor"
+                                                            strokeWidth="4"
+                                                        ></circle>
+                                                        <path
+                                                            className="opacity-75"
+                                                            fill="currentColor"
+                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                                        ></path>
+                                                    </svg>
+                                                ) : (
+                                                    <>
+                                                        <FaUpload className="text-white" />
+                                                        Upload
+                                                    </>
+                                                )}
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
 
-                                <div className="mt-4 video-container">
-                                    <h4 className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                                        <FaVideo /> Uploaded Video
-                                    </h4>
-
-                                    {videos.filter(v => v.videounitid === unit.id).length === 0 ? (
-                                        <p className="text-sm text-gray-500">No video for this unit</p>
-                                    ) : (
-                                        videos
-                                            .filter(v => v.videounitid === unit.id)
-                                            .map(video => (
-                                                <button
-                                                    key={video.cloudinary_id}
-                                                    onClick={() => openModal(video.cloudinary_url)}
-                                                    className="text-sm text-blue-600 underline flex items-center gap-1 hover:text-blue-800"
-                                                >
-                                                    <FaPlay className="text-xs" />
-                                                    Watch Video
-                                                </button>
-                                            ))
-                                    )}
-                                </div>
                             </div>
 
                             {/* Unit Details */}
@@ -544,20 +544,22 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
             </div>
 
             {isModalOpen && activeVideoUrl && (
-                <div className="fixed inset-0 bg-black/65 bg-opacity-60 flex items-center justify-center z-50">
-                    <div className="bg-white rounded-lg shadow-lg p-4 w-full max-w-2xl relative">
+                <div className="fixed inset-0 bg-black/65 bg-opacity-60 flex items-center justify-center z-50 lg:px-0 px-4">
+                    <div className="bg-white rounded-lg shadow-lg p-2 w-full max-w-2xl relative">
                         <button
-                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                            className="absolute -top-10 right-6.5 lg:-right-10 text-gray-500 bg-white rounded-4xl hover:text-gray-700"
                             onClick={closeModal}
                         >
-                            <IoMdClose size={24} />
+                            <IoMdClose size={34} />
                         </button>
-                        <video
-                            src={activeVideoUrl}
-                            controls
-                            autoPlay
-                            className="w-full rounded"
-                        />
+                        <div className='h-[400px]'>
+                            <video
+                                src={activeVideoUrl}
+                                controls
+                                autoPlay
+                                className="size-full rounded object-cover"
+                            />
+                        </div>
                     </div>
                 </div>
             )}
