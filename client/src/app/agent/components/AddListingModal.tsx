@@ -32,7 +32,7 @@ export default function AddListingModal({ onClose, onSuccess }: AddListingModalP
             onClose();
         } catch (err) {
             const error = err as AxiosError<ApiResponse>;
-            setError(error.response?.data?.error || 'Failed to add listing');
+            setError(error.response?.data?.message || 'Failed to add listing');
         } finally {
             setIsSubmitting(false);
         }
