@@ -17,7 +17,8 @@ import {
     FaSnowflake,
     FaCoffee,
     FaBriefcase,
-    FaKey
+    FaKey,
+    FaUpload
 } from 'react-icons/fa';
 import { FaElevator } from 'react-icons/fa6';
 import axiosInstance from '@/api/axiosInstance';
@@ -26,6 +27,7 @@ import { useEffect, useState } from 'react';
 import FloorPlanGallery from '@/app/filter/components/FloorPlanGallery';
 import { formatAvailabilityDate } from '@/utils/dateUtils';
 import PropertySpecials from '../components/PropertySpecials';
+import PropertyVideoList from '../components/PropertyVideoList';
 
 interface Photo {
     type: string;
@@ -158,7 +160,8 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
     const [property, setProperty] = useState<PropertyData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
-    const [selectedVideos, setSelectedVideos] = useState<SelectedVideos>({}); // unitId -> File
+    const [selectedVideos, setSelectedVideos] = useState<SelectedVideos>({});
+    const [uploadingUnitId, setUploadingUnitId] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchProperty = async () => {
@@ -217,6 +220,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
         formData.append("propertyId", property!._id);
         formData.append("videounitid", unitId.toString());
 
+        setUploadingUnitId(unitId.toString());
         try {
             const res = await axiosInstance.post<VideoUploadResponse>(
                 `/properties/${property!._id}/video`,
@@ -233,8 +237,11 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
         } catch (err) {
             console.error(err);
             alert("Video upload failed");
+        } finally {
+            setUploadingUnitId(null);
         }
     };
+
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -389,19 +396,54 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                                 </div>
 
                                 {/* Video Upload Controls */}
-                                <div className="mt-4">
+                                <div className="mt-4 flex items-center gap-4">
                                     <input
                                         type="file"
                                         accept="video/*"
                                         onChange={(e) => handleVideoChange(e, unit.id)}
+                                        className="text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
                                     />
+
                                     <button
                                         onClick={() => handleUpload({ unitId: unit.id })}
-                                        className="ml-2 px-4 py-1 bg-blue-600 text-white rounded"
+                                        disabled={uploadingUnitId === unit.id.toString()}
+                                        className={`flex items-center gap-2 px-4 py-1 rounded text-white transition ${uploadingUnitId === unit.id.toString()
+                                            ? "bg-blue-400 cursor-not-allowed"
+                                            : "bg-blue-600 hover:bg-blue-700"
+                                            }`}
                                     >
-                                        Upload Video
+                                        {uploadingUnitId === unit.id.toString() ? (
+                                            <svg
+                                                className="animate-spin h-4 w-4 text-white"
+                                                viewBox="0 0 24 24"
+                                                fill="none"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                            >
+                                                <circle
+                                                    className="opacity-25"
+                                                    cx="12"
+                                                    cy="12"
+                                                    r="10"
+                                                    stroke="currentColor"
+                                                    strokeWidth="4"
+                                                ></circle>
+                                                <path
+                                                    className="opacity-75"
+                                                    fill="currentColor"
+                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                                ></path>
+                                            </svg>
+                                        ) : (
+                                            <>
+                                                <FaUpload className="text-white" />
+                                                Upload
+                                            </>
+                                        )}
                                     </button>
                                 </div>
+
+                                <PropertyVideoList propertyId={property._id} />
+
 
                                 {/* <iframe
                                     src="https://player.cloudinary.com/embed/?cloud_name=dozvjuoio&public_id=property_videos%2Fs16b3wek1pvgztx0ykse&profile=cld-default"
