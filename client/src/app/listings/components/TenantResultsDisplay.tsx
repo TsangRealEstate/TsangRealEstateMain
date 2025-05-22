@@ -127,7 +127,6 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
 
     const handleUnitSelection = (unit: Unit, subUnit?: SubUnit) => {
         if (!selectedListing) return;
-
         setSelectedUnits(prev => {
 
             const unitId = `${subUnit?.id}`
@@ -150,7 +149,8 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
                     availableDate: subUnit?.available_on || unit.available_on || '',
                     scrapeListId: selectedListing.scrapeListId,
                     bed: unit.bed,
-                    bath: unit.bath
+                    bath: unit.bath,
+                    videoId: unit.id
                 }
             ];
         });
