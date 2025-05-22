@@ -51,13 +51,9 @@ class ListScraper {
 
   async scrapeApartmentListPropertyByURL(url) {
     try {
-      //   console.log(`[1] Starting scrape for ${url}`);
       const updatedInfo = { lastScrapeInfo: "none" };
 
-      // 1- fetch the page information
-      //   console.log(`[2] Fetching page HTML...`);
       const { html, status } = await this.getPageHtml(url);
-      //   console.log(`[3] Got status: ${status}, HTML length: ${html.length}`);
 
       if (status !== "200") {
         updatedInfo.lastScrapeInfo = "failed";
@@ -65,18 +61,9 @@ class ListScraper {
         return;
       }
 
-      // 2- extract the script data
-      //   console.log(`[4] Extracting script data...`);
       const scriptData = this.extractScriptById(html);
-      //   console.log(`[5] Script data length: ${scriptData.length}`);
 
-      // 3- extract the propertyInfo
-      //   console.log(`[6] Extracting property info...`);
       const propertyInformation = this.extractPropertyInformation(scriptData);
-      //   console.log(
-      //     `[7] Property info:`,
-      //     propertyInformation ? "Exists" : "NULL"
-      //   );
 
       if (propertyInformation === null) {
         updatedInfo.lastScrapeInfo = "failed";
@@ -84,20 +71,18 @@ class ListScraper {
         return;
       }
 
-      updatedInfo.lastScrapeInfo = "success";
-      Object.assign(updatedInfo, { Information: propertyInformation });
+      const cleanedInformation = this.cleanUnitData(propertyInformation);
 
-      //   console.log(`[8] Saving to database...`);
+      updatedInfo.lastScrapeInfo = "success";
+      Object.assign(updatedInfo, { Information: cleanedInformation });
+
       const result = await ScrapeListModel.findOneAndUpdate(
         { destinationURL: url },
         updatedInfo,
-        { new: true } // Return the updated document
+        { new: true }
       );
 
-      //   console.log(`[✓] Successfully updated:`, {
-      //     matched: result?.lastScrapeInfo,
-      //     updated: result?.updatedAt,
-      //   });
+      console.log(`Successfully updated: ${url}`);
     } catch (error) {
       console.error(`[!] Error in scrapeApartmentListPropertyByURL:`, error);
     }
@@ -144,7 +129,6 @@ class ListScraper {
       return ``;
     }
   }
-  
 
   extractPropertyInformation(jsonString) {
     try {
@@ -181,6 +165,57 @@ class ListScraper {
       console.error("Extraction error:", error);
       return null;
     }
+  }
+
+  cleanUnitData(propertyData) {
+    if (!propertyData || typeof propertyData !== "object") {
+      return propertyData;
+    }
+
+    // Handle the property information structure from apartmentlist.com
+    if (
+      propertyData.available_units &&
+      Array.isArray(propertyData.available_units)
+    ) {
+      const cleanedData = { ...propertyData };
+      cleanedData.available_units = propertyData.available_units.map((unit) => {
+        if (!unit.units || !Array.isArray(unit.units)) return unit;
+
+        const cleanedUnit = { ...unit };
+        cleanedUnit.units = unit.units.map((subUnit) => {
+          const cleanedSubUnit = { ...subUnit };
+
+          // Only replace if the field contains both letters and numbers
+          const shouldReplaceName =
+            subUnit.name &&
+            /[a-zA-Z]/.test(subUnit.name) &&
+            /\d/.test(subUnit.name);
+
+          const shouldReplaceDisplayName =
+            subUnit.display_name &&
+            /[a-zA-Z]/.test(subUnit.display_name) &&
+            /\d/.test(subUnit.display_name);
+
+          // Use remote_listing_id if available, otherwise keep original
+          if (shouldReplaceName && subUnit.remote_listing_id) {
+            cleanedSubUnit.name = subUnit.remote_listing_id;
+          }
+
+          if (shouldReplaceDisplayName && subUnit.remote_listing_id) {
+            cleanedSubUnit.display_name = subUnit.remote_listing_id;
+          }
+
+          return cleanedSubUnit;
+        });
+
+        return cleanedUnit;
+      });
+
+      return cleanedData;
+    }
+
+    // If it's not in the expected format, return as-is
+    return propertyData;
   }
 }
 
