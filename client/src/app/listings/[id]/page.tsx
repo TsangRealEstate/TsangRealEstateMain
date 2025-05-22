@@ -18,7 +18,9 @@ import {
     FaCoffee,
     FaBriefcase,
     FaKey,
-    FaUpload
+    FaUpload,
+    FaVideo,
+    FaPlay
 } from 'react-icons/fa';
 import { FaElevator } from 'react-icons/fa6';
 import axiosInstance from '@/api/axiosInstance';
@@ -27,7 +29,7 @@ import { useEffect, useState } from 'react';
 import FloorPlanGallery from '@/app/filter/components/FloorPlanGallery';
 import { formatAvailabilityDate } from '@/utils/dateUtils';
 import PropertySpecials from '../components/PropertySpecials';
-import PropertyVideoList from '../components/PropertyVideoList';
+import { IoMdClose } from 'react-icons/io';
 
 interface Photo {
     type: string;
@@ -155,6 +157,12 @@ interface VideoUploadResponse {
     data?: any;
 }
 
+interface Video {
+    videounitid: number;
+    cloudinary_url: string;
+    cloudinary_id: string;
+}
+
 export default function PropertyDetailPage({ params }: PropertyDetailPageProps) {
     const router = useRouter();
     const [property, setProperty] = useState<PropertyData | null>(null);
@@ -162,15 +170,27 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
     const [error, setError] = useState(false);
     const [selectedVideos, setSelectedVideos] = useState<SelectedVideos>({});
     const [uploadingUnitId, setUploadingUnitId] = useState<string | null>(null);
+    const [videos, setVideos] = useState<Video[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchProperty = async () => {
             try {
                 const { id } = await params;
                 const response = await axiosInstance.get(`/scrape-list/${id}`);
-                setProperty(response.data.data);
-            } catch (err) {
-                setError(true);
+                const fetchedProperty = response.data.data;
+                setProperty(fetchedProperty);
+
+                const videoRes = await axiosInstance.get(`/properties/${fetchedProperty._id}/videos`);
+                setVideos(videoRes.data.videos || []);
+
+            } catch (err: any) {
+                if (err.response && err.response.status === 404) {
+                    setVideos([]);
+                } else {
+                    console.error("Failed to fetch videos:", err);
+                }
             } finally {
                 setLoading(false);
             }
@@ -186,6 +206,16 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
     if (error || !property) {
         notFound();
     }
+
+    const openModal = (videoUrl: string) => {
+        setActiveVideoUrl(videoUrl);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setActiveVideoUrl(null);
+        setIsModalOpen(false);
+    };
 
     const handleSpecialsUpdate = (updatedSpecials: any) => {
         setProperty(prev => {
@@ -233,7 +263,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
             );
 
             alert("Video uploaded successfully");
-            console.log(res.data);
+            window.location.reload();
         } catch (err) {
             console.error(err);
             alert("Video upload failed");
@@ -399,7 +429,7 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                                 <div className="mt-4 flex items-center gap-4">
                                     <input
                                         type="file"
-                                        accept="video/*"
+                                        accept="video/mp4,video/quicktime,video/x-m4v"
                                         onChange={(e) => handleVideoChange(e, unit.id)}
                                         className="text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
                                     />
@@ -442,19 +472,28 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                                     </button>
                                 </div>
 
-                                <PropertyVideoList propertyId={property._id} />
+                                <div className="mt-4 video-container">
+                                    <h4 className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                        <FaVideo /> Uploaded Video
+                                    </h4>
 
-
-                                {/* <iframe
-                                    src="https://player.cloudinary.com/embed/?cloud_name=dozvjuoio&public_id=property_videos%2Fs16b3wek1pvgztx0ykse&profile=cld-default"
-                                    width="640"
-                                    height="360"
-                                    style={{ height: 'auto', width: '100%', aspectRatio: '640 / 360' }}
-                                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                                    allowFullScreen
-                                    frameBorder="0"
-                                ></iframe> */}
-
+                                    {videos.filter(v => v.videounitid === unit.id).length === 0 ? (
+                                        <p className="text-sm text-gray-500">No video for this unit</p>
+                                    ) : (
+                                        videos
+                                            .filter(v => v.videounitid === unit.id)
+                                            .map(video => (
+                                                <button
+                                                    key={video.cloudinary_id}
+                                                    onClick={() => openModal(video.cloudinary_url)}
+                                                    className="text-sm text-blue-600 underline flex items-center gap-1 hover:text-blue-800"
+                                                >
+                                                    <FaPlay className="text-xs" />
+                                                    Watch Video
+                                                </button>
+                                            ))
+                                    )}
+                                </div>
                             </div>
 
                             {/* Unit Details */}
@@ -503,6 +542,25 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                     ))}
                 </div>
             </div>
+
+            {isModalOpen && activeVideoUrl && (
+                <div className="fixed inset-0 bg-black/65 bg-opacity-60 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-lg p-4 w-full max-w-2xl relative">
+                        <button
+                            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                            onClick={closeModal}
+                        >
+                            <IoMdClose size={24} />
+                        </button>
+                        <video
+                            src={activeVideoUrl}
+                            controls
+                            autoPlay
+                            className="w-full rounded"
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

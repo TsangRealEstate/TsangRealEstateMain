@@ -7,7 +7,7 @@ const storage = new CloudinaryStorage({
   params: {
     folder: "property_videos",
     resource_type: "video",
-    allowedFormats: ["mp4", "mov", "avi"],
+    format: "mp4",
   },
 });
 
