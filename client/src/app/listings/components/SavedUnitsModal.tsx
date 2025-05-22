@@ -64,12 +64,15 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
 
 
     const sendUnitToTenant = async () => {
+        setLoading(true);
         try {
             const res = await axiosInstance.post(`/meetings/${tenantId}/send-units`);
             alert(`✅ Successfully sent ${res.data.count} property areas to tenant!`);
         } catch (err: any) {
             console.error('Error sending units to tenant:', err.response?.data || err.message);
             alert(err.response?.data?.error || 'Failed to send units to tenant');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -222,12 +225,18 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
 
                 {/* Footer */}
                 <div className="p-4 flex justify-between border-t border-gray-200 bg-gray-50 rounded-b-xl">
-                    <button
-                        onClick={sendUnitToTenant}
-                        className="w-full lg:w-[30%] py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
-                    >
-                        Send to Client Mail
-                    </button>
+                    {
+                        Object.keys(groupedUnits).length > 0 && (
+                            <button
+                                onClick={sendUnitToTenant}
+                                disabled={loading}
+                                className="w-full lg:w-[30%] py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                            >
+                                {loading ? 'Sending...' : 'Send Units to Client Mail'}
+                            </button>
+                        )
+                    }
+
                     <button
                         onClick={onClose}
                         className="w-full lg:w-[30%] py-2 px-4 bg-red-600 mx-3 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
