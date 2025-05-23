@@ -394,7 +394,10 @@ router.delete("/url/:encodedUrl", async (req, res) => {
 
     res.json({
       success: true,
-      message: `${deletedProperty.Information.display_name} deleted successfully`,
+      message: `${deletedProperty?.Information?.display_name ||
+        deletedProperty?.destinationURL ||
+        "Property"
+        } deleted successfully`,
     });
   } catch (error) {
     console.error(`Error deleting property by URL:`, error);
