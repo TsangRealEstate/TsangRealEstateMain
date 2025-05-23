@@ -178,16 +178,16 @@ router.get("/filter", async (req, res) => {
                   { $ifNull: ["$$specificUnit.available_on", false] },
                   earliestMoveInDate
                     ? {
-                      $gte: [
-                        "$$specificUnit.available_on",
-                        earliestMoveInDate,
-                      ],
-                    }
+                        $gte: [
+                          "$$specificUnit.available_on",
+                          earliestMoveInDate,
+                        ],
+                      }
                     : true,
                   latestMoveInDate
                     ? {
-                      $lte: ["$$specificUnit.available_on", latestMoveInDate],
-                    }
+                        $lte: ["$$specificUnit.available_on", latestMoveInDate],
+                      }
                     : true,
                 ].filter((cond) => cond !== true),
               },
@@ -304,9 +304,9 @@ router.get("/:id", async (req, res) => {
       details:
         process.env.NODE_ENV === "development"
           ? {
-            message: error.message,
-            stack: error.stack,
-          }
+              message: error.message,
+              stack: error.stack,
+            }
           : undefined,
     });
   }
@@ -353,9 +353,9 @@ router.put("/:id/specials", async (req, res) => {
       details:
         process.env.NODE_ENV === "development"
           ? {
-            message: error.message,
-            stack: error.stack,
-          }
+              message: error.message,
+              stack: error.stack,
+            }
           : undefined,
     });
   }
@@ -394,10 +394,11 @@ router.delete("/url/:encodedUrl", async (req, res) => {
 
     res.json({
       success: true,
-      message: `${deletedProperty?.Information?.display_name ||
+      message: `${
+        deletedProperty?.Information?.display_name ||
         deletedProperty?.destinationURL ||
         "Property"
-        } deleted successfully`,
+      } deleted successfully`,
     });
   } catch (error) {
     console.error(`Error deleting property by URL:`, error);
