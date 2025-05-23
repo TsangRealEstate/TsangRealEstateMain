@@ -3,72 +3,83 @@ const router = express.Router();
 const upload = require("../config/multer");
 const { ScrapeListModel } = require("../models/scrapeList");
 const PropertyVideo = require("../models/PropertyVideo");
+const cloudinary = require("../config/cloudinary");
+const fs = require("fs")
+const multer = require("multer");
+;
 
-router.post("/:propertyId/video", upload.single("video"), async (req, res) => {
-  const { propertyId } = req.params;
-  const { videounitid } = req.body;
+router.post(
+  "/:propertyId/video",
+  (req, res, next) => {
+    upload.single("video")(req, res, function (err) {
+      if (err instanceof multer.MulterError) {
+        if (err.code === "LIMIT_FILE_SIZE") {
+          return res
+            .status(400)
+            .json({ error: "Video exceeds 100MB size limit" });
+        }
+        return res.status(500).json({ error: "Multer error: " + err.message });
+      } else if (err) {
+        return res.status(400).json({ error: err.message });
+      }
+      next();
+    });
+  },
+  async (req, res) => {
+    const { propertyId } = req.params;
+    const { videounitid } = req.body;
 
-  try {
-    const property = await ScrapeListModel.findById(propertyId);
-    if (!property) {
-      return res.status(404).json({ error: "Property not found" });
-    }
+    try {
+      const property = await ScrapeListModel.findById(propertyId);
+      if (!property)
+        return res.status(404).json({ error: "Property not found" });
 
-    const parsedUnitId = parseInt(videounitid, 10);
-    if (isNaN(parsedUnitId)) {
-      return res.status(400).json({ error: "Invalid videounitid" });
-    }
+      const parsedUnitId = parseInt(videounitid, 10);
+      if (isNaN(parsedUnitId)) {
+        return res.status(400).json({ error: "Invalid videounitid" });
+      }
 
-    // Check if a file was uploaded
-    if (!req.file) {
-      return res.status(400).json({ error: "No video file uploaded" });
-    }
+      if (!req.file) {
+        return res.status(400).json({ error: "No video file uploaded" });
+      }
 
-    // Validate file size (limit to 100MB)
-    const MAX_SIZE_MB = 100;
-    const MAX_SIZE_BYTES = MAX_SIZE_MB * 1024 * 1024;
-    if (req.file.size > MAX_SIZE_BYTES) {
-      return res.status(400).json({
-        error: `Video file exceeds the ${MAX_SIZE_MB}MB limit allowed on the Free plan. Please upload a smaller file.`,
+      // Upload to Cloudinary
+      const result = await cloudinary.uploader.upload(req.file.path, {
+        resource_type: "video",
+        folder: "property_videos",
       });
-    }
 
-    const newVideo = {
-      videounitid: parsedUnitId,
-      cloudinary_url: req.file.path,
-      cloudinary_id: req.file.filename,
-    };
+      // Delete local file after upload
+      fs.unlinkSync(req.file.path);
 
-    // Check if PropertyVideo already exists
-    let propertyVideoDoc = await PropertyVideo.findOne({ propertyId });
+      const newVideo = {
+        videounitid: parsedUnitId,
+        cloudinary_url: result.secure_url,
+        cloudinary_id: result.public_id,
+      };
 
-    if (propertyVideoDoc) {
-      propertyVideoDoc.videos.push(newVideo);
-      await propertyVideoDoc.save();
-    } else {
-      propertyVideoDoc = await PropertyVideo.create({
-        propertyId,
-        videos: [newVideo],
+      let propertyVideoDoc = await PropertyVideo.findOne({ propertyId });
+
+      if (propertyVideoDoc) {
+        propertyVideoDoc.videos.push(newVideo);
+        await propertyVideoDoc.save();
+      } else {
+        propertyVideoDoc = await PropertyVideo.create({
+          propertyId,
+          videos: [newVideo],
+        });
+      }
+
+      res.json({
+        message: "Video uploaded and saved",
+        video: propertyVideoDoc,
       });
+    } catch (err) {
+      console.error("Upload error:", err);
+      res.status(500).json({ error: "Something went wrong" });
     }
-
-    res.json({ message: "Video uploaded and saved", video: propertyVideoDoc });
-  } catch (err) {
-    console.error("Upload error:", err);
-
-    if (err instanceof Error) {
-      console.error("Message:", err.message);
-      console.error("Stack:", err.stack);
-    } else {
-      console.error(
-        "Raw error (non-Error object):",
-        JSON.stringify(err, null, 2)
-      );
-    }
-
-    res.status(500).json({ error: "Something went wrong" });
   }
-});
+);
 
 router.get("/:propertyId/videos", async (req, res) => {
   const { propertyId } = req.params;

@@ -264,9 +264,9 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
 
             alert("Video uploaded successfully");
             window.location.reload();
-        } catch (err) {
-            console.error(err);
-            alert("Video upload failed");
+        } catch (error: any) {
+            console.error(error);
+            alert(error?.response?.data?.error || "Failed to upload video");
         } finally {
             setUploadingUnitId(null);
         }

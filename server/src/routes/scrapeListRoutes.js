@@ -20,7 +20,7 @@ router.post("/", async (req, res) => {
     if (existingEntry) {
       return res.status(409).json({
         error: "Conflict",
-        message: "Destination URL already exists",
+        message: "Property URL already exists",
         existingId: existingEntry._id,
         createdAt: existingEntry.createdAt,
       });
@@ -178,16 +178,16 @@ router.get("/filter", async (req, res) => {
                   { $ifNull: ["$$specificUnit.available_on", false] },
                   earliestMoveInDate
                     ? {
-                        $gte: [
-                          "$$specificUnit.available_on",
-                          earliestMoveInDate,
-                        ],
-                      }
+                      $gte: [
+                        "$$specificUnit.available_on",
+                        earliestMoveInDate,
+                      ],
+                    }
                     : true,
                   latestMoveInDate
                     ? {
-                        $lte: ["$$specificUnit.available_on", latestMoveInDate],
-                      }
+                      $lte: ["$$specificUnit.available_on", latestMoveInDate],
+                    }
                     : true,
                 ].filter((cond) => cond !== true),
               },
@@ -304,9 +304,9 @@ router.get("/:id", async (req, res) => {
       details:
         process.env.NODE_ENV === "development"
           ? {
-              message: error.message,
-              stack: error.stack,
-            }
+            message: error.message,
+            stack: error.stack,
+          }
           : undefined,
     });
   }
@@ -353,9 +353,9 @@ router.put("/:id/specials", async (req, res) => {
       details:
         process.env.NODE_ENV === "development"
           ? {
-              message: error.message,
-              stack: error.stack,
-            }
+            message: error.message,
+            stack: error.stack,
+          }
           : undefined,
     });
   }
