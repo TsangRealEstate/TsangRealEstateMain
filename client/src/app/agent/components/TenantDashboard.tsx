@@ -252,10 +252,37 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
     };
 
     useEffect(() => {
+        const handleKeyDown = (event: { key: string; }) => {
+            if (event.key === 'Escape') {
+                onClose();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [onClose]);
+
+    useEffect(() => {
         if (tenant?._id) {
             fetchMovements();
         }
     }, [tenant]);
+
+    const formatDate = (dateString: string | number | Date) => {
+        if (!dateString) return "N/A";
+        const date = new Date(dateString);
+
+        const options: Intl.DateTimeFormatOptions = {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        };
+
+        return date.toLocaleDateString('en-US', options);
+    };
 
     return (
         <div
@@ -332,8 +359,19 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     {renderDetailItem("Budget", "budget", tenant.budget, <AiOutlineDollarCircle className="text-blue-500" />)}
                     {renderDetailItem("Bedrooms", "bedrooms", tenant.bedrooms, <FiHome className="text-blue-500" />)}
                     {renderDetailItem("Bathrooms", "bathrooms", tenant.bathrooms, <FiHome className="text-blue-500" />)}
-                    {renderDetailItem("Lease Start Date", "leaseStartDate", tenant.leaseStartDate, <FiCalendar className="text-blue-500" />)}
-                    {renderDetailItem("Lease End Date", "leaseEndDate", tenant.leaseEndDate, <FiCalendar className="text-blue-500" />)}
+                    {renderDetailItem(
+                        "Lease Start Date",
+                        "leaseStartDate",
+                        formatDate(tenant.leaseStartDate),
+                        <FiCalendar className="text-blue-500" />
+                    )}
+                    {renderDetailItem(
+                        "Lease End Date",
+                        "leaseEndDate",
+                        formatDate(tenant.leaseEndDate),
+                        <FiCalendar className="text-blue-500" />
+                    )}
+
                     {renderDetailItem(
                         "Desired Location",
                         "desiredLocation",
