@@ -3,9 +3,13 @@ import { useEffect, useState } from 'react';
 import axiosInstance from '@/api/axiosInstance';
 import {
     FaHome, FaBed, FaBath, FaRulerCombined,
-    FaCalendarAlt, FaExternalLinkAlt
+    FaCalendarAlt, FaExternalLinkAlt,
+    FaVideo,
+    FaPlay,
+    FaVideoSlash
 } from 'react-icons/fa';
 import Link from 'next/link';
+import { IoMdClose } from 'react-icons/io';
 
 interface SavedUnit {
     unitId: string;
@@ -14,11 +18,17 @@ interface SavedUnit {
     unitName: string;
     price: number;
     sqft: number;
+    videoId: number;
     availableDate: string;
     scrapeListId: string;
     _id: string;
     bed: number;
     bath: number;
+}
+interface Video {
+    videounitid: number;
+    cloudinary_url: string;
+    cloudinary_id: string;
 }
 
 interface PropertyGroup {
@@ -34,6 +44,9 @@ export default function TenantListingsPage() {
     const [savedUnits, setSavedUnits] = useState<SavedUnit[]>([]);
     const [loading, setLoading] = useState(true);
     const [sortBy, setSortBy] = useState<'price' | 'sqft'>('price');
+    const [videos, setVideos] = useState<Video[]>([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -54,8 +67,29 @@ export default function TenantListingsPage() {
                 const res = await axiosInstance.get(`/saved-units/${userId}`);
                 const allUnits = res.data.flatMap((doc: any) => doc.selectedUnits);
                 setSavedUnits(allUnits);
+
+                // Get unique scrapeListIds
+                const uniqueScrapeListIds = [...new Set(allUnits.map((u: { scrapeListId: any; }) => u.scrapeListId))];
+
+                // Fetch videos for each scrapeListId
+                const videoPromises = uniqueScrapeListIds.map(async (id) => {
+                    try {
+                        const res = await axiosInstance.get(`/properties/${id}/videos`);
+                        return res.data.videos || [];
+                    } catch (err: any) {
+                        if (err.response?.status === 404) {
+                            return [];
+                        }
+                        throw err;
+                    }
+                });
+
+                const videoResults = await Promise.all(videoPromises);
+                const allVideos = videoResults.flat();
+
+                setVideos(allVideos);
             } catch (err) {
-                console.error('Error fetching saved units:', err);
+                console.error('Error fetching saved units or videos:', err);
             } finally {
                 setLoading(false);
             }
@@ -115,6 +149,16 @@ export default function TenantListingsPage() {
         return a.propertyArea.localeCompare(b.propertyArea);
     });
 
+    const openModal = (videoUrl: string) => {
+        setActiveVideoUrl(videoUrl);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setActiveVideoUrl(null);
+        setIsModalOpen(false);
+    };
+
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-5xl mx-auto">
@@ -164,15 +208,48 @@ export default function TenantListingsPage() {
                                                 </h2>
                                             </div>
 
-                                            <Link href={`/listings/${group.scrapeListId}`}>
-                                                <button
-                                                    type="button"
-                                                    className="inline-flex mt-6 lg:mt-0 items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                                                >
-                                                    View Details
-                                                    <FaExternalLinkAlt className="ml-2 h-4 w-4" />
-                                                </button>
-                                            </Link>
+                                            <div className='flex items-center'>
+                                                {group.units.some(unit =>
+                                                    videos.some(video => video.videounitid === unit.videoId)
+                                                ) ? (
+                                                    (() => {
+                                                        const matchingUnit = group.units.find(unit =>
+                                                            videos.some(video => video.videounitid === unit.videoId)
+                                                        );
+                                                        if (!matchingUnit) return null;
+
+                                                        const video = videos.find(v => v.videounitid === matchingUnit.videoId);
+                                                        return video ? (
+                                                            <button
+                                                                key={video.cloudinary_id}
+                                                                onClick={() => openModal(video.cloudinary_url)}
+                                                                className="inline-flex mr-3 mt-6 lg:mt-0 items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                            >
+                                                                <FaPlay className="text-xs mr-3" />
+                                                                Watch Video
+                                                            </button>
+                                                        ) : null;
+                                                    })()
+                                                ) : (
+                                                    <p className="text-sm text-gray-400 font-bold italic items-center gap-2 inline-flex mr-3 mt-6 lg:mt-0">
+                                                        <FaVideoSlash className="text-gray-300 text-base" />
+                                                        No video for this property yet
+                                                    </p>
+
+                                                )}
+
+                                                <Link href={`/listings/${group.scrapeListId}`}
+                                                    target='_blank'
+                                                    rel="noopener noreferrer">
+                                                    <button
+                                                        type="button"
+                                                        className="inline-flex mt-6 lg:mt-0 items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                    >
+                                                        View Details
+                                                        <FaExternalLinkAlt className="ml-2 h-4 w-4" />
+                                                    </button>
+                                                </Link>
+                                            </div>
                                         </div>
 
                                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -236,6 +313,27 @@ export default function TenantListingsPage() {
                     </div>
                 </div>
             </div>
+
+            {isModalOpen && activeVideoUrl && (
+                <div className="fixed inset-0 bg-black/65 bg-opacity-60 flex items-center justify-center z-50 lg:px-0 px-4">
+                    <div className="bg-white rounded-lg shadow-lg p-2 w-full max-w-2xl relative">
+                        <button
+                            className="absolute -top-10 right-6.5 lg:-right-10 text-gray-500 bg-white rounded-4xl hover:text-gray-700"
+                            onClick={closeModal}
+                        >
+                            <IoMdClose size={34} />
+                        </button>
+                        <div className='h-[400px]'>
+                            <video
+                                src={activeVideoUrl}
+                                controls
+                                autoPlay
+                                className="size-full rounded object-cover"
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

@@ -19,7 +19,10 @@ const savedUnitSchema = new mongoose.Schema({
       unitName: String,
       price: Number,
       sqft: Number,
+      videoId: Number,
       availableDate: String,
+      bed: Number,
+      bath: Number,
       scrapeListId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "ScrapeList",

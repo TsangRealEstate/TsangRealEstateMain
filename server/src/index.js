@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const connectDB = require("./db");
+const connectDB = require("./database/connectors/simple.connector");
 const {
   createPredefinedLabels,
   cleanupLabelCollection,
@@ -13,7 +13,7 @@ const labelRoutes = require("./routes/labelRoutes");
 const listingRoutes = require("./routes/listingRoutes");
 const scrapeListRoutes = require("./routes/scrapeListRoutes");
 const savedUnitRoutes = require("./routes/savedUnitRoutes");
-
+const propertiesVideoRoutes = require("./routes/propertiesVideo");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -33,6 +33,7 @@ app.use("/api/v1/labels", labelRoutes);
 app.use("/api/v1/listings", listingRoutes);
 app.use("/api/v1/scrape-list", scrapeListRoutes);
 app.use("/api/v1/saved-units", savedUnitRoutes);
+app.use("/api/v1/properties", propertiesVideoRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "Welcome. Server is up and running!" });

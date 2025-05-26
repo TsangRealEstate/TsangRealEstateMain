@@ -341,6 +341,30 @@ const ApartmentListings = () => {
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {sortedListings.length > 0 ? (
                             sortedListings.map((listing) => {
+
+                                if (!listing.available_units || listing.available_units.length === 0) {
+                                    return (
+                                        <div
+                                            key={listing._id}
+                                            className="bg-blue-50 p-4 rounded-lg border border-blue-100 relative flex items-center justify-center"
+                                            style={{ minHeight: '120px' }}
+                                        >
+                                            <button
+                                                onClick={() => handleDeleteListing(listing.destinationURL)}
+                                                className="absolute top-2 right-2 p-2 text-gray-400 hover:text-red-500"
+                                                title="Delete listing"
+                                            >
+                                                <FaTrash className="h-4 w-4" />
+                                            </button>
+
+                                            {/* Perfectly centered status message */}
+                                            <p className="text-blue-600 text-sm text-center px-4">
+                                                Listing just added. Data will populate after scraping.
+                                            </p>
+                                        </div>
+                                    );
+                                }
+
                                 const propertyName = getPropertyNameFromUrl(listing.destinationURL);
                                 const lowestPrice = listing.available_units?.reduce((min, unit) => {
                                     const unitMin = unit.units.reduce((unitMin, subUnit) =>
@@ -358,6 +382,7 @@ const ApartmentListings = () => {
                                         >
                                             <FaTrash className="h-4 w-4" />
                                         </button>
+
                                         {/* Initial Listing details before modal */}
                                         <div className="px-4 py-5 sm:p-6">
                                             <div className="flex items-center">

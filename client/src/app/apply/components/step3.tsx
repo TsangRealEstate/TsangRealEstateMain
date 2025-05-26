@@ -116,9 +116,9 @@ const formFields = {
             { value: "Below $1200", label: "Below $1200" },
             {
                 value:
-                    "$1200 - $1300 (average pricing of one-bedrooms as of July 2023)",
+                    "$1200 - $1300",
                 label:
-                    "$1200 - $1300 (average pricing of one-bedrooms as of July 2023)",
+                    "$1200 - $1300",
             },
             { value: "$1400 - $1500", label: "$1400 - $1500" },
             {

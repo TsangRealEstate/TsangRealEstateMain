@@ -243,7 +243,7 @@ export default function Agent() {
                                                         {column.cards.length} cards
                                                     </span>
                                                 </div>
-                                                <div className="space-y-3 max-h-[200px] overflow-x-hidden overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                                                <div className="space-y-3 max-h-[700px] overflow-x-hidden overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                                                     {column.cards.map((card: { id: string; content: string }, i: number) => (
                                                         <Draggable key={card.id} draggableId={card.id} index={i}>
                                                             {(provided: DraggableProvided) => (

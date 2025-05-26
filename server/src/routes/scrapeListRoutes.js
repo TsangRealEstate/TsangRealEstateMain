@@ -20,7 +20,7 @@ router.post("/", async (req, res) => {
     if (existingEntry) {
       return res.status(409).json({
         error: "Conflict",
-        message: "Destination URL already exists",
+        message: "Property URL already exists",
         existingId: existingEntry._id,
         createdAt: existingEntry.createdAt,
       });
@@ -394,7 +394,11 @@ router.delete("/url/:encodedUrl", async (req, res) => {
 
     res.json({
       success: true,
-      message: `${deletedProperty.Information.display_name} deleted successfully`,
+      message: `${
+        deletedProperty?.Information?.display_name ||
+        deletedProperty?.destinationURL ||
+        "Property"
+      } deleted successfully`,
     });
   } catch (error) {
     console.error(`Error deleting property by URL:`, error);
