@@ -414,132 +414,137 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
             <div className="mb-8">
                 <h2 className="text-2xl font-semibold mb-4">Available Units</h2>
                 <div className="space-y-6">
-                    {property.Information.available_units.map((unit) => (
-                        <div key={unit.id} className="border border-gray-200 rounded-lg overflow-hidden">
-                            {/* Unit Header */}
-                            <div className="bg-gray-50 p-4 border-b border-gray-200">
-                                <h3 className="text-xl font-medium">Floor Name: {unit.name}</h3>
-                                <div className="flex space-x-4 text-gray-600 mt-1">
-                                    <span><FaBed className="inline mr-1" /> {unit.bed} {unit.bed === 1 ? 'bed' : 'beds'}</span>
-                                    <span><FaBath className="inline mr-1" /> {unit.bath} {unit.bath === 1 ? 'bath' : 'baths'}</span>
-                                    <span><FaRulerCombined className="inline mr-1" /> {unit.sqft} sqft</span>
+                    {property.Information.available_units
+                        .slice()
+                        .sort((a, b) => a.sqft - b.sqft)
+                        .map((unit) => (
+                            <div key={unit.id} className="border border-gray-200 rounded-lg overflow-hidden">
+                                {/* Unit Header */}
+                                <div className="bg-gray-50 p-4 border-b border-gray-200">
+                                    <h3 className="text-xl font-medium">Floor Name: {unit.name}</h3>
+                                    <div className="flex space-x-4 text-gray-600 mt-1">
+                                        <span><FaBed className="inline mr-1" /> {unit.bed} {unit.bed === 1 ? 'bed' : 'beds'}</span>
+                                        <span><FaBath className="inline mr-1" /> {unit.bath} {unit.bath === 1 ? 'bath' : 'baths'}</span>
+                                        <span><FaRulerCombined className="inline mr-1" /> {unit.sqft} sqft</span>
+                                    </div>
+
+                                    {/* Video */}
+                                    <div>
+                                        {videos.some(v => v.videounitid === unit.id) ? (
+                                            <div className="mt-4 video-container">
+                                                <h4 className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
+                                                    <FaVideo /> Uploaded Video : {videos
+                                                        .filter(v => v.videounitid === unit.id)
+                                                        .map(video => (
+                                                            <button
+                                                                key={video.cloudinary_id}
+                                                                onClick={() => openModal(video.cloudinary_url)}
+                                                                className="text-sm text-blue-600 underline flex items-center gap-1 hover:text-blue-800"
+                                                            >
+                                                                <FaPlay className="text-xs" />
+                                                                Watch Video
+                                                            </button>
+                                                        ))}
+                                                </h4>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {/* Video Upload Controls */}
+                                                <div className="mt-4 flex items-center gap-4">
+                                                    <input
+                                                        type="file"
+                                                        accept="video/mp4,video/quicktime,video/x-m4v"
+                                                        onChange={(e) => handleVideoChange(e, unit.id)}
+                                                        className="text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
+                                                    />
+
+                                                    <button
+                                                        onClick={() => handleUpload({ unitId: unit.id })}
+                                                        disabled={uploadingUnitId === unit.id.toString()}
+                                                        className={`flex items-center gap-2 px-4 py-1 rounded text-white transition ${uploadingUnitId === unit.id.toString()
+                                                            ? "bg-blue-400 cursor-not-allowed"
+                                                            : "bg-blue-600 hover:bg-blue-700"
+                                                            }`}
+                                                    >
+                                                        {uploadingUnitId === unit.id.toString() ? (
+                                                            <svg
+                                                                className="animate-spin h-4 w-4 text-white"
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                            >
+                                                                <circle
+                                                                    className="opacity-25"
+                                                                    cx="12"
+                                                                    cy="12"
+                                                                    r="10"
+                                                                    stroke="currentColor"
+                                                                    strokeWidth="4"
+                                                                ></circle>
+                                                                <path
+                                                                    className="opacity-75"
+                                                                    fill="currentColor"
+                                                                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                                                                ></path>
+                                                            </svg>
+                                                        ) : (
+                                                            <>
+                                                                <FaUpload className="text-white" />
+                                                                Upload
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </>
+                                        )}
+
+                                    </div>
                                 </div>
 
-                                {/* Check if a video exists for the unit */}
-                                {videos.some(v => v.videounitid === unit.id) ? (
-                                    <div className="mt-4 video-container">
-                                        <h4 className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-2">
-                                            <FaVideo /> Uploaded Video : {videos
-                                                .filter(v => v.videounitid === unit.id)
-                                                .map(video => (
-                                                    <button
-                                                        key={video.cloudinary_id}
-                                                        onClick={() => openModal(video.cloudinary_url)}
-                                                        className="text-sm text-blue-600 underline flex items-center gap-1 hover:text-blue-800"
-                                                    >
-                                                        <FaPlay className="text-xs" />
-                                                        Watch Video
-                                                    </button>
-                                                ))}
-                                        </h4>
-                                    </div>
-                                ) : (
-                                    <>
-                                        {/* Video Upload Controls */}
-                                        <div className="mt-4 flex items-center gap-4">
-                                            <input
-                                                type="file"
-                                                accept="video/mp4,video/quicktime,video/x-m4v"
-                                                onChange={(e) => handleVideoChange(e, unit.id)}
-                                                className="text-sm file:mr-4 file:py-1 file:px-3 file:rounded file:border-0 file:bg-blue-100 file:text-blue-700 hover:file:bg-blue-200"
-                                            />
+                                {/* Unit Details */}
+                                <div className="p-4">
+                                    {unit.units.length > 0 ? (
+                                        <div>
+                                            <FloorPlanGallery unit={unit} />
 
-                                            <button
-                                                onClick={() => handleUpload({ unitId: unit.id })}
-                                                disabled={uploadingUnitId === unit.id.toString()}
-                                                className={`flex items-center gap-2 px-4 py-1 rounded text-white transition ${uploadingUnitId === unit.id.toString()
-                                                    ? "bg-blue-400 cursor-not-allowed"
-                                                    : "bg-blue-600 hover:bg-blue-700"
-                                                    }`}
-                                            >
-                                                {uploadingUnitId === unit.id.toString() ? (
-                                                    <svg
-                                                        className="animate-spin h-4 w-4 text-white"
-                                                        viewBox="0 0 24 24"
-                                                        fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                    >
-                                                        <circle
-                                                            className="opacity-25"
-                                                            cx="12"
-                                                            cy="12"
-                                                            r="10"
-                                                            stroke="currentColor"
-                                                            strokeWidth="4"
-                                                        ></circle>
-                                                        <path
-                                                            className="opacity-75"
-                                                            fill="currentColor"
-                                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                                                        ></path>
-                                                    </svg>
-                                                ) : (
-                                                    <>
-                                                        <FaUpload className="text-white" />
-                                                        Upload
-                                                    </>
-                                                )}
-                                            </button>
-                                        </div>
-                                    </>
-                                )}
-
-                            </div>
-
-                            {/* Unit Details */}
-                            <div className="p-4">
-                                {unit.units.length > 0 ? (
-                                    <div>
-                                        <FloorPlanGallery unit={unit} />
-
-                                        <div className="space-y-4">
-                                            {unit.units.map((specificUnit) => (
-                                                <div key={specificUnit.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
-                                                    <div className="flex justify-between items-start">
-                                                        <div>
-                                                            <h4 className="font-medium">Unit Number: {specificUnit.display_name}</h4>
-                                                            {/* <p>rentalId: {specificUnit.unit_rental_id}</p> */}
-                                                            <p className='my-3'>Sqft: {specificUnit.sqft}</p>
-                                                            <p className="text-gray-600 text-sm">
-                                                                Availability: <FaCalendarAlt className="inline mr-1" />
-                                                                {formatAvailabilityDate(specificUnit.available_on)}
-                                                            </p>
+                                            <div className="space-y-4">
+                                                {unit.units
+                                                    .slice()
+                                                    .sort((a, b) => a.sqft - b.sqft)
+                                                    .map((specificUnit) => (
+                                                        <div key={specificUnit.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
+                                                            <div className="flex justify-between items-start">
+                                                                <div>
+                                                                    <h4 className="font-medium">Unit Number: {specificUnit.display_name}</h4>
+                                                                    <p className='my-3'>Sqft: {specificUnit.sqft}</p>
+                                                                    <p className="text-gray-600 text-sm">
+                                                                        Availability: <FaCalendarAlt className="inline mr-1" />
+                                                                        {formatAvailabilityDate(specificUnit.available_on)}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="text-right">
+                                                                    <p className="font-bold text-lg">
+                                                                        <FaDollarSign className="inline mr-1" />
+                                                                        {specificUnit.price}
+                                                                    </p>
+                                                                    <span className={`text-xs px-2 py-1 hidden rounded-full ${specificUnit.availability === 'available'
+                                                                        ? 'bg-green-100 text-green-800'
+                                                                        : 'bg-yellow-100 text-yellow-800'
+                                                                        }`}>
+                                                                        {specificUnit.availability}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
                                                         </div>
-                                                        <div className="text-right">
-                                                            <p className="font-bold text-lg">
-                                                                <FaDollarSign className="inline mr-1" />
-                                                                {specificUnit.price}
-                                                            </p>
-                                                            <span className={`text-xs px-2 py-1 hidden rounded-full ${specificUnit.availability === 'available'
-                                                                ? 'bg-green-100 text-green-800'
-                                                                : 'bg-yellow-100 text-yellow-800'
-                                                                }`}>
-                                                                {specificUnit.availability}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
-                                            ))}
-
+                                                    ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                ) : (
-                                    <p className="text-gray-500">No specific units currently available</p>
-                                )}
+                                    ) : (
+                                        <p className="text-gray-500">No specific units currently available</p>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))}
                 </div>
             </div>
 
