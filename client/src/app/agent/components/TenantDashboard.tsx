@@ -341,7 +341,9 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             }
 
             // Add amenities with cleaning
-            const selectedNonNegotiables = getLocalNonNegotiables(tenant._id) || tenant.nonNegotiables;
+            const localNonNegotiables = getLocalNonNegotiables(tenant._id);
+            const tenantNonNegotiables = Array.isArray(tenant.nonNegotiables) ? tenant.nonNegotiables : [];
+            const selectedNonNegotiables = localNonNegotiables.length > 0 ? localNonNegotiables : tenantNonNegotiables;
 
             if (selectedNonNegotiables.length > 0) {
                 const cleanedAmenities = selectedNonNegotiables
@@ -360,7 +362,9 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             }
 
             // Add areas with cleaning (as before)
-            const desiredLocations = getLocalDesiredLocations(tenant._id) || tenant.desiredLocation;
+            const localLocations = getLocalDesiredLocations(tenant._id);
+            const tenantLocations = Array.isArray(tenant.desiredLocation) ? tenant.desiredLocation : [];
+            const desiredLocations = localLocations.length > 0 ? localLocations : tenantLocations;
 
             if (desiredLocations?.length > 0) {
                 console.log(desiredLocations);
