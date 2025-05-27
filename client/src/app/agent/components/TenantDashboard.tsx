@@ -12,6 +12,7 @@ import Link from "next/link";
 import { FaCheck, FaTimes, FaUsers } from "react-icons/fa";
 import { getLocalDesiredLocations, getLocalNonNegotiables, setLocalDesiredLocations, setLocalNonNegotiables } from "@/utils/localStorageUtils";
 import MultiSelectModal from "./MultiSelectModal";
+import TenantComments from "./TenantComments";
 
 interface TenantModalProps {
     tenant: any;
@@ -570,6 +571,8 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                 </div>
 
                 <LabelManager cardId={tenant._id} />
+
+                <TenantComments tenantId={tenant._id} />
 
                 <ActivityLog
                     movements={movements}
