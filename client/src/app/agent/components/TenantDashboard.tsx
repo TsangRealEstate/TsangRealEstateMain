@@ -10,6 +10,8 @@ import ActivityLog from "./ActivityLog";
 import ResultsModal from "@/app/listings/components/ResultsModal";
 import Link from "next/link";
 import { FaCheck, FaTimes, FaUsers } from "react-icons/fa";
+import { getLocalDesiredLocations, getLocalNonNegotiables, setLocalDesiredLocations, setLocalNonNegotiables } from "@/utils/localStorageUtils";
+import MultiSelectModal from "./MultiSelectModal";
 
 interface TenantModalProps {
     tenant: any;
@@ -33,6 +35,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
         tenantName: ''
     });
     const [editField, setEditField] = useState<string | null>(null);
+    const [showNonNegotiablesModal, setShowNonNegotiablesModal] = useState(false);
     const [editedValue, setEditedValue] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -65,6 +68,156 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
 
     const renderDetailItem = (label: string, field: string, value: any, icon: JSX.Element) => {
         const isEditing = editField === field;
+
+        if (field === 'nonNegotiables') {
+            const negotiablesString =
+                typeof tenant.nonNegotiables === 'string'
+                    ? tenant.nonNegotiables
+                    : Array.isArray(tenant.nonNegotiables)
+                        ? tenant.nonNegotiables.join(', ')
+                        : '';
+
+            const negotiableOptions = negotiablesString
+                .split(',')
+                .map((item: string) => item.trim())
+                .filter((item: any) => item);
+
+            const [currentSelected, setCurrentSelected] = useState<string[]>(() => {
+                const localItems = getLocalNonNegotiables(tenant._id);
+                if (localItems.length > 0) return localItems;
+
+                return typeof value === 'string'
+                    ? value.split(',').map(item => item.trim()).filter(item => item)
+                    : Array.isArray(value) ? value : [];
+            });
+
+            const handleSaveNonNegotiables = (selected: string[]) => {
+                setLocalNonNegotiables(tenant._id, selected);
+                setCurrentSelected(selected);
+                setShowNonNegotiablesModal(false);
+            };
+
+            return (
+                <>
+                    <div
+                        className="relative group cursor-pointer"
+                        onClick={() => setShowNonNegotiablesModal(true)}
+                    >
+                        <DetailItem
+                            label={label}
+                            value={
+                                <div className="flex flex-wrap gap-2 pr-10">
+                                    {currentSelected.length > 0
+                                        ? currentSelected.map((item, index) => (
+                                            <span
+                                                key={index}
+                                                className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                                            >
+                                                {item}
+                                            </span>
+                                        ))
+                                        : 'N/A'}
+                                </div>
+                            }
+                            icon={icon}
+                        />
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+                            <AiOutlineEdit
+                                size={22}
+                                className="text-gray-400 group-hover:text-blue-600 transition-colors opacity-0 group-hover:opacity-100"
+                            />
+                        </div>
+                    </div>
+
+                    {showNonNegotiablesModal && (
+                        <MultiSelectModal
+                            title="Edit Non-Negotiables"
+                            items={negotiableOptions}
+                            selectedItems={currentSelected}
+                            onSave={handleSaveNonNegotiables}
+                            onClose={() => setShowNonNegotiablesModal(false)}
+                        />
+                    )}
+                </>
+            );
+        }
+
+        if (field === "desiredLocation") {
+            const locationString =
+                typeof tenant.desiredLocation === 'string'
+                    ? tenant.desiredLocation
+                    : Array.isArray(tenant.desiredLocation)
+                        ? tenant.desiredLocation.join(', ')
+                        : '';
+
+            const locationOptions = locationString
+                .split(',')
+                .map((item: string) => item.trim())
+                .filter((item: any) => item);
+
+            const [currentLocations, setCurrentLocations] = useState<string[]>(() => {
+                const local = getLocalDesiredLocations(tenant._id);
+                if (local.length > 0) return local;
+
+                return typeof value === 'string'
+                    ? value.split(',').map(i => i.trim()).filter(Boolean)
+                    : Array.isArray(value)
+                        ? value
+                        : [];
+            });
+            const [showLocationModal, setShowLocationModal] = useState(false);
+
+            const handleSaveLocations = (selected: string[]) => {
+                setLocalDesiredLocations(tenant._id, selected);
+                setCurrentLocations(selected);
+                setShowLocationModal(false);
+            };
+
+            return (
+                <>
+                    <div
+                        className="relative group cursor-pointer"
+                        onClick={() => setShowLocationModal(true)}
+                    >
+                        <DetailItem
+                            label="Desired Location"
+                            value={
+                                <div className="flex flex-wrap gap-2 pr-10">
+                                    {currentLocations.length > 0
+                                        ? currentLocations.map((loc, index) => (
+                                            <span
+                                                key={index}
+                                                className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                                            >
+                                                {loc}
+                                            </span>
+                                        ))
+                                        : "N/A"}
+                                </div>
+                            }
+                            icon={<FiMapPin className="text-blue-500" />}
+                        />
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+                            <AiOutlineEdit
+                                size={22}
+                                className="text-gray-400 group-hover:text-green-600 transition-colors opacity-0 group-hover:opacity-100"
+                            />
+                        </div>
+                    </div>
+
+                    {showLocationModal && (
+                        <MultiSelectModal
+                            title="Edit Desired Locations"
+                            items={locationOptions}
+                            selectedItems={currentLocations}
+                            onSave={handleSaveLocations}
+                            onClose={() => setShowLocationModal(false)}
+                        />
+                    )}
+                </>
+            );
+        }
+
         return (
             <div
                 className="relative group cursor-pointer"
@@ -187,24 +340,36 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             }
 
             // Add amenities with cleaning
-            if (tenant.nonNegotiables?.length > 0) {
-                const cleanedAmenities = tenant.nonNegotiables
-                    .map((amenity: string) => amenity.trim().toLowerCase())
-                    .filter((amenity: string | any[]) => amenity.length > 0);
+            const selectedNonNegotiables = getLocalNonNegotiables(tenant._id) || tenant.nonNegotiables;
 
-                if (cleanedAmenities.includes('in-unit laundry')) params.append('inUnitLaundry', 'true');
-                if (cleanedAmenities.includes('balcony')) params.append('balcony', 'true');
-                if (cleanedAmenities.includes('yard')) params.append('yard', 'true');
+            if (selectedNonNegotiables.length > 0) {
+                const cleanedAmenities = selectedNonNegotiables
+                    .map((item: string) => item.trim().toLowerCase())
+                    .filter((item: string) => item.length > 0);
+
+                if (cleanedAmenities.includes('in-unit laundry')) {
+                    params.append('inUnitLaundry', 'true');
+                }
+                if (cleanedAmenities.includes('balcony')) {
+                    params.append('balcony', 'true');
+                }
+                if (cleanedAmenities.includes('yard')) {
+                    params.append('yard', 'true');
+                }
             }
 
             // Add areas with cleaning (as before)
-            if (tenant.desiredLocation?.length > 0) {
-                const cleanedAreas = tenant.desiredLocation
+            const desiredLocations = getLocalDesiredLocations(tenant._id) || tenant.desiredLocation;
+
+            if (desiredLocations?.length > 0) {
+                console.log(desiredLocations);
+
+                const cleanedAreas = desiredLocations
                     .flatMap((area: string) => area.split(','))
                     .map((area: string) => area.trim())
-                    .filter((area: string | any[]) => area.length > 0);
+                    .filter((area: string) => area.length > 0);
 
-                params.append('area', cleanedAreas.join('&'));
+                params.append('area', cleanedAreas.join(','));
             }
 
             const response = await axiosInstance.get('/scrape-list/filter', { params });
@@ -352,7 +517,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 renderDetails">
                     {renderDetailItem("Email", "email", tenant.email, <AiOutlineMail className="text-blue-500" />)}
                     {renderDetailItem("Mobile", "mobileNumber", tenant.mobileNumber, <AiOutlinePhone className="text-blue-500" />)}
                     {renderDetailItem("Search Type", "searchType", tenant.searchType, <FiSearch className="text-blue-500" />)}
