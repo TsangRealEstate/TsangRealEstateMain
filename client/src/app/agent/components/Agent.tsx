@@ -284,6 +284,7 @@ export default function Agent() {
                                                         {column.cards.length} cards
                                                     </span>
                                                 </div>
+
                                                 <div className="space-y-3 max-h-[700px] overflow-x-hidden overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                                                     {column.cards.map((card: { id: string; content: string }, i: number) => (
                                                         <Draggable key={card.id} draggableId={card.id} index={i}>
@@ -324,6 +325,7 @@ export default function Agent() {
                                                     ))}
                                                     {provided.placeholder}
                                                 </div>
+
                                                 <div className="mt-4">
                                                     <input
                                                         type="text"
@@ -333,10 +335,11 @@ export default function Agent() {
                                                         onChange={(e) => updateNewCard(index, e.target.value)}
                                                         onKeyPress={(e) => e.key === 'Enter' && addCard(index)}
                                                     />
+
                                                     <button
                                                         className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg active:bg-blue-800 flex items-center justify-center gap-2"
                                                         onClick={() => addCard(index)}
-                                                        disabled={!column.newCard.trim() || loading}
+                                                        disabled={loading}
                                                     >
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                             <path d="M12 5v14M5 12h14"></path>
