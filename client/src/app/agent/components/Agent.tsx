@@ -109,15 +109,52 @@ export default function Agent() {
     };
 
     // Card functions
-    const addCard = (index: number) => {
+    const addCard = async (index: number) => {
+        const storedPassword = localStorage.getItem("authPassword");
         if (columns[index].newCard.trim()) {
-            const updatedColumns = [...columns];
-            updatedColumns[index].cards.push({
-                id: crypto.randomUUID(),
-                content: updatedColumns[index].newCard
-            });
-            updatedColumns[index].newCard = "";
-            setColumns(updatedColumns);
+            try {
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+
+                const tenantPayload = {
+                    firstName: columns[index].newCard.trim(),
+                    lastName: "Doe",
+                    mobileNumber: "0000000000",
+                    email: "default@example.com",
+                    searchType: "rent",
+                    OtherOnLease: "no",
+                    othersOnLeasevalue: "",
+                    bathrooms: "1",
+                    bedrooms: "1",
+                    brokenLease: [],
+                    budget: "1000",
+                    creditScore: "700",
+                    desiredLocation: [],
+                    grossIncome: "50000",
+                    instagram: "",
+                    leaseEndDate: tomorrow.toISOString().split('T')[0],
+                    leaseStartDate: today.toISOString().split('T')[0],
+                    nonNegotiables: [],
+                    propertyOwnerName: "John Smith"
+                };
+
+                const response = await axiosInstance.post('/tenants', tenantPayload);
+
+                const updatedColumns = [...columns];
+                updatedColumns[index].cards.push({
+                    content: columns[index].newCard
+                });
+                updatedColumns[index].newCard = "";
+                setColumns(updatedColumns);
+                if (storedPassword) {
+                    fetchTenants(storedPassword);
+                }
+
+            } catch (error: any) {
+                console.error("Failed to create tenant:", error);
+                alert(`Failed to create tenant: ${error.response?.data?.message || error.message}`);
+            }
         }
     };
 
