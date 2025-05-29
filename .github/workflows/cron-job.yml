@@ -23,13 +23,11 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: |
-          cd server
-          npm ci
+        working-directory: ./server
+        run: npm ci
 
       - name: Run Scraper
-        run: |
-          cd server
-          npm run scrape:newapartments
+        working-directory: ./server
+        run: npm run scrape:newapartments
         env:
           NODE_ENV: production
