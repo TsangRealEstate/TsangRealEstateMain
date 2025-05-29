@@ -2,9 +2,9 @@ name: Run Apartment Scraper
 
 on:
   schedule:
-    - cron: "0 8 * * *" #8AM UTC every day
-    - cron: "0 12 * * *" #12PM UTC every day
-    - cron: "0 18 * * *" #6PM UTC every day
+    - cron: "0 14 * * *" # 8AM CST (which is 14:00 UTC)
+    - cron: "0 18 * * *" # 12PM CST (which is 18:00 UTC)
+    - cron: "0 0 * * *"  # 6PM CST (which is 00:00 UTC next day)
   workflow_dispatch:
   push:
     branches:
