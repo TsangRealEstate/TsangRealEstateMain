@@ -2,8 +2,8 @@ name: Run Apartment Scraper
 
 on:
   schedule:
-    - cron: "0 */6 * * *"  
-  workflow_dispatch:  # Allows manual triggering
+    - cron: "0 */6 * * *"
+  workflow_dispatch: # Allows manual triggering
   push:
     branches:
       - p2
@@ -32,3 +32,4 @@ jobs:
         run: npm run scrape:newapartments
         env:
           NODE_ENV: production
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
