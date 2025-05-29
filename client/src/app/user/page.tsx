@@ -329,7 +329,7 @@ export default function TenantListingsPage() {
 
             {isModalOpen && activeVideoUrl && (
                 <div className="fixed inset-0 bg-black/65 bg-opacity-60 flex items-center justify-center z-50 lg:px-0 px-4">
-                    <div className="bg-white rounded-lg shadow-lg p-2 w-full max-w-2xl relative">
+                    <div className="bg-white rounded-lg shadow-lg p-2 max-w-2xl relative">
                         <button
                             className="absolute -top-10 right-6.5 lg:-right-10 text-gray-500 bg-white rounded-4xl hover:text-gray-700"
                             onClick={closeModal}
@@ -341,7 +341,7 @@ export default function TenantListingsPage() {
                                 src={activeVideoUrl}
                                 controls
                                 autoPlay
-                                className="size-full rounded object-cover"
+                                className="size-full rounded"
                             />
                         </div>
                     </div>
