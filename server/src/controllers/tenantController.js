@@ -8,7 +8,7 @@ const createOrUpdateTenant = async (req, res) => {
     const tenantData = req.body;
     const { email } = tenantData;
 
-    if (!email) {
+    if (!email && tenantData.email !== "default@example.com") {
       return res.status(400).json({ error: "Email is required." });
     }
 
@@ -19,12 +19,18 @@ const createOrUpdateTenant = async (req, res) => {
     await tenant.save();
     message = "Tenant created successfully!";
 
-    const inviteResult = await sendMeetingInvite(tenant._id);
-    return res.status(tenant.isNew ? 201 : 200).json({
-      message: `${message} Meeting invite ${
-        inviteResult.success ? "sent!" : "failed!"
-      }`,
-      inviteResult,
+    let inviteResult = null;
+    if (email && email !== "default@example.com") {
+      inviteResult = await sendMeetingInvite(tenant._id);
+    }
+
+    return res.status(201).json({
+      message: message,
+      inviteSkipped: email === "default@example.com",
+      inviteResult: inviteResult || {
+        success: false,
+        reason: "Default email used",
+      },
     });
   } catch (error) {
     res.status(400).json({ error: error.message });

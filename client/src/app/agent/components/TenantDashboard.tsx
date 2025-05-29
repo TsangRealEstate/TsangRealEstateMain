@@ -421,6 +421,36 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
         }
     };
 
+    const handleSendInvite = async () => {
+        try {
+            setLoading(true);
+            const response = await axiosInstance.post(
+                `/meetings/send-invite/${tenant._id}`
+            );
+
+            // Success case
+            alert(`✅ Success!\nMeeting invite sent to:\n${tenant.firstName} ${tenant.lastName}\n(${tenant.email})`);
+        } catch (error: any) {
+            console.error("Error sending meeting invite:", error.response?.data || error.message);
+
+            // Special handling for default email case
+            if (error.response?.data?.requiresEmailUpdate) {
+                alert(
+                    `⚠️ Cannot Send Invite\n\nThis tenant has a default email address.\n\nPlease update their emailto a valid one.`
+                )
+            }
+
+            else {
+                alert(`❌ Failed to Send Invite\n\n${error.response?.data?.error ||
+                    error.response?.data?.message ||
+                    'Please try again later'
+                    }`);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         const handleKeyDown = (event: { key: string; }) => {
             if (event.key === 'Escape') {
@@ -463,7 +493,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                 }
             }}
         >
-            <div className="bg-white relative rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-white relative rounded-xl p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between flex-col lg:flex-row items-start mb-4 Top_CTA_BTNS">
                     <span>
                         <h2 className="text-2xl font-semibold capitalize text-blue-500">
@@ -489,7 +519,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     </span>
 
 
-                    <div className="mt-6 lg:mt-0 flex flex-wrap gap-2">
+                    <div className="mt-6 lg:mt-0 flex flex-wrap gap-2 items-center main-cta-btns">
                         <button
                             onClick={handleApplyFilters}
                             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -511,6 +541,14 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                         >
                             Close
+                        </button>
+
+                        <button
+                            onClick={() => handleSendInvite()}
+                            disabled={loading}
+                            className="inline-block rounded-md bg-blue-600 px-5 py-2.5 font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        >
+                            {loading ? 'Sending...' : 'Send Meeting Invite'}
                         </button>
 
                         <button

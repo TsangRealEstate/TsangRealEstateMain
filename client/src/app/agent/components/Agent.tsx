@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
 import TenantSearch from "./TenantSearch";
 import AgentLoginForm from "./AgentLoginForm";
+import { randomUUID } from "crypto";
 
 type CardLabelsMap = Record<string, CardLabel[]>;
 
@@ -145,6 +146,7 @@ export default function Agent() {
 
                 const updatedColumns = [...columns];
                 updatedColumns[index].cards.push({
+                    id: crypto.randomUUID() || response.data._id,
                     content: columns[index].newCard
                 });
                 updatedColumns[index].newCard = "";
