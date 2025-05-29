@@ -345,21 +345,22 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             const tenantNonNegotiables = Array.isArray(tenant.nonNegotiables) ? tenant.nonNegotiables : [];
             const selectedNonNegotiables = localNonNegotiables.length > 0 ? localNonNegotiables : tenantNonNegotiables;
 
-            if (selectedNonNegotiables.length > 0) {
-                const cleanedAmenities = selectedNonNegotiables
-                    .map((item: string) => item.trim().toLowerCase())
-                    .filter((item: string) => item.length > 0);
+            // if (selectedNonNegotiables.length > 0) {
+            //     const cleanedAmenities = selectedNonNegotiables
+            //         .map((item: string) => item.trim().toLowerCase())
+            //         .filter((item: string) => item.length > 0);
 
-                if (cleanedAmenities.includes('in-unit laundry')) {
-                    params.append('inUnitLaundry', 'true');
-                }
-                if (cleanedAmenities.includes('balcony')) {
-                    params.append('balcony', 'true');
-                }
-                if (cleanedAmenities.includes('yard')) {
-                    params.append('yard', 'true');
-                }
-            }
+            //     if (cleanedAmenities.includes('in-unit laundry')) {
+            //         params.append('inUnitLaundry', 'true');
+            //     }
+            //     if (cleanedAmenities.includes('balcony')) {
+            //         params.append('balcony', 'true');
+            //     }
+            //     if (cleanedAmenities.includes('yard')) {
+            //         params.append('yard', 'true');
+            //     }
+            // }
+
 
             // Add areas with cleaning (as before)
             const localLocations = getLocalDesiredLocations(tenant._id);
