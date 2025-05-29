@@ -2,11 +2,14 @@ name: Run Apartment Scraper
 
 on:
   schedule:
-    - cron: "0 */6 * * *"
-  workflow_dispatch: # Allows manual triggering
+    - cron: "0 8 * * *" #8AM UTC every day
+    - cron: "0 12 * * *" #12PM UTC every day
+    - cron: "0 18 * * *" #6PM UTC every day
+  workflow_dispatch:
   push:
     branches:
       - p2
+      - main
 
 jobs:
   scrape:

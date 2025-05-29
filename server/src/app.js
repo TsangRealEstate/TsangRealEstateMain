@@ -9,7 +9,6 @@ async function App() {
   await scraper.run();
 }
 
-// Ensure clean exit + error handling
 (async () => {
   try {
     await App();
