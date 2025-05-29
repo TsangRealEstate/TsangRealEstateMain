@@ -367,7 +367,6 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             const desiredLocations = localLocations.length > 0 ? localLocations : tenantLocations;
 
             if (desiredLocations?.length > 0) {
-                console.log(desiredLocations);
 
                 const cleanedAreas = desiredLocations
                     .flatMap((area: string) => area.split(','))

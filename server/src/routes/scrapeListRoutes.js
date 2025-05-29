@@ -117,7 +117,10 @@ router.get("/filter", async (req, res) => {
 
     // Area filter
     if (area) {
-      const areas = area.split("&").map((a) => a.trim());
+      const areas = area
+        .split(",")
+        .map((a) => a.trim())
+        .filter((a) => a.length > 0);
       propertyFilter["Information.neighborhood"] = { $in: areas };
     }
 
