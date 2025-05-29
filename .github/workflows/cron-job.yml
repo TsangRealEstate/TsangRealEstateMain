@@ -2,7 +2,7 @@ name: Run Apartment Scraper
 
 on:
   schedule:
-    - cron: "0 */6 * * *"  # Runs every 6 hours
+    - cron: "0 */6 * * *"  
   workflow_dispatch:  # Allows manual triggering
   push:
     branches:
