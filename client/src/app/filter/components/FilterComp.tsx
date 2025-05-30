@@ -167,7 +167,7 @@ export default function FilterComp() {
 
             // Add areas (joined with &)
             if (filters.area.length > 0) {
-                params.append('area', filters.area.join('&'));
+                params.append('area', filters.area.join(','));
             }
 
             // Make API call
