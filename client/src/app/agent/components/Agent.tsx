@@ -7,12 +7,14 @@ import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
 import TenantSearch from "./TenantSearch";
 import AgentLoginForm from "./AgentLoginForm";
+import { randomUUID } from "crypto";
 
 type CardLabelsMap = Record<string, CardLabel[]>;
 
 export default function Agent() {
     const {
         authenticated,
+        setLoading,
         setColumns,
         password,
         columns,
@@ -109,15 +111,56 @@ export default function Agent() {
     };
 
     // Card functions
-    const addCard = (index: number) => {
+    const addCard = async (index: number) => {
+        const storedPassword = localStorage.getItem("authPassword");
         if (columns[index].newCard.trim()) {
-            const updatedColumns = [...columns];
-            updatedColumns[index].cards.push({
-                id: crypto.randomUUID(),
-                content: updatedColumns[index].newCard
-            });
-            updatedColumns[index].newCard = "";
-            setColumns(updatedColumns);
+            try {
+                setLoading(true)
+                const today = new Date();
+                const tomorrow = new Date(today);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+
+                const tenantPayload = {
+                    firstName: columns[index].newCard.trim(),
+                    lastName: "Doe",
+                    mobileNumber: "0000000000",
+                    email: "default@example.com",
+                    searchType: "rent",
+                    OtherOnLease: "no",
+                    othersOnLeasevalue: "",
+                    bathrooms: "1",
+                    bedrooms: "1",
+                    brokenLease: [],
+                    budget: "1000",
+                    creditScore: "700",
+                    desiredLocation: [],
+                    grossIncome: "50000",
+                    instagram: "",
+                    leaseEndDate: tomorrow.toISOString().split('T')[0],
+                    leaseStartDate: today.toISOString().split('T')[0],
+                    nonNegotiables: [],
+                    propertyOwnerName: "John Smith"
+                };
+
+                const response = await axiosInstance.post('/tenants', tenantPayload);
+
+                const updatedColumns = [...columns];
+                updatedColumns[index].cards.push({
+                    id: crypto.randomUUID() || response.data._id,
+                    content: columns[index].newCard
+                });
+                updatedColumns[index].newCard = "";
+                setColumns(updatedColumns);
+                if (storedPassword) {
+                    fetchTenants(storedPassword);
+                }
+
+            } catch (error: any) {
+                console.error("Failed to create tenant:", error);
+                alert(`Failed to create tenant: ${error.response?.data?.message || error.message}`);
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -243,6 +286,7 @@ export default function Agent() {
                                                         {column.cards.length} cards
                                                     </span>
                                                 </div>
+
                                                 <div className="space-y-3 max-h-[700px] overflow-x-hidden overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                                                     {column.cards.map((card: { id: string; content: string }, i: number) => (
                                                         <Draggable key={card.id} draggableId={card.id} index={i}>
@@ -283,6 +327,7 @@ export default function Agent() {
                                                     ))}
                                                     {provided.placeholder}
                                                 </div>
+
                                                 <div className="mt-4">
                                                     <input
                                                         type="text"
@@ -292,14 +337,26 @@ export default function Agent() {
                                                         onChange={(e) => updateNewCard(index, e.target.value)}
                                                         onKeyPress={(e) => e.key === 'Enter' && addCard(index)}
                                                     />
+
                                                     <button
                                                         className="w-full mt-3 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium transition-colors shadow-md hover:shadow-lg active:bg-blue-800 flex items-center justify-center gap-2"
                                                         onClick={() => addCard(index)}
+                                                        disabled={loading}
                                                     >
                                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                                             <path d="M12 5v14M5 12h14"></path>
                                                         </svg>
-                                                        Add Card
+                                                        {loading ? (
+                                                            <>
+                                                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                                </svg>
+                                                                Adding...
+                                                            </>
+                                                        ) : (
+                                                            "Add Card"
+                                                        )}
                                                     </button>
                                                 </div>
 

@@ -4,12 +4,15 @@ import axiosInstance from "@/api/axiosInstance";
 import LabelManager from "./LabelManager";
 import { AiOutlineEdit, AiOutlineMail, AiOutlinePhone, AiOutlineDollarCircle } from "react-icons/ai";
 import { BsCheckLg } from "react-icons/bs";
-import { FiSearch, FiHome, FiCalendar, FiMapPin, FiAlertCircle, FiXCircle } from "react-icons/fi";
+import { FiSearch, FiHome, FiCalendar, FiMapPin, FiAlertCircle, FiXCircle, FiClock } from "react-icons/fi";
 import DetailItem from "./DetailItem";
 import ActivityLog from "./ActivityLog";
 import ResultsModal from "@/app/listings/components/ResultsModal";
 import Link from "next/link";
 import { FaCheck, FaTimes, FaUsers } from "react-icons/fa";
+import { getLocalDesiredLocations, getLocalNonNegotiables, setLocalDesiredLocations, setLocalNonNegotiables } from "@/utils/localStorageUtils";
+import MultiSelectModal from "./MultiSelectModal";
+import TenantComments from "./TenantComments";
 
 interface TenantModalProps {
     tenant: any;
@@ -33,6 +36,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
         tenantName: ''
     });
     const [editField, setEditField] = useState<string | null>(null);
+    const [showNonNegotiablesModal, setShowNonNegotiablesModal] = useState(false);
     const [editedValue, setEditedValue] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -65,6 +69,164 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
 
     const renderDetailItem = (label: string, field: string, value: any, icon: JSX.Element) => {
         const isEditing = editField === field;
+
+        if (field === 'nonNegotiables') {
+            const allNonNegotiableOptions = [
+                "1st floor",
+                "2nd floor",
+                "3rd floor or top floor",
+                "Washer/dryer connections",
+                "Washer/dryer included",
+                "Patio/Balcony",
+                "No carpet in living room",
+                "Yard",
+            ];
+
+            const [currentSelected, setCurrentSelected] = useState<string[]>(() => {
+                const localItems = getLocalNonNegotiables(tenant._id);
+                if (localItems.length > 0) return localItems;
+
+                // Handle tenant.nonNegotiables whether it's string or array
+                if (typeof tenant.nonNegotiables === 'string') {
+                    return tenant.nonNegotiables.split(',')
+                        .map((item: string) => item.trim())
+                        .filter((item: any) => item);
+                } else if (Array.isArray(tenant.nonNegotiables)) {
+                    return tenant.nonNegotiables;
+                }
+                return [];
+            });
+
+            const handleSaveNonNegotiables = (selected: string[]) => {
+                setLocalNonNegotiables(tenant._id, selected);
+                setCurrentSelected(selected);
+                setShowNonNegotiablesModal(false);
+            };
+
+            return (
+                <>
+                    <div
+                        className="relative group cursor-pointer"
+                        onClick={() => setShowNonNegotiablesModal(true)}
+                    >
+                        <DetailItem
+                            label={label}
+                            value={
+                                <div className="flex flex-wrap gap-2 pr-10">
+                                    {currentSelected.length > 0
+                                        ? currentSelected.map((item, index) => (
+                                            <span
+                                                key={index}
+                                                className="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                                            >
+                                                {item}
+                                            </span>
+                                        ))
+                                        : 'N/A'}
+                                </div>
+                            }
+                            icon={icon}
+                        />
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+                            <AiOutlineEdit
+                                size={22}
+                                className="text-gray-400 group-hover:text-blue-600 transition-colors opacity-0 group-hover:opacity-100"
+                            />
+                        </div>
+                    </div>
+
+                    {showNonNegotiablesModal && (
+                        <MultiSelectModal
+                            title="Edit Non-Negotiables"
+                            items={allNonNegotiableOptions} // Show all available options
+                            selectedItems={currentSelected} // Current selections will be checked
+                            onSave={handleSaveNonNegotiables}
+                            onClose={() => setShowNonNegotiablesModal(false)}
+                        />
+                    )}
+                </>
+            );
+        }
+
+        if (field === "desiredLocation") {
+            const allLocationOptions = [
+                "Dominion/Rim/La Cantera/UTSA",
+                "Boerne",
+                "Stone Oak",
+                "North Central/Castle Hills",
+                "Medical Center",
+                "Alamo Ranch/Westover Hills",
+                "Downtown",
+                "Alamo Heights",
+                "Thousand Oaks/Far Northeast/Live Oak/Schertz/Converse",
+                "Southeast/South Central/Brooks City Base",
+                "New Braunfels",
+            ];
+
+            const [currentLocations, setCurrentLocations] = useState<string[]>(() => {
+                const local = getLocalDesiredLocations(tenant._id);
+                if (local.length > 0) return local;
+
+                if (typeof tenant.desiredLocation === 'string') {
+                    return tenant.desiredLocation.split(',')
+                        .map((i: string) => i.trim())
+                        .filter(Boolean);
+                } else if (Array.isArray(tenant.desiredLocation)) {
+                    return tenant.desiredLocation;
+                }
+                return [];
+            });
+
+            const [showLocationModal, setShowLocationModal] = useState(false);
+
+            const handleSaveLocations = (selected: string[]) => {
+                setLocalDesiredLocations(tenant._id, selected);
+                setCurrentLocations(selected);
+                setShowLocationModal(false);
+            };
+
+            return (
+                <>
+                    <div className="relative group cursor-pointer" onClick={() => setShowLocationModal(true)}>
+                        <DetailItem
+                            label="Desired Location"
+                            value={
+                                <div className="flex flex-wrap gap-2 pr-10">
+                                    {currentLocations.length > 0
+                                        ? currentLocations.map((loc, index) => (
+                                            <span
+                                                key={index}
+                                                className="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                                            >
+                                                {loc}
+                                            </span>
+                                        ))
+                                        : "N/A"}
+                                </div>
+                            }
+                            icon={<FiMapPin className="text-blue-500" />}
+                        />
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+                            <AiOutlineEdit
+                                size={22}
+                                className="text-gray-400 group-hover:text-green-600 transition-colors opacity-0 group-hover:opacity-100"
+                            />
+                        </div>
+                    </div>
+
+                    {showLocationModal && (
+                        <MultiSelectModal
+                            title="Edit Desired Locations"
+                            items={allLocationOptions}
+                            selectedItems={currentLocations}
+                            onSave={handleSaveLocations}
+                            onClose={() => setShowLocationModal(false)}
+                        />
+                    )}
+                </>
+            );
+        }
+
         return (
             <div
                 className="relative group cursor-pointer"
@@ -187,24 +349,40 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             }
 
             // Add amenities with cleaning
-            if (tenant.nonNegotiables?.length > 0) {
-                const cleanedAmenities = tenant.nonNegotiables
-                    .map((amenity: string) => amenity.trim().toLowerCase())
-                    .filter((amenity: string | any[]) => amenity.length > 0);
+            const localNonNegotiables = getLocalNonNegotiables(tenant._id);
+            const tenantNonNegotiables = Array.isArray(tenant.nonNegotiables) ? tenant.nonNegotiables : [];
+            const selectedNonNegotiables = localNonNegotiables.length > 0 ? localNonNegotiables : tenantNonNegotiables;
 
-                if (cleanedAmenities.includes('in-unit laundry')) params.append('inUnitLaundry', 'true');
-                if (cleanedAmenities.includes('balcony')) params.append('balcony', 'true');
-                if (cleanedAmenities.includes('yard')) params.append('yard', 'true');
-            }
+            // if (selectedNonNegotiables.length > 0) {
+            //     const cleanedAmenities = selectedNonNegotiables
+            //         .map((item: string) => item.trim().toLowerCase())
+            //         .filter((item: string) => item.length > 0);
+
+            //     if (cleanedAmenities.includes('in-unit laundry')) {
+            //         params.append('inUnitLaundry', 'true');
+            //     }
+            //     if (cleanedAmenities.includes('balcony')) {
+            //         params.append('balcony', 'true');
+            //     }
+            //     if (cleanedAmenities.includes('yard')) {
+            //         params.append('yard', 'true');
+            //     }
+            // }
+
 
             // Add areas with cleaning (as before)
-            if (tenant.desiredLocation?.length > 0) {
-                const cleanedAreas = tenant.desiredLocation
+            const localLocations = getLocalDesiredLocations(tenant._id);
+            const tenantLocations = Array.isArray(tenant.desiredLocation) ? tenant.desiredLocation : [];
+            const desiredLocations = localLocations.length > 0 ? localLocations : tenantLocations;
+
+            if (desiredLocations?.length > 0) {
+
+                const cleanedAreas = desiredLocations
                     .flatMap((area: string) => area.split(','))
                     .map((area: string) => area.trim())
-                    .filter((area: string | any[]) => area.length > 0);
+                    .filter((area: string) => area.length > 0);
 
-                params.append('area', cleanedAreas.join('&'));
+                params.append('area', cleanedAreas.join(','));
             }
 
             const response = await axiosInstance.get('/scrape-list/filter', { params });
@@ -251,6 +429,36 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
         }
     };
 
+    const handleSendInvite = async () => {
+        try {
+            setLoading(true);
+            const response = await axiosInstance.post(
+                `/meetings/send-invite/${tenant._id}`
+            );
+
+            // Success case
+            alert(`✅ Success!\nMeeting invite sent to:\n${tenant.firstName} ${tenant.lastName}\n(${tenant.email})`);
+        } catch (error: any) {
+            console.error("Error sending meeting invite:", error.response?.data || error.message);
+
+            // Special handling for default email case
+            if (error.response?.data?.requiresEmailUpdate) {
+                alert(
+                    `⚠️ Cannot Send Invite\n\nThis tenant has a default email address.\n\nPlease update their emailto a valid one.`
+                )
+            }
+
+            else {
+                alert(`❌ Failed to Send Invite\n\n${error.response?.data?.error ||
+                    error.response?.data?.message ||
+                    'Please try again later'
+                    }`);
+            }
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         const handleKeyDown = (event: { key: string; }) => {
             if (event.key === 'Escape') {
@@ -293,7 +501,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                 }
             }}
         >
-            <div className="bg-white relative rounded-xl p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <div className="bg-white relative rounded-xl p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between flex-col lg:flex-row items-start mb-4 Top_CTA_BTNS">
                     <span>
                         <h2 className="text-2xl font-semibold capitalize text-blue-500">
@@ -319,7 +527,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     </span>
 
 
-                    <div className="mt-6 lg:mt-0 flex flex-wrap gap-2">
+                    <div className="mt-6 lg:mt-0 flex flex-wrap gap-2 items-center main-cta-btns">
                         <button
                             onClick={handleApplyFilters}
                             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
@@ -344,6 +552,14 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         </button>
 
                         <button
+                            onClick={() => handleSendInvite()}
+                            disabled={loading}
+                            className="inline-block rounded-md bg-blue-600 px-5 py-2.5 font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                        >
+                            {loading ? 'Sending...' : 'Send Meeting Invite'}
+                        </button>
+
+                        <button
                             onClick={handleDelete}
                             className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
                         >
@@ -352,7 +568,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 renderDetails">
                     {renderDetailItem("Email", "email", tenant.email, <AiOutlineMail className="text-blue-500" />)}
                     {renderDetailItem("Mobile", "mobileNumber", tenant.mobileNumber, <AiOutlinePhone className="text-blue-500" />)}
                     {renderDetailItem("Search Type", "searchType", tenant.searchType, <FiSearch className="text-blue-500" />)}
@@ -400,11 +616,15 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                             : <FaTimes className="text-red-500" />
                     )}
                     {renderDetailItem("Other-OnLease Value", "othersOnLeasevalue",
-                        tenant.othersOnLeasevalue, <FaUsers className="text-blue-500"
-                    />)}
+                        tenant.othersOnLeasevalue, <FaUsers className="text-blue-500" />
+                    )}
+                    {renderDetailItem("Availability-Date", "AvailabilityDate", formatDate(tenant.AvailabilityDate), <FiCalendar className="text-blue-500" />)}
+                    {renderDetailItem("Time-For-Call", "timeForCall", tenant.timeForCall, <FiClock className="text-blue-500" />)}
                 </div>
 
                 <LabelManager cardId={tenant._id} />
+
+                <TenantComments tenantId={tenant._id} />
 
                 <ActivityLog
                     movements={movements}

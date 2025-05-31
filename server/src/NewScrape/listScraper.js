@@ -3,11 +3,7 @@ const { delay } = require("../utils/commons");
 const { ScrapeListModel } = require("../models/scrapeList");
 
 class ListScraper {
-  constructor() {
-    this.init();
-  }
-
-  async init() {
+  async run() {
     try {
       const dataList = await this.fetchAllList();
       for (const property of dataList) {

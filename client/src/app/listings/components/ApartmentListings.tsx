@@ -254,11 +254,11 @@ const ApartmentListings = () => {
                                                     <h4 className="text-md font-medium text-gray-900 mb-3">
                                                         Available Units ({selectedListing.available_units.reduce((acc, unit) => acc + (unit.units?.length || 0), 0)})
                                                     </h4>
-                                                    <div className="grid gap-6 max-h-[400px] overflow-y-auto">
+
+                                                    <div className="grid gap-6 sorting max-h-[400px] overflow-y-auto">
                                                         {/* Filter out units that have no available subunits */}
                                                         {selectedListing.available_units
                                                             .filter(unit => unit.units && unit.units.length > 0)
-                                                            // First sort parent units by sqft (smallest to largest)
                                                             .sort((a, b) => a.sqft - b.sqft)
                                                             .map((unit) => (
                                                                 <div key={unit.id} className="space-y-3">
@@ -281,13 +281,14 @@ const ApartmentListings = () => {
                                                                                 const dateB = new Date(b.available_on);
                                                                                 return dateA.getTime() - dateB.getTime();
                                                                             })
+
+                                                                            .sort((a, b) => new Date(a.available_on).getTime() - new Date(b.available_on).getTime())
                                                                             .map((subUnit) => (
                                                                                 <div
                                                                                     key={`${unit.id}-${subUnit.id}`}
                                                                                     className="border border-blue-600 rounded-lg p-4 hover:shadow-md transition-shadow"
                                                                                 >
                                                                                     <p className="text-sm text-gray-500 mb-2">Unit {subUnit.display_name || subUnit.name}</p>
-
                                                                                     <div className="flex items-center text-sm text-gray-600 mb-1">
                                                                                         <FaBed className="mr-2 text-gray-400" />
                                                                                         {unit.bed} {unit.bed === 1 ? 'bed' : 'beds'}
@@ -313,6 +314,7 @@ const ApartmentListings = () => {
                                                                 </div>
                                                             ))}
                                                     </div>
+
                                                 </div>
                                             ) : (
                                                 <div className="mt-6 bg-yellow-50 p-4 rounded-md">

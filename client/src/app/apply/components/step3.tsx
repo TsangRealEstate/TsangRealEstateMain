@@ -10,6 +10,7 @@ const schema = yup.object().shape({
     instagram: yup.string().required("Instagram value is not valid"),
     leaseEndDate: yup.string().required("Select lease end date"),
     leaseStartDate: yup.string().required("Select lease start date"),
+    AvailabilityDate: yup.string().required("Select availability date"),
     propertyOwnerName: yup.string().required("property owner name is not valid"),
     bedrooms: yup.string().required("bedrooms is not valid"),
     bathrooms: yup.string().required("bathrooms is not valid"),
@@ -47,6 +48,14 @@ const formFields = {
         inputContainerClass,
         registerOptions: { required: true },
     },
+
+    timeForCall: {
+        name: "timeForCall",
+        labelText: 'What time of the day can our agent call you to discuss your application? (Our opening hours are 9AM–9PM, Monday to Sunday)',
+        inputContainerClass,
+        registerOptions: { required: true },
+    },
+
     bedrooms: {
         name: "bedrooms",
         labelText: "How many bedrooms is your household looking for?",
@@ -372,6 +381,48 @@ export function StepThree({ callBack, goBack }: stepProps) {
                         <OptionInput
                             formState={formState}
                             field={formFields.nonNegotiables}
+                        />
+
+                        {/* AvailabilityDate */}
+                        <div className="mt-4">
+                            <label
+                                htmlFor="AvailabilityDate"
+                                className="text-sm font-semibold leading-6 text-gray-900"
+                            >
+                                When can our agent call you to discuss your application?
+                            </label>
+                            <div className={inputContainerClass}>
+                                <Controller
+                                    control={control}
+                                    name="AvailabilityDate"
+                                    rules={{ required: true }}
+                                    render={({ field, fieldState: { invalid, error } }) => {
+                                        // Convert Date object to YYYY-MM-DD format for input
+                                        const value = field.value ? new Date(field.value).toISOString().split('T')[0] : '';
+
+                                        return (
+                                            <input
+                                                type="date"
+                                                id="AvailabilityDate"
+                                                min={new Date().toISOString().split('T')[0]} // Set min date to today
+                                                className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
+                                                    }`}
+                                                value={value}
+                                                onChange={(e) => {
+                                                    // Convert back to Date object when value changes
+                                                    field.onChange(e.target.value ? new Date(e.target.value) : null);
+                                                }}
+                                            />
+                                        );
+                                    }}
+                                />
+                            </div>
+                        </div>
+
+                        {/* timeForCall  */}
+                        <TextInput
+                            formState={formState}
+                            field={formFields.timeForCall}
                         />
 
                         <div className="mt-4">

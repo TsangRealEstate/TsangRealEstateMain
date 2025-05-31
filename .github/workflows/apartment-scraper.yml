@@ -2,11 +2,14 @@ name: Run Apartment Scraper
 
 on:
   schedule:
-    - cron: "0 */6 * * *"  # Runs every 6 hours
-  workflow_dispatch:  # Allows manual triggering
+    - cron: "0 14 * * *" # 8AM CST (which is 14:00 UTC)
+    - cron: "0 18 * * *" # 12PM CST (which is 18:00 UTC)
+    - cron: "0 0 * * *"  # 6PM CST (which is 00:00 UTC next day)
+  workflow_dispatch:
   push:
     branches:
       - p2
+      - main
 
 jobs:
   scrape:
@@ -21,11 +24,15 @@ jobs:
         with:
           node-version: "20"
           cache: "npm"
+          cache-dependency-path: ./server/package-lock.json
 
       - name: Install dependencies
+        working-directory: ./server
         run: npm ci
 
       - name: Run Scraper
+        working-directory: ./server
         run: npm run scrape:newapartments
         env:
           NODE_ENV: production
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}

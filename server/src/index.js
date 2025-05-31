@@ -14,6 +14,7 @@ const listingRoutes = require("./routes/listingRoutes");
 const scrapeListRoutes = require("./routes/scrapeListRoutes");
 const savedUnitRoutes = require("./routes/savedUnitRoutes");
 const propertiesVideoRoutes = require("./routes/propertiesVideo");
+const commentRoutes = require("./routes/commentRoutes");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -23,6 +24,7 @@ app.use(
     origin: ["http://localhost:3000", "https://tsangv1.netlify.app"],
   })
 );
+
 app.use(express.json());
 
 // Routes
@@ -34,6 +36,7 @@ app.use("/api/v1/listings", listingRoutes);
 app.use("/api/v1/scrape-list", scrapeListRoutes);
 app.use("/api/v1/saved-units", savedUnitRoutes);
 app.use("/api/v1/properties", propertiesVideoRoutes);
+app.use("/api/v1/comments", commentRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "Welcome. Server is up and running!" });

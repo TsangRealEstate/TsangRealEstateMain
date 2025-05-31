@@ -6,10 +6,13 @@ import {
     FaCalendarAlt, FaExternalLinkAlt,
     FaVideo,
     FaPlay,
-    FaVideoSlash
+    FaVideoSlash,
+    FaMap
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { IoMdClose } from 'react-icons/io';
+import { CiLocationOn } from 'react-icons/ci';
+import { MapRedirectLink } from './components/MapRedirectLink';
 
 interface SavedUnit {
     unitId: string;
@@ -208,7 +211,7 @@ export default function TenantListingsPage() {
                                                 </h2>
                                             </div>
 
-                                            <div className='flex items-center'>
+                                            <div className='flex items-center flex-wrap gap-4'>
                                                 {group.units.some(unit =>
                                                     videos.some(video => video.videounitid === unit.videoId)
                                                 ) ? (
@@ -243,12 +246,22 @@ export default function TenantListingsPage() {
                                                     rel="noopener noreferrer">
                                                     <button
                                                         type="button"
-                                                        className="inline-flex mt-6 lg:mt-0 items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                                                     >
                                                         View Details
                                                         <FaExternalLinkAlt className="ml-2 h-4 w-4" />
                                                     </button>
                                                 </Link>
+
+                                                <MapRedirectLink address={`${group.propertyArea}, San Antonio, TX`}>
+                                                    <button
+                                                        type="button"
+                                                        className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                    >
+                                                        View on Google Maps
+                                                        <CiLocationOn className="ml-2 h-4 w-4" />
+                                                    </button>
+                                                </MapRedirectLink>
                                             </div>
                                         </div>
 
@@ -316,7 +329,7 @@ export default function TenantListingsPage() {
 
             {isModalOpen && activeVideoUrl && (
                 <div className="fixed inset-0 bg-black/65 bg-opacity-60 flex items-center justify-center z-50 lg:px-0 px-4">
-                    <div className="bg-white rounded-lg shadow-lg p-2 w-full max-w-2xl relative">
+                    <div className="bg-white rounded-lg shadow-lg p-2 max-w-2xl relative">
                         <button
                             className="absolute -top-10 right-6.5 lg:-right-10 text-gray-500 bg-white rounded-4xl hover:text-gray-700"
                             onClick={closeModal}
@@ -328,7 +341,7 @@ export default function TenantListingsPage() {
                                 src={activeVideoUrl}
                                 controls
                                 autoPlay
-                                className="size-full rounded object-cover"
+                                className="size-full rounded"
                             />
                         </div>
                     </div>

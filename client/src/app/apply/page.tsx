@@ -22,7 +22,21 @@ export default function Apply() {
 
             const response = await axiosInstance.post('/tenants', payload);
 
-            alert(`${response.data.message} ${email}`);
+            const successMessage = `
+            ✅ Success! 
+            ${response.data.message}
+            
+            ${email !== "default@example.com"
+                    ? "We've sent a confirmation email to " + email
+                    : "No email sent (default account used)"}
+            
+            Next steps:
+            - Our team will review your application
+            - You'll receive property matches within 24-48 hours
+            - Check your spam folder if you don't see our email
+        `;
+
+            alert(successMessage.replace(/\s+/g, ' ').trim())
 
             setSetp(4);
         } catch (error: any) {

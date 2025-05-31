@@ -16,6 +16,10 @@ const transporter = nodemailer.createTransport({
 
 const templatePath = path.join(__dirname, "../../views/meeting-invite.hbs");
 const unitsTemplatePath = path.join(__dirname, "../../views/units-email.hbs");
+const submissionTemplatePath = path.join(
+  __dirname,
+  "../../views/submission-notification.hbs"
+);
 
 const renderTemplate = (template, data) => {
   const compiledTemplate = hbs.handlebars.compile(template);
@@ -128,4 +132,100 @@ const sendUnitsToTenant = async (tenantId) => {
   }
 };
 
-module.exports = { sendMeetingInvite, sendUnitsToTenant };
+const sendSubmissionNotification = async (tenantId) => {
+  try {
+    const tenant = await Tenant.findById(tenantId).lean();
+    if (!tenant) {
+      throw new Error("Tenant record not found in database");
+    }
+
+    const userEmail = tenant.email;
+    if (!userEmail || userEmail === "default@example.com") {
+      return {
+        success: false,
+        reason: "Invalid or default email address",
+      };
+    }
+
+    const template = await fs.promises.readFile(submissionTemplatePath, "utf8");
+
+    // Helper functions
+    const formatDate = (dateString) => {
+      if (!dateString) return "Not specified";
+      try {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+        });
+      } catch (e) {
+        console.error("Date formatting error:", e);
+        return dateString;
+      }
+    };
+
+    const capitalize = (str) => {
+      if (!str) return "";
+      return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+    };
+
+    // Prepare template data
+    const templateData = {
+      ...tenant,
+      submittedAt: formatDate(new Date()),
+      preferences: {
+        searchType: capitalize(tenant.searchType),
+        budget: tenant.budget ? `$${tenant.budget}` : "Not specified",
+        bedrooms: tenant.bedrooms || "Not specified",
+        bathrooms: tenant.bathrooms || "Not specified",
+        desiredLocation: tenant.desiredLocation || [],
+        grossIncome: tenant.grossIncome
+          ? `$${tenant.grossIncome}`
+          : "Not specified",
+        creditScore: tenant.creditScore || "Not specified",
+        OtherOnLease: capitalize(tenant.OtherOnLease),
+        othersOnLeasevalue: tenant.othersOnLeasevalue || "Not applicable",
+        brokenLease: tenant.brokenLease || [],
+        AvailabilityDate: formatDate(tenant.AvailabilityDate),
+        leaseStartDate: formatDate(tenant.leaseStartDate),
+        leaseEndDate: formatDate(tenant.leaseEndDate),
+        timeForCall: tenant.timeForCall || "Not specified",
+        nonNegotiables: tenant.nonNegotiables || [],
+        propertyOwnerName: tenant.propertyOwnerName || "Not specified",
+      },
+      formatDate,
+      capitalize,
+    };
+
+    // Render and send email
+    const html = renderTemplate(template, templateData);
+
+    const mailOptions = {
+      from: `"Property Match Team" <${process.env.EMAIL_USER}>`,
+      to: userEmail,
+      subject: "✅ Your Application Has Been Received - Next Steps",
+      html,
+      headers: {
+        "X-Priority": "1",
+        "X-MSMail-Priority": "High",
+      },
+    };
+
+    await transporter.sendMail(mailOptions);
+    return { success: true };
+  } catch (error) {
+    console.error("Notification processing failed:", error);
+    return {
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString(),
+    };
+  }
+};
+
+module.exports = {
+  sendMeetingInvite,
+  sendUnitsToTenant,
+  sendSubmissionNotification,
+};
