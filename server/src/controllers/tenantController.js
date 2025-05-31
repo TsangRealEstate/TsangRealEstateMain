@@ -1,5 +1,5 @@
 const Tenant = require("../models/Tenant");
-const { sendMeetingInvite } = require("./meetingController");
+const { sendSubmissionNotification } = require("./meetingController");
 const TenantSearchResult = require("../models/TenantSearchResult");
 
 // ✅ Create a Tenant
@@ -9,31 +9,55 @@ const createOrUpdateTenant = async (req, res) => {
     const { email } = tenantData;
 
     if (!email && tenantData.email !== "default@example.com") {
-      return res.status(400).json({ error: "Email is required." });
-    }
-
-    let tenant;
-    let message;
-
-    tenant = new Tenant(tenantData);
-    await tenant.save();
-    message = "Tenant created successfully!";
-
-    let inviteResult = null;
-    if (email && email !== "default@example.com") {
-      inviteResult = await sendMeetingInvite(tenant._id);
-    }
-
-    return res.status(201).json({
-      message: message,
-      inviteSkipped: email === "default@example.com",
-      inviteResult: inviteResult || {
+      return res.status(400).json({
         success: false,
-        reason: "Default email used",
+        error: "Email is required for tenant creation.",
+      });
+    }
+
+    const tenant = new Tenant(tenantData);
+    await tenant.save();
+
+    const response = {
+      success: true,
+      message: "Tenant profile created successfully!",
+      tenantId: tenant._id,
+      inviteStatus: {
+        sent: false,
+        reason: "Default email used - notification skipped",
       },
-    });
+    };
+
+    if (email && email !== "default@example.com") {
+      try {
+        const notificationResult = await sendSubmissionNotification(tenant._id);
+        response.inviteStatus = {
+          sent: notificationResult.success,
+          message: notificationResult.success
+            ? "Notification email sent successfully"
+            : "Failed to send notification",
+          ...(!notificationResult.success && {
+            error: notificationResult.error,
+          }),
+        };
+      } catch (notificationError) {
+        console.error("Notification error:", notificationError);
+        response.inviteStatus = {
+          sent: false,
+          error: "Failed to send notification email",
+          details: notificationError.message,
+        };
+      }
+    }
+
+    return res.status(201).json(response);
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    console.error("Tenant creation error:", error);
+    res.status(400).json({
+      success: false,
+      error: "Failed to create tenant profile",
+      details: error.message,
+    });
   }
 };
 

@@ -510,7 +510,18 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                                             <div className="space-y-4">
                                                 {unit.units
                                                     .slice()
-                                                    .sort((a, b) => a.sqft - b.sqft)
+                                                    .sort((a, b) => {
+                                                        const sqftDiff = a.sqft - b.sqft;
+                                                        if (sqftDiff !== 0) return sqftDiff;
+
+                                                        const priceDiff = a.price - b.price;
+                                                        if (priceDiff !== 0) return priceDiff;
+
+                                                        const dateA = new Date(a.available_on);
+                                                        const dateB = new Date(b.available_on);
+                                                        return dateA.getTime() - dateB.getTime();
+                                                    })
+                                                    .sort((a, b) => new Date(a.available_on).getTime() - new Date(b.available_on).getTime())
                                                     .map((specificUnit) => (
                                                         <div key={specificUnit.id} className="border-b border-gray-100 pb-4 last:border-0 last:pb-0">
                                                             <div className="flex justify-between items-start">

@@ -25,6 +25,8 @@ const tenantSchema = new mongoose.Schema(
     instagram: { type: String },
     leaseEndDate: { type: String, required: true },
     leaseStartDate: { type: String, required: true },
+    timeForCall: { type: String, required: true },
+    AvailabilityDate: { type: String, required: true },
     nonNegotiables: { type: [String], default: [] },
     propertyOwnerName: { type: String, required: true },
   },

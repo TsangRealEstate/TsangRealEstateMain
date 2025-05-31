@@ -4,7 +4,7 @@ import axiosInstance from "@/api/axiosInstance";
 import LabelManager from "./LabelManager";
 import { AiOutlineEdit, AiOutlineMail, AiOutlinePhone, AiOutlineDollarCircle } from "react-icons/ai";
 import { BsCheckLg } from "react-icons/bs";
-import { FiSearch, FiHome, FiCalendar, FiMapPin, FiAlertCircle, FiXCircle } from "react-icons/fi";
+import { FiSearch, FiHome, FiCalendar, FiMapPin, FiAlertCircle, FiXCircle, FiClock } from "react-icons/fi";
 import DetailItem from "./DetailItem";
 import ActivityLog from "./ActivityLog";
 import ResultsModal from "@/app/listings/components/ResultsModal";
@@ -71,25 +71,30 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
         const isEditing = editField === field;
 
         if (field === 'nonNegotiables') {
-            const negotiablesString =
-                typeof tenant.nonNegotiables === 'string'
-                    ? tenant.nonNegotiables
-                    : Array.isArray(tenant.nonNegotiables)
-                        ? tenant.nonNegotiables.join(', ')
-                        : '';
-
-            const negotiableOptions = negotiablesString
-                .split(',')
-                .map((item: string) => item.trim())
-                .filter((item: any) => item);
+            const allNonNegotiableOptions = [
+                "1st floor",
+                "2nd floor",
+                "3rd floor or top floor",
+                "Washer/dryer connections",
+                "Washer/dryer included",
+                "Patio/Balcony",
+                "No carpet in living room",
+                "Yard",
+            ];
 
             const [currentSelected, setCurrentSelected] = useState<string[]>(() => {
                 const localItems = getLocalNonNegotiables(tenant._id);
                 if (localItems.length > 0) return localItems;
 
-                return typeof value === 'string'
-                    ? value.split(',').map(item => item.trim()).filter(item => item)
-                    : Array.isArray(value) ? value : [];
+                // Handle tenant.nonNegotiables whether it's string or array
+                if (typeof tenant.nonNegotiables === 'string') {
+                    return tenant.nonNegotiables.split(',')
+                        .map((item: string) => item.trim())
+                        .filter((item: any) => item);
+                } else if (Array.isArray(tenant.nonNegotiables)) {
+                    return tenant.nonNegotiables;
+                }
+                return [];
             });
 
             const handleSaveNonNegotiables = (selected: string[]) => {
@@ -133,8 +138,8 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     {showNonNegotiablesModal && (
                         <MultiSelectModal
                             title="Edit Non-Negotiables"
-                            items={negotiableOptions}
-                            selectedItems={currentSelected}
+                            items={allNonNegotiableOptions} // Show all available options
+                            selectedItems={currentSelected} // Current selections will be checked
                             onSave={handleSaveNonNegotiables}
                             onClose={() => setShowNonNegotiablesModal(false)}
                         />
@@ -144,28 +149,34 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
         }
 
         if (field === "desiredLocation") {
-            const locationString =
-                typeof tenant.desiredLocation === 'string'
-                    ? tenant.desiredLocation
-                    : Array.isArray(tenant.desiredLocation)
-                        ? tenant.desiredLocation.join(', ')
-                        : '';
-
-            const locationOptions = locationString
-                .split(',')
-                .map((item: string) => item.trim())
-                .filter((item: any) => item);
+            const allLocationOptions = [
+                "Dominion/Rim/La Cantera/UTSA",
+                "Boerne",
+                "Stone Oak",
+                "North Central/Castle Hills",
+                "Medical Center",
+                "Alamo Ranch/Westover Hills",
+                "Downtown",
+                "Alamo Heights",
+                "Thousand Oaks/Far Northeast/Live Oak/Schertz/Converse",
+                "Southeast/South Central/Brooks City Base",
+                "New Braunfels",
+            ];
 
             const [currentLocations, setCurrentLocations] = useState<string[]>(() => {
                 const local = getLocalDesiredLocations(tenant._id);
                 if (local.length > 0) return local;
 
-                return typeof value === 'string'
-                    ? value.split(',').map(i => i.trim()).filter(Boolean)
-                    : Array.isArray(value)
-                        ? value
-                        : [];
+                if (typeof tenant.desiredLocation === 'string') {
+                    return tenant.desiredLocation.split(',')
+                        .map((i: string) => i.trim())
+                        .filter(Boolean);
+                } else if (Array.isArray(tenant.desiredLocation)) {
+                    return tenant.desiredLocation;
+                }
+                return [];
             });
+
             const [showLocationModal, setShowLocationModal] = useState(false);
 
             const handleSaveLocations = (selected: string[]) => {
@@ -176,10 +187,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
 
             return (
                 <>
-                    <div
-                        className="relative group cursor-pointer"
-                        onClick={() => setShowLocationModal(true)}
-                    >
+                    <div className="relative group cursor-pointer" onClick={() => setShowLocationModal(true)}>
                         <DetailItem
                             label="Desired Location"
                             value={
@@ -209,7 +217,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     {showLocationModal && (
                         <MultiSelectModal
                             title="Edit Desired Locations"
-                            items={locationOptions}
+                            items={allLocationOptions}
                             selectedItems={currentLocations}
                             onSave={handleSaveLocations}
                             onClose={() => setShowLocationModal(false)}
@@ -608,8 +616,10 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                             : <FaTimes className="text-red-500" />
                     )}
                     {renderDetailItem("Other-OnLease Value", "othersOnLeasevalue",
-                        tenant.othersOnLeasevalue, <FaUsers className="text-blue-500"
-                    />)}
+                        tenant.othersOnLeasevalue, <FaUsers className="text-blue-500" />
+                    )}
+                    {renderDetailItem("Availability-Date", "AvailabilityDate", formatDate(tenant.AvailabilityDate), <FiCalendar className="text-blue-500" />)}
+                    {renderDetailItem("Time-For-Call", "timeForCall", tenant.timeForCall, <FiClock className="text-blue-500" />)}
                 </div>
 
                 <LabelManager cardId={tenant._id} />

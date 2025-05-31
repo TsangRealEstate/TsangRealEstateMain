@@ -526,7 +526,7 @@ export default function FilterComp() {
 
                                         {/* Units Modal */}
                                         {isUnitsModalOpen && (
-                                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75">
+                                            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/15">
                                                 <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
                                                     {/* Modal Header */}
                                                     <div className="flex justify-between items-center border-b border-gray-200 p-4">
