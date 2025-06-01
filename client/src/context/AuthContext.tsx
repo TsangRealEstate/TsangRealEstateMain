@@ -1,6 +1,6 @@
 "use client"
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { AuthContextType, Column, Listing } from "@/types/sharedTypes";
+import { AuthContextType, Column, Listing, ZipCode } from "@/types/sharedTypes";
 import axiosInstance from "@/api/axiosInstance";
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
@@ -13,6 +13,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     const [tenants, setTenants] = useState<any[]>([]);
     const [columns, setColumns] = useState<Column[]>([]);
     const [listings, setListings] = useState<Listing[]>([]);
+    const [zipCodes, setZipCodes] = useState<ZipCode[]>([]);
+
     const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
 
     type Card = {
@@ -27,6 +29,18 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
         newCard: string;
     };
 
+    const fetchZipCodes = async () => {
+        try {
+            setLoading(true);
+            const response = await axiosInstance.get('/scrape-list/zip-codes');
+            setZipCodes(response.data.data)
+        } catch (error) {
+            console.error('Error fetching zip codes:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const fetchTenants = async (adminPassword: string) => {
         setLoading(true);
@@ -115,6 +129,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     useEffect(() => {
         if (localStorage.getItem("authenticated") === "true") {
             fetchListings()
+            fetchZipCodes()
         }
     }, [])
 
@@ -138,7 +153,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
                 listings,
                 neighborhoods,
                 setListings,
-                setLoading
+                setLoading,
+                zipCodes
             }}
         >
             {children}

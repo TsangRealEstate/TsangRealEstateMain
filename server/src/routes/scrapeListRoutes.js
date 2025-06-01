@@ -96,6 +96,34 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET endpoint to list all property Zip-codes
+router.get("/zip-codes", async (req, res) => {
+  try {
+    const entries = await ScrapeListModel.find({})
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const simplifiedEntries = entries.map((entry) => ({
+      PropertyId: entry._id,
+      PropertyZip: entry.Information?.zip || null,
+      PropertyDisplayName: entry.Information?.display_name || null,
+      PropertyNeighborhood: entry.Information?.neighborhood || null,
+    }));
+
+    res.json({
+      count: simplifiedEntries.length,
+      data: simplifiedEntries,
+    });
+  } catch (error) {
+    console.error("Error fetching zip-codes list:", error);
+    res.status(500).json({
+      error: "Failed to zip-codes",
+      details:
+        process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
+});
+
 // GET endpoint with filtering capabilities
 router.get("/filter", async (req, res) => {
   try {

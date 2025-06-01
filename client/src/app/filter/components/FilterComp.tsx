@@ -7,6 +7,7 @@ import { AiOutlineArrowLeft } from 'react-icons/ai';
 import FloorPlanGallery from './FloorPlanGallery';
 import axiosInstance from '@/api/axiosInstance';
 import { formatAvailabilityDate } from '@/utils/dateUtils';
+import ZipCodesModal from './ZipCodesModal';
 interface Photo {
     type: string;
     id: string;
@@ -78,7 +79,7 @@ interface PropertyData {
 }
 
 export default function FilterComp() {
-    const { neighborhoods } = useAuth();
+    const { neighborhoods, zipCodes } = useAuth();
     const [filters, setFilters] = useState({
         area: [] as string[],
         minPrice: '',
@@ -93,6 +94,7 @@ export default function FilterComp() {
     const [error, setError] = useState('');
     const [results, setResults] = useState<PropertyData | null>(null);
     const [isUnitsModalOpen, setIsUnitsModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
     const handleAreaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const options = Array.from(e.target.selectedOptions, option => option.value);
@@ -189,16 +191,30 @@ export default function FilterComp() {
     const getPhotoUrl = (propertyId: string) => {
         return `https://cdn.apartmentlist.com/image/upload/c_fill,dpr_auto,f_auto,g_center,h_415,q_auto,w_640/${propertyId}.jpg`;
     };
+
     const router = useRouter();
+
+    const toggleModal = () => {
+        setIsModalOpen(!isModalOpen);
+    };
+
     return (
         <div className="p-6 bg-white my-6">
             <div className='lg:w-[50%] mx-auto'>
                 <button
                     onClick={() => router.back()}
-                    className="mb-10 flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-100 transition"
+                    className="flex items-center justify-center gap-2 py-2 px-4 border border-gray-300 rounded-md hover:bg-gray-100 transition"
                 >
                     <AiOutlineArrowLeft />
                     Go Back
+                </button>
+
+                <button
+                    onClick={toggleModal}
+                    disabled={zipCodes.length === 0}
+                    className={`px-4 py-2 my-10 rounded ${zipCodes.length === 0 ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}
+                >
+                    Zip Codes ({zipCodes.length})
                 </button>
             </div>
 
@@ -642,6 +658,13 @@ export default function FilterComp() {
 
 
                 )}
+
+                <ZipCodesModal
+                    isOpen={isModalOpen}
+                    onClose={toggleModal}
+                    zipCodes={zipCodes}
+                />
+
             </section>
 
             {error && (
