@@ -14,6 +14,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     const [columns, setColumns] = useState<Column[]>([]);
     const [listings, setListings] = useState<Listing[]>([]);
     const [zipCodes, setZipCodes] = useState<ZipCode[]>([]);
+    const [tenantName, setTenantName] = useState<string | null>(null);
+    const [searchedResults, setSearchedResults] = useState({});
 
     const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
 
@@ -76,6 +78,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
                         content: `${tenant.firstName || "No Firstname"} ${tenant.lastName || "No Lastname"}`,
                     };
 
+                    setTenantName(
+                        `${tenant.firstName || ""} ${tenant.lastName || ""}`.trim()
+                    );
+
                     const lastPosition = cardPositions[tenant._id];
                     const targetColumn = initialColumns.find(col =>
                         lastPosition ? col.title === lastPosition : col.id === "initial-leads"
@@ -126,6 +132,21 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
         }
     };
 
+    const fetchSearchedResults = async (tenantName: string) => {
+        try {
+            const response = await axiosInstance.get(
+                `/tenants/search-results/${encodeURIComponent(tenantName ?? '')}`
+            );
+
+            const data = response.data;
+            setSearchedResults({ count: data.count });
+        } catch (error) {
+            console.error('Fetch error:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (localStorage.getItem("authenticated") === "true") {
             fetchListings()
@@ -154,7 +175,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
                 neighborhoods,
                 setListings,
                 setLoading,
-                zipCodes
+                zipCodes,
+                searchedResults, fetchSearchedResults,
             }}
         >
             {children}

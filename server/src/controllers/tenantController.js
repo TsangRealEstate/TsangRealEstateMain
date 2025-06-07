@@ -171,8 +171,8 @@ const getSearchResultsByTenantName = async (req, res) => {
 
     if (!result) {
       return res
-        .status(404)
-        .json({ message: "No results found for this tenant" });
+        .status(200)
+        .json({ count: 0, message: "No results found for this tenant" });
     }
 
     res.status(200).json({

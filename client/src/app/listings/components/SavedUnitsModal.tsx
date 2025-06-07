@@ -174,7 +174,7 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
                                                         <h3 className="text-lg font-semibold text-gray-800 line-clamp-1">
                                                             {unit.propertyName}
                                                         </h3>
-                                                        <p className="text-gray-600 text-sm mt-1 line-clamp-1">{unit.unitName}</p>
+                                                        <p className="text-gray-600 text-sm mt-1 line-clamp-1">Unit Number: {unit.unitName}</p>
 
                                                         <div className="mt-4 grid grid-cols-2 gap-3">
                                                             <div className="flex items-center">
@@ -224,7 +224,7 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 flex justify-between border-t border-gray-200 bg-gray-50 rounded-b-xl">
+                <div className="p-4 flex justify-center border-t border-gray-200 bg-gray-50 rounded-b-xl">
                     {
                         Object.keys(groupedUnits).length > 0 && (
                             <button
@@ -237,12 +237,6 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
                         )
                     }
 
-                    <button
-                        onClick={onClose}
-                        className="w-full lg:w-[30%] py-2 px-4 bg-red-600 mx-3 hover:bg-red-700 text-white font-medium rounded-lg transition-colors"
-                    >
-                        Close
-                    </button>
                 </div>
             </div>
         </div>

@@ -40,7 +40,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
     const [editedValue, setEditedValue] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const { setTenants, setColumns } = useAuth();
+    const { setTenants, setColumns, searchedResults, fetchSearchedResults } = useAuth();
     const [movements, setMovements] = useState<Movement[]>([]);
     if (!tenant) return null;
 
@@ -627,6 +627,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
     useEffect(() => {
         if (tenant?._id) {
             fetchMovements();
+            fetchSearchedResults(`${tenant.firstName || ""} ${tenant.lastName || ""}`);
         }
     }, [tenant]);
 
@@ -678,7 +679,6 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         </div>
                     </span>
 
-
                     <div className="mt-6 lg:mt-0 flex flex-wrap gap-2 items-center main-cta-btns">
                         <button
                             onClick={handleApplyFilters}
@@ -688,20 +688,17 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                             {loading ? 'Searching...' : 'Search'}
                         </button>
 
-                        <Link href={`/listings/Tenant/${encodeURIComponent(`${tenant.firstName} ${tenant.lastName}`.trim() || '')}`} target="_blank">
-                            <button
-                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                        {searchedResults.count > 0 && (
+                            <Link
+                                href={`/listings/Tenant/${encodeURIComponent(`${tenant.firstName || ""} ${tenant.lastName || ""}`.trim())}`}
+                                target="_blank"
                             >
-                                Searched Units
-                            </button>
-                        </Link>
+                                <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                                    Searched Units
+                                </button>
+                            </Link>
+                        )}
 
-                        <button
-                            onClick={onClose}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
-                        >
-                            X
-                        </button>
 
                         <button
                             onClick={() => handleSendInvite()}
@@ -709,6 +706,13 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                             className="inline-block rounded-md bg-blue-600 px-5 py-2.5 font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
                             {loading ? 'Sending...' : 'Send Meeting Invite'}
+                        </button>
+
+                        <button
+                            onClick={onClose}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                        >
+                            X
                         </button>
 
                         <button
@@ -747,7 +751,6 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         formatDate(tenant.leaseEndDate),
                         <FiCalendar className="text-blue-500" />
                     )}
-
                     {renderDetailItem(
                         "Desired Location",
                         "desiredLocation",
@@ -767,7 +770,6 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         <FiXCircle className="text-blue-500" />
                     )}
                     {renderDetailItem("Gross Income", "grossIncome", tenant.grossIncome, <AiOutlineDollarCircle className="text-blue-500" />)}
-
                     {renderDetailItem(
                         "Other-OnLease",
                         "OtherOnLease",
@@ -776,7 +778,6 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                             ? <FaCheck className="text-green-500" />
                             : <FaTimes className="text-red-500" />
                     )}
-
                     {renderDetailItem("Availability-Date", "AvailabilityDate", formatDate(tenant.AvailabilityDate), <FiCalendar className="text-blue-500" />)}
                     {renderDetailItem("Time-For-Call", "timeForCall", tenant.timeForCall, <FiClock className="text-blue-500" />)}
                 </div>

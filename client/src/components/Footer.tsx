@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { FiChevronRight, FiMapPin, FiMail, FiPhone } from "react-icons/fi";
-import { FaInstagram, FaFacebook, FaLinkedin, FaTwitter } from "react-icons/fa";
+import { FaInstagram, FaFacebook, FaLinkedin, FaTwitter, FaTiktok } from "react-icons/fa";
 
 const quickLinks = [
     { title: "Home", url: "/" },
@@ -11,8 +11,6 @@ const quickLinks = [
 
 const servicesLink = [
     { title: "Rent", url: "#" },
-    { title: "Buy", url: "#" },
-    { title: "Sell", url: "#" },
     { title: "Tour", url: "#" },
     { title: "Submit request", url: "#" },
 ];
@@ -20,8 +18,7 @@ const servicesLink = [
 const socialLinks = [
     { icon: "instagram", url: "https://www.instagram.com" },
     { icon: "facebook", url: "https://www.facebook.com" },
-    { icon: "linkedin", url: "https://www.linkedin.com" },
-    { icon: "twitter", url: "https://twitter.com" },
+    { icon: "TikTok ", url: "https://twitter.com" },
 ];
 
 export function Footer() {
@@ -50,13 +47,13 @@ export function Footer() {
                                             Tsang
                                         </span>
                                     </Link>
-                                    <p className="mt-6 text-gray-300 text-center md:text-left">
+                                    <p className="mt-6 text-gray-300 text-center md:text-left hidden">
                                         Lorem Ipsum is simply dummy text of the printing and
                                         typesetting industry. Lorem Ipsum has been the
                                         industry&apos;s standard dummy text ever since the 1500s
                                     </p>
 
-                                    <ul className="flex mt-4">
+                                    <ul className="flex mt-6">
                                         {socialLinks.map((socialLink, index) => (
                                             <li key={index} className="mr-4">
                                                 <a
@@ -71,11 +68,8 @@ export function Footer() {
                                                     {socialLink.icon === "facebook" && (
                                                         <FaFacebook className="w-5 h-5" />
                                                     )}
-                                                    {socialLink.icon === "linkedin" && (
-                                                        <FaLinkedin className="w-5 h-5" />
-                                                    )}
-                                                    {socialLink.icon === "twitter" && (
-                                                        <FaTwitter className="w-5 h-5" />
+                                                    {socialLink.icon === "TikTok " && (
+                                                        <FaTiktok className="w-5 h-5" />
                                                     )}
                                                 </a>
                                             </li>

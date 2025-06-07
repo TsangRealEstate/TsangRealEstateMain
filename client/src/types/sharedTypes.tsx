@@ -45,6 +45,8 @@ export interface DetailItemProps {
 }
 export interface AuthContextType {
   zipCodes: ZipCode[];
+  searchedResults: Record<string, any>;
+  fetchSearchedResults: (searchTerm: string) => Promise<void>;
   authenticated: boolean;
   fetchListings: () => Promise<void>;
   setAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
