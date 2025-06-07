@@ -302,6 +302,66 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             );
         }
 
+        if (field === "leaseStartDate" || field === "leaseEndDate") {
+            let dateValue = "";
+            if (value) {
+                const parsedDate = new Date(value);
+                if (!isNaN(parsedDate.getTime())) {
+                    dateValue = parsedDate.toISOString().slice(0, 10);
+                }
+            }
+
+            return (
+                <div
+                    className="relative group cursor-pointer"
+                    onClick={() => {
+                        if (!isEditing) handleEditClick(field, dateValue);
+                    }}
+                >
+                    <DetailItem
+                        label={label}
+                        value={
+                            isEditing ? (
+                                <input
+                                    type="date"
+                                    className="border border-gray-300 rounded px-2 py-1 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    value={editedValue || dateValue}
+                                    onChange={(e) => setEditedValue(e.target.value)}
+                                    onClick={(e) => e.stopPropagation()}
+                                    autoFocus
+                                />
+                            ) : (
+                                <div className="flex items-center space-x-2 text-blue-600">
+
+                                    <span>{formatDate(value)}</span>
+                                </div>
+                            )
+                        }
+                        icon={icon}
+                    />
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+                        {!isEditing ? (
+                            <AiOutlineEdit
+                                size={22}
+                                className="text-gray-400 group-hover:text-blue-600 transition-colors opacity-0 group-hover:opacity-100"
+                            />
+                        ) : (
+                            <button
+                                className="text-green-600 hover:text-green-800 transition-colors"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSave();
+                                }}
+                            >
+                                <BsCheckLg size={26} />
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+
         return (
             <div
                 className="relative group cursor-pointer"
