@@ -138,6 +138,8 @@ export default function Agent() {
                     instagram: "",
                     leaseEndDate: tomorrow.toISOString().split('T')[0],
                     leaseStartDate: today.toISOString().split('T')[0],
+                    AvailabilityDate: tomorrow.toISOString().split('T')[0],
+                    timeForCall: "Anytime",
                     nonNegotiables: [],
                     propertyOwnerName: "John Smith"
                 };

@@ -62,6 +62,23 @@ const updateCardLabels = async (req, res) => {
         .json({ message: "cardId and labelId are required" });
     }
 
+    // First check if we're updating the main label properties
+    if (req.body.name || req.body.color) {
+      // Update the main label document
+      const updatedLabel = await Label.findByIdAndUpdate(
+        labelId,
+        { name: req.body.name, color: req.body.color },
+        { new: true }
+      );
+
+      // Then update all card labels that reference this label
+      await CardLabel.updateMany(
+        { labelId },
+        { $unset: { customName: 1 } } // Remove custom names since we're updating globally
+      );
+    }
+
+    // Handle the card-specific update
     const update = await CardLabel.findOneAndUpdate(
       { cardId, labelId },
       { isActive, customName },
@@ -71,6 +88,32 @@ const updateCardLabels = async (req, res) => {
     res.status(200).json(update);
   } catch (error) {
     console.error("Error updating card labels:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Update a label globally
+const updateLabel = async (req, res) => {
+  try {
+    const { labelId } = req.params;
+    const { name, color } = req.body;
+
+    if (!name && !color) {
+      return res.status(400).json({ message: "Name or color is required" });
+    }
+
+    const updatedLabel = await Label.findByIdAndUpdate(
+      labelId,
+      { name, color },
+      { new: true }
+    );
+
+    // Remove all custom names for this label
+    await CardLabel.updateMany({ labelId }, { $unset: { customName: 1 } });
+
+    res.status(200).json(updatedLabel);
+  } catch (error) {
+    console.error("Error updating label:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -136,4 +179,5 @@ module.exports = {
   updateCardLabels,
   deleteLabel,
   getAllCardLabels,
+  updateLabel,
 };

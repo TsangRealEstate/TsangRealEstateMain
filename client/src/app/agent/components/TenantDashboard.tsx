@@ -548,7 +548,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                             onClick={onClose}
                             className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                         >
-                            Close
+                            X
                         </button>
 
                         <button
@@ -569,6 +569,14 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 renderDetails">
+                    {tenant.OtherOnLease === "yes" &&
+                        renderDetailItem(
+                            "Other-OnLease Value",
+                            "othersOnLeasevalue",
+                            tenant.othersOnLeasevalue,
+                            <FaUsers className="text-blue-500" />
+                        )
+                    }
                     {renderDetailItem("Email", "email", tenant.email, <AiOutlineMail className="text-blue-500" />)}
                     {renderDetailItem("Mobile", "mobileNumber", tenant.mobileNumber, <AiOutlinePhone className="text-blue-500" />)}
                     {renderDetailItem("Search Type", "searchType", tenant.searchType, <FiSearch className="text-blue-500" />)}
@@ -595,7 +603,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         <FiMapPin className="text-blue-500" />
                     )}
                     {renderDetailItem(
-                        "Broken Lease",
+                        "Issues",
                         "brokenLease",
                         Array.isArray(tenant.brokenLease) ? tenant.brokenLease.join(", ") : "None",
                         <FiAlertCircle className="text-blue-500" />
@@ -607,6 +615,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         <FiXCircle className="text-blue-500" />
                     )}
                     {renderDetailItem("Gross Income", "grossIncome", tenant.grossIncome, <AiOutlineDollarCircle className="text-blue-500" />)}
+
                     {renderDetailItem(
                         "Other-OnLease",
                         "OtherOnLease",
@@ -615,9 +624,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                             ? <FaCheck className="text-green-500" />
                             : <FaTimes className="text-red-500" />
                     )}
-                    {renderDetailItem("Other-OnLease Value", "othersOnLeasevalue",
-                        tenant.othersOnLeasevalue, <FaUsers className="text-blue-500" />
-                    )}
+
                     {renderDetailItem("Availability-Date", "AvailabilityDate", formatDate(tenant.AvailabilityDate), <FiCalendar className="text-blue-500" />)}
                     {renderDetailItem("Time-For-Call", "timeForCall", tenant.timeForCall, <FiClock className="text-blue-500" />)}
                 </div>
