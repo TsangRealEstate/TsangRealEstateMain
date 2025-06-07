@@ -4,13 +4,13 @@ import axiosInstance from "@/api/axiosInstance";
 import LabelManager from "./LabelManager";
 import { AiOutlineEdit, AiOutlineMail, AiOutlinePhone, AiOutlineDollarCircle } from "react-icons/ai";
 import { BsCheckLg } from "react-icons/bs";
-import { FiSearch, FiHome, FiCalendar, FiMapPin, FiAlertCircle, FiXCircle, FiClock } from "react-icons/fi";
+import { FiSearch, FiHome, FiCalendar, FiMapPin, FiAlertCircle, FiXCircle, FiClock, FiDollarSign } from "react-icons/fi";
 import DetailItem from "./DetailItem";
 import ActivityLog from "./ActivityLog";
 import ResultsModal from "@/app/listings/components/ResultsModal";
 import Link from "next/link";
 import { FaCheck, FaTimes, FaUsers } from "react-icons/fa";
-import { getLocalDesiredLocations, getLocalNonNegotiables, setLocalDesiredLocations, setLocalNonNegotiables } from "@/utils/localStorageUtils";
+import { getLocalBudget, getLocalDesiredLocations, getLocalNonNegotiables, setLocalBudget, setLocalDesiredLocations, setLocalNonNegotiables } from "@/utils/localStorageUtils";
 import MultiSelectModal from "./MultiSelectModal";
 import TenantComments from "./TenantComments";
 
@@ -227,6 +227,81 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             );
         }
 
+        if (field === "budget") {
+            const budgetOptions = (() => {
+                if (typeof tenant.budget === "string") {
+                    try {
+                        const parts = tenant.budget.replace(/\$/g, '').trim().split('-');
+                        if (parts.length === 2) {
+                            const min = parts[0].trim();
+                            const max = parts[1].trim();
+                            return [min, max];
+                        }
+                    } catch (err) {
+                        console.error("Error parsing budget:", err);
+                    }
+                }
+                return [];
+            })();
+
+
+            const [currentBudget, setCurrentBudget] = useState<string[]>(() => {
+                const local = getLocalBudget(tenant._id);
+                if (Array.isArray(local) && local.length > 0) return local;
+
+                return budgetOptions;
+            });
+
+
+            const [showBudgetModal, setShowBudgetModal] = useState(false);
+
+            const handleSaveBudget = (selected: string[]) => {
+                setLocalBudget(tenant._id, selected);
+                setCurrentBudget(selected);
+                setShowBudgetModal(false);
+            };
+
+            return (
+                <>
+                    <div
+                        className="relative group cursor-pointer"
+                        onClick={() => setShowBudgetModal(true)}
+                    >
+                        <DetailItem
+                            label="Budget"
+
+                            value={
+                                currentBudget.length === 2
+                                    ? `$${Math.min(Number(currentBudget[0]), Number(currentBudget[1]))} - $${Math.max(Number(currentBudget[0]), Number(currentBudget[1]))}`
+                                    : currentBudget.length === 1
+                                        ? `$${currentBudget[0]}`
+                                        : "N/A"
+                            }
+
+
+                            icon={<FiDollarSign className="text-blue-500" />}
+                        />
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+                            <AiOutlineEdit
+                                size={22}
+                                className="text-gray-400 group-hover:text-green-600 transition-colors opacity-0 group-hover:opacity-100"
+                            />
+                        </div>
+                    </div>
+
+                    {showBudgetModal && (
+                        <MultiSelectModal
+                            title="Edit Budget Range"
+                            items={budgetOptions}
+                            selectedItems={currentBudget}
+                            onSave={handleSaveBudget}
+                            onClose={() => setShowBudgetModal(false)}
+                        />
+                    )}
+                </>
+            );
+        }
+
         return (
             <div
                 className="relative group cursor-pointer"
@@ -303,23 +378,40 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             // Prepare query parameters
             const params = new URLSearchParams();
 
-            // Handle budget range (e.g., "$1400 - $1500") with cleaning
-            if (tenant.budget) {
-                const cleanedBudget = tenant.budget
+            //Budget handling
+            const localBudget = getLocalBudget(tenant._id);
+
+            let budgetString = "";
+            if (Array.isArray(localBudget)) {
+                if (localBudget.length === 2) {
+                    budgetString = `$${localBudget[0]} - $${localBudget[1]}`;
+                } else if (localBudget.length === 1) {
+                    budgetString = `$${localBudget[0]}`;
+                } else {
+                    budgetString = "";
+                }
+            } else if (typeof tenant.budget === "string") {
+                budgetString = tenant.budget;
+            }
+
+            if (budgetString && budgetString !== "N/A") {
+                const cleanedBudget = budgetString
                     .replace(/\$/g, '')
                     .replace(/,/g, '')
                     .trim();
 
-                const budgetRange = cleanedBudget.split('-')
-                    .map((part: string) => parseInt(part.trim(), 10))
-                    .filter((num: number) => !isNaN(num));
+                const budgetRange = cleanedBudget
+                    .split('-')
+                    .map(part => parseInt(part.trim(), 10))
+                    .filter(num => !isNaN(num));
 
                 if (budgetRange.length === 2) {
-                    params.append('minPrice', budgetRange[0].toString());
-                    params.append('maxPrice', budgetRange[1].toString());
+                    const minVal = Math.min(budgetRange[0], budgetRange[1]);
+                    const maxVal = Math.max(budgetRange[0], budgetRange[1]);
+                    params.append('minPrice', minVal.toString());
+                    params.append('maxPrice', maxVal.toString());
                 } else if (budgetRange.length === 1) {
                     params.append('minPrice', budgetRange[0].toString());
-                    params.append('maxPrice', budgetRange[0].toString());
                 }
             }
 
