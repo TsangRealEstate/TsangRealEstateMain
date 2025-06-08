@@ -64,8 +64,7 @@ const formFields = {
             { value: "1", label: "1" },
             { value: "2", label: "2" },
             { value: "3", label: "3" },
-            { value: "4", label: "4" },
-            { value: "5+", label: "5+" },
+            { value: "4+", label: "4+" },
         ],
     },
     bathrooms: {
@@ -76,8 +75,7 @@ const formFields = {
             { value: "1", label: "1" },
             { value: "2", label: "2" },
             { value: "3", label: "3" },
-            { value: "4", label: "4" },
-            { value: "5+", label: "5+" },
+            { value: "4+", label: "4+" },
         ],
     },
     desiredLocation: {
@@ -131,16 +129,16 @@ const formFields = {
             },
             { value: "$1400 - $1500", label: "$1400 - $1500" },
             {
-                value: "$1500 - $1600 (average pricing of two-bedrooms as of Jan 2023)",
-                label: "$1500 - $1600 (average pricing of two-bedrooms as of Jan 2023)",
+                value: "$1500 - $1600",
+                label: "$1500 - $1600",
             },
             { value: "$1600 - $1700", label: "$1600 - $1700" },
             { value: "$1700 - $1800", label: "$1700 - $1800" },
             {
                 value:
-                    "$1800 - $1900 (average pricing of three-bedrooms as of July 2023)",
+                    "$1800 - $1900",
                 label:
-                    "$1800 - $1900 (average pricing of three-bedrooms as of July 2023)",
+                    "$1800 - $1900",
             },
             { value: "$1900+", label: "$1900+" },
             { value: "inp1", label: "Other", input: true },
@@ -241,6 +239,8 @@ const formFields = {
 export function StepThree({ callBack, goBack }: stepProps) {
     const { loading } = useAuth()
     const [isConsentChecked, setIsConsentChecked] = useState(false);
+    const [noLease, setNoLease] = useState(false);
+
 
     const formState = useForm({
         mode: "onChange",
@@ -251,6 +251,7 @@ export function StepThree({ callBack, goBack }: stepProps) {
         formState: { errors, dirtyFields },
         handleSubmit,
         control,
+        setValue,
     } = formState;
 
 
@@ -321,30 +322,56 @@ export function StepThree({ callBack, goBack }: stepProps) {
                             >
                                 When does your current lease end?
                             </label>
-                            <div className={inputContainerClass}>
-                                <Controller
-                                    control={control}
-                                    name="leaseEndDate"
-                                    rules={{ required: true }}
-                                    render={({ field, fieldState: { invalid, error } }) => {
-                                        const value = field.value ? new Date(field.value).toISOString().split('T')[0] : '';
 
-                                        return (
-                                            <input
-                                                type="date"
-                                                id="leaseEndDate"
-                                                min={new Date().toISOString().split('T')[0]}
-                                                className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
-                                                    }`}
-                                                value={value}
-                                                onChange={(e) => {
-                                                    field.onChange(e.target.value ? new Date(e.target.value) : null);
-                                                }}
-                                            />
-                                        );
+                            {/* Checkbox to indicate no current lease */}
+                            <div className="flex items-center space-x-2 mt-2">
+                                <input
+                                    type="checkbox"
+                                    id="noLeaseCheckbox"
+                                    checked={noLease}
+                                    onChange={(e) => {
+                                        setNoLease(e.target.checked);
+                                        if (e.target.checked) {
+                                            setValue("leaseEndDate", "Not on a current lease");
+                                        }
                                     }}
                                 />
+                                <label htmlFor="noLeaseCheckbox" className="text-sm text-gray-700">
+                                    Not on a current lease
+                                </label>
                             </div>
+
+                            {/* Date input, only shown when not "noLease" */}
+                            {!noLease && (
+                                <div className={inputContainerClass}>
+                                    <Controller
+                                        control={control}
+                                        name="leaseEndDate"
+                                        rules={{ required: true }}
+                                        render={({ field, fieldState: { invalid, error } }) => {
+                                            const value = field.value
+                                                ? new Date(field.value).toISOString().split("T")[0]
+                                                : "";
+
+                                            return (
+                                                <input
+                                                    type="date"
+                                                    id="leaseEndDate"
+                                                    min={new Date().toISOString().split("T")[0]}
+                                                    className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
+                                                        }`}
+                                                    value={value}
+                                                    onChange={(e) => {
+                                                        field.onChange(
+                                                            e.target.value ? new Date(e.target.value) : null
+                                                        );
+                                                    }}
+                                                />
+                                            );
+                                        }}
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         {/* propertyOwnername  */}

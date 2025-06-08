@@ -18,7 +18,14 @@ const tenantSchema = new mongoose.Schema(
     bathrooms: { type: String, required: true },
     bedrooms: { type: String, required: true },
     brokenLease: { type: [String], default: [] },
-    budget: { type: String, required: true },
+    budget: {
+      type: String,
+      required: true,
+      set: function (val) {
+        const trimmed = val.trim();
+        return trimmed.includes("-") ? trimmed : `$0 - ${trimmed}`;
+      },
+    },
     creditScore: { type: String, required: true },
     desiredLocation: { type: [String], default: [] },
     grossIncome: { type: String, required: true },

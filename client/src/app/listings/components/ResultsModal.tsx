@@ -78,7 +78,7 @@ export default function ResultsModal({
                     <div className="mb-4">
                         <p className="font-semibold">Matching properties:</p>
                         <ul className="list-disc pl-5 mt-2">
-                            {results?.slice(0, 3).map((result, index) => (
+                            {results?.map((result, index) => (
                                 <li key={index}>{result.Information.display_name}</li>
                             ))}
                         </ul>
