@@ -176,7 +176,8 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
                 setListings,
                 setLoading,
                 zipCodes,
-                searchedResults, fetchSearchedResults,
+                searchedResults,
+                fetchSearchedResults,
             }}
         >
             {children}

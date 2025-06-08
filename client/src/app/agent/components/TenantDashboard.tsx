@@ -4,13 +4,13 @@ import axiosInstance from "@/api/axiosInstance";
 import LabelManager from "./LabelManager";
 import { AiOutlineEdit, AiOutlineMail, AiOutlinePhone, AiOutlineDollarCircle } from "react-icons/ai";
 import { BsCheckLg } from "react-icons/bs";
-import { FiSearch, FiHome, FiCalendar, FiMapPin, FiAlertCircle, FiXCircle, FiClock, FiDollarSign } from "react-icons/fi";
+import { FiSearch, FiHome, FiCalendar, FiMapPin, FiAlertCircle, FiXCircle, FiClock, FiDollarSign, FiAlertTriangle } from "react-icons/fi";
 import DetailItem from "./DetailItem";
 import ActivityLog from "./ActivityLog";
 import ResultsModal from "@/app/listings/components/ResultsModal";
 import Link from "next/link";
 import { FaCheck, FaTimes, FaUsers } from "react-icons/fa";
-import { getLocalBudget, getLocalDesiredLocations, getLocalNonNegotiables, setLocalBudget, setLocalDesiredLocations, setLocalNonNegotiables } from "@/utils/localStorageUtils";
+import { getLocalBrokenLease, getLocalBudget, getLocalDesiredLocations, getLocalNonNegotiables, setLocalBrokenLease, setLocalBudget, setLocalDesiredLocations, setLocalNonNegotiables } from "@/utils/localStorageUtils";
 import MultiSelectModal from "./MultiSelectModal";
 import TenantComments from "./TenantComments";
 
@@ -358,6 +358,79 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         )}
                     </div>
                 </div>
+            );
+        }
+
+        if (field === "brokenLease") {
+            const allBrokenLeaseOptions = [
+                "Broken lease/Owe money to a property",
+                "Owe a property money",
+                "Eviction",
+                "Felony",
+                "Misdemeanor"
+            ];
+
+            const [currentSelections, setCurrentSelections] = useState<string[]>(() => {
+                const local = getLocalBrokenLease(tenant._id);
+                if (local.length > 0) return local;
+
+                if (typeof tenant.brokenLease === 'string') {
+                    return tenant.brokenLease.split(',')
+                        .map((i: string) => i.trim())
+                        .filter(Boolean);
+                } else if (Array.isArray(tenant.brokenLease)) {
+                    return tenant.brokenLease;
+                }
+                return [];
+            });
+
+            const [showModal, setShowModal] = useState(false);
+
+            const handleSaveSelections = (selected: string[]) => {
+                setLocalBrokenLease(tenant._id, selected);
+                setCurrentSelections(selected);
+                setShowModal(false);
+            };
+
+            return (
+                <>
+                    <div className="relative group cursor-pointer" onClick={() => setShowModal(true)}>
+                        <DetailItem
+                            label="Broken Lease/History"
+                            value={
+                                <div className="flex flex-wrap gap-2 pr-10">
+                                    {currentSelections.length > 0
+                                        ? currentSelections.map((item, index) => (
+                                            <span
+                                                key={index}
+                                                className="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded"
+                                            >
+                                                {item}
+                                            </span>
+                                        ))
+                                        : "N/A"}
+                                </div>
+                            }
+                            icon={<FiAlertTriangle className="text-red-500" />}
+                        />
+                        <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
+                            <AiOutlineEdit
+                                size={22}
+                                className="text-gray-400 group-hover:text-green-600 transition-colors opacity-0 group-hover:opacity-100"
+                            />
+                        </div>
+                    </div>
+
+                    {showModal && (
+                        <MultiSelectModal
+                            title="Edit Broken Lease/History"
+                            items={allBrokenLeaseOptions}
+                            selectedItems={currentSelections}
+                            onSave={handleSaveSelections}
+                            onClose={() => setShowModal(false)}
+                        />
+                    )}
+                </>
             );
         }
 

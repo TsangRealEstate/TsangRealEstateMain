@@ -32,3 +32,12 @@ export const getLocalBudget = (tenantId: string): string[] => {
 export const setLocalBudget = (tenantId: string, items: string[]) => {
     localStorage.setItem(`budget_${tenantId}`, JSON.stringify(items));
 };
+
+export const getLocalBrokenLease = (tenantId: string): string[] => {
+    const saved = localStorage.getItem(`brokenLease_${tenantId}`);
+    return saved ? JSON.parse(saved) : [];
+};
+
+export const setLocalBrokenLease = (tenantId: string, items: string[]) => {
+    localStorage.setItem(`brokenLease_${tenantId}`, JSON.stringify(items));
+};
