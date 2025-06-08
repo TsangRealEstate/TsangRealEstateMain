@@ -13,7 +13,7 @@ const HowIsThisFreePage = () => {
                 <div className="relative text-center my">
                     <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
                         <span className="bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent">
-                            How Our Service Is Free
+                            How Our Apartment Locating <br /> Service is Free
                         </span>
                     </h1>
 
@@ -26,9 +26,8 @@ const HowIsThisFreePage = () => {
 
                     <div className="max-w-3xl mx-auto bg-white/80 p-6 rounded-lg shadow-sm border border-blue-100">
                         <p className="text-xl text-gray-700">
-                            <span className="font-bold text-blue-600">Here's the simple truth:</span> Property owners pay us from their
-                            marketing budget when we bring qualified tenants. You get the <strong>exact same rates and specials</strong>
-                            as if you walked in directly, plus the benefit of our expertise.
+                            <span className="font-bold text-blue-600"></span> Property owners pay us from their
+                            marketing budget when we bring qualified tenants. You get the <strong> exact same rates and specials </strong> as if you walked in directly. Working with us streamlines your rental search by saving you time and money.
                         </p>
                     </div>
                 </div>
@@ -43,7 +42,7 @@ const HowIsThisFreePage = () => {
                             <GiHouseKeys className="w-8 h-8" /> How We Work
                         </h2>
                         <p className="text-xl">
-                            All our agents are licensed real estate agents with the Texas Relocation Expert brokerage.
+                            All our agents are Texas licensed real estate agents.
                         </p>
                     </div>
 
@@ -94,7 +93,7 @@ const HowIsThisFreePage = () => {
                                 <div>
                                     <h3 className="text-xl font-semibold text-gray-800">Bonus: Free Movers</h3>
                                     <p className="text-gray-600">
-                                        Some properties qualify for <strong>2 hours of free movers</strong> that we cover for you!
+                                        Some properties qualify <strong>up to 2 hours of free movers!</strong>
                                     </p>
                                 </div>
                             </div>
