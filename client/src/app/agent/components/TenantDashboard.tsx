@@ -441,6 +441,13 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                 onClick={() => {
                     if (!isEditing) handleEditClick(field, value);
                 }}
+
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        e.stopPropagation();
+                        handleSave();
+                    }
+                }}
             >
                 <DetailItem
                     label={label}
@@ -800,7 +807,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 renderDetails">
                     {tenant.OtherOnLease === "yes" &&
                         renderDetailItem(
-                            "Other-OnLease Value",
+                            "Other Adults On The Lease",
                             "othersOnLeasevalue",
                             tenant.othersOnLeasevalue,
                             <FaUsers className="text-blue-500" />
