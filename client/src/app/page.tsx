@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FaArrowDown } from "react-icons/fa";
 
 export default function Home() {
   const data = [
@@ -180,11 +181,11 @@ export default function Home() {
                   )}
                 </div>
                 {index !== 6 && (
-                  <div className="absolute -bottom-20">
-                    <span className="[writing-mode:vertical-lr] text-blue-500 -mb-2 font-semibold">
-                      - - -
-                    </span>
+                  <div className="absolute -bottom-20 flex flex-col items-center text-blue-500 font-semibold">
+                    <span className="[writing-mode:vertical-lr]">- - -</span>
+                    <FaArrowDown className="mt-1 mr-[1.5px]" />
                   </div>
+
                 )}
               </div>
             );
