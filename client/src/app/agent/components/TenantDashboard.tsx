@@ -859,7 +859,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         <>
                             {renderDetailItem("Pre-Approval", "preApproval", tenant.preApproval, <FaCheck className="text-blue-500" />)}
                             {renderDetailItem("Pre-Approval Amount", "preApprovalAmount", tenant.preApprovalAmount, <AiOutlineDollarCircle className="text-blue-500" />)}
-                            {renderDetailItem("Closing Timeline", "closingTimeline", tenant.closingTimeline, <FiClock className="text-blue-500" />)}
+                            {renderDetailItem("Closing Timeline", "closingTimeline", formatDate(tenant.closingTimeline), <FiClock className="text-blue-500" />)}
                         </>
                     )}
 

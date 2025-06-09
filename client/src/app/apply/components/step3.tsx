@@ -575,7 +575,37 @@ export function StepThree({ callBack, goBack, searchType }: stepProps) {
                             <div className="mt-10 text-left">
 
                                 {/* Purchase Timeline */}
-                                <OptionInput formState={formState} field={purchaseFields.closingTimeline} />
+                                <div className="closingTimeline">
+                                    <label
+                                        htmlFor="closingTimeline"
+                                        className="text-sm font-semibold leading-6 text-gray-900"
+                                    >
+                                        When are you looking to close?
+                                    </label>
+                                    <div className={inputContainerClass}>
+                                        <Controller
+                                            control={control}
+                                            name="closingTimeline"
+                                            rules={{ required: true }}
+                                            render={({ field, fieldState: { invalid, error } }) => {
+                                                const value = field.value ? new Date(field.value).toISOString().split('T')[0] : '';
+                                                return (
+                                                    <input
+                                                        type="date"
+                                                        id="closingTimeline"
+                                                        min={new Date().toISOString().split('T')[0]}
+                                                        className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
+                                                            }`}
+                                                        value={value}
+                                                        onChange={(e) => {
+                                                            field.onChange(e.target.value ? new Date(e.target.value) : null);
+                                                        }}
+                                                    />
+                                                );
+                                            }}
+                                        />
+                                    </div>
+                                </div>
 
                                 {/* Financing */}
                                 <OptionInput formState={formState} field={purchaseFields.preApproval} />
