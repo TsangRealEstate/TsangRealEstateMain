@@ -813,43 +813,64 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                             <FaUsers className="text-blue-500" />
                         )
                     }
+
                     {renderDetailItem("Email", "email", tenant.email, <AiOutlineMail className="text-blue-500" />)}
                     {renderDetailItem("Mobile", "mobileNumber", tenant.mobileNumber, <AiOutlinePhone className="text-blue-500" />)}
                     {renderDetailItem("Search Type", "searchType", tenant.searchType, <FiSearch className="text-blue-500" />)}
                     {renderDetailItem("Budget", "budget", tenant.budget, <AiOutlineDollarCircle className="text-blue-500" />)}
                     {renderDetailItem("Bedrooms", "bedrooms", tenant.bedrooms, <FiHome className="text-blue-500" />)}
                     {renderDetailItem("Bathrooms", "bathrooms", tenant.bathrooms, <FiHome className="text-blue-500" />)}
-                    {renderDetailItem(
-                        "Lease Start Date",
-                        "leaseStartDate",
-                        formatDate(tenant.leaseStartDate),
-                        <FiCalendar className="text-blue-500" />
+
+                    {tenant.searchType === "rent" && (
+                        <>
+                            {renderDetailItem(
+                                "Lease Start Date",
+                                "leaseStartDate",
+                                formatDate(tenant.leaseStartDate),
+                                <FiCalendar className="text-blue-500" />
+                            )}
+                            {renderDetailItem(
+                                "Lease End Date",
+                                "leaseEndDate",
+                                formatDate(tenant.leaseEndDate),
+                                <FiCalendar className="text-blue-500" />
+                            )}
+
+                            {renderDetailItem(
+                                "Issues",
+                                "brokenLease",
+                                Array.isArray(tenant.brokenLease) ? tenant.brokenLease.join(", ") : "None",
+                                <FiAlertCircle className="text-blue-500" />
+                            )}
+
+                            {renderDetailItem(
+                                "Non-Negotiables",
+                                "nonNegotiables",
+                                Array.isArray(tenant.nonNegotiables) ? tenant.nonNegotiables.join(", ") : "None",
+                                <FiXCircle className="text-blue-500" />
+                            )}
+
+                            {renderDetailItem("Gross Income", "grossIncome", tenant.grossIncome, <AiOutlineDollarCircle className="text-blue-500" />)}
+
+                        </>
                     )}
-                    {renderDetailItem(
-                        "Lease End Date",
-                        "leaseEndDate",
-                        formatDate(tenant.leaseEndDate),
-                        <FiCalendar className="text-blue-500" />
+
+                    {(tenant.searchType === "purchase") && (
+                        <>
+                            {renderDetailItem("Pre-Approval", "preApproval", tenant.preApproval, <FaCheck className="text-blue-500" />)}
+                            {renderDetailItem("Pre-Approval Amount", "preApprovalAmount", tenant.preApprovalAmount, <AiOutlineDollarCircle className="text-blue-500" />)}
+                            {renderDetailItem("Closing Timeline", "closingTimeline", tenant.closingTimeline, <FiClock className="text-blue-500" />)}
+                        </>
                     )}
+
                     {renderDetailItem(
                         "Desired Location",
                         "desiredLocation",
                         Array.isArray(tenant.desiredLocation) ? tenant.desiredLocation.join(", ") : "N/A",
                         <FiMapPin className="text-blue-500" />
                     )}
-                    {renderDetailItem(
-                        "Issues",
-                        "brokenLease",
-                        Array.isArray(tenant.brokenLease) ? tenant.brokenLease.join(", ") : "None",
-                        <FiAlertCircle className="text-blue-500" />
-                    )}
-                    {renderDetailItem(
-                        "Non-Negotiables",
-                        "nonNegotiables",
-                        Array.isArray(tenant.nonNegotiables) ? tenant.nonNegotiables.join(", ") : "None",
-                        <FiXCircle className="text-blue-500" />
-                    )}
-                    {renderDetailItem("Gross Income", "grossIncome", tenant.grossIncome, <AiOutlineDollarCircle className="text-blue-500" />)}
+
+
                     {renderDetailItem(
                         "Other-OnLease",
                         "OtherOnLease",
@@ -860,10 +881,6 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     )}
                     {renderDetailItem("Availability-Date", "AvailabilityDate", formatDate(tenant.AvailabilityDate), <FiCalendar className="text-blue-500" />)}
                     {renderDetailItem("Time-For-Call", "timeForCall", tenant.timeForCall, <FiClock className="text-blue-500" />)}
-                    {renderDetailItem("Closing Timeline", "closingTimeline", tenant.closingTimeline, <FiClock className="text-blue-500" />)}
-                    {renderDetailItem("Pre-Approval", "preApproval", tenant.preApproval, <FaCheck className="text-blue-500" />)}
-                    {renderDetailItem("Pre-Approval Amount", "preApprovalAmount", tenant.preApprovalAmount, <AiOutlineDollarCircle className="text-blue-500" />)}
-
                 </div>
 
                 <LabelManager cardId={tenant._id} />
