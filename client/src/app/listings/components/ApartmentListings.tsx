@@ -397,7 +397,9 @@ const ApartmentListings = () => {
                                                         <p className="text-sm text-blue-600 font-medium">{formatPrice(lowestPrice)}</p>
                                                     ) : (
                                                         <p className="text-sm text-blue-700">
-                                                            {listing.rental_type.charAt(0).toUpperCase() + listing.rental_type.slice(1)}
+                                                            {typeof listing.rental_type === 'string' && listing.rental_type.length > 0
+                                                                ? listing.rental_type.charAt(0).toUpperCase() + listing.rental_type.slice(1)
+                                                                : "Apartment"}
                                                         </p>
                                                     )}
                                                 </div>
