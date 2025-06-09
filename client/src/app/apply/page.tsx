@@ -8,9 +8,16 @@ import { useAuth } from "@/context/AuthContext";
 
 
 export default function Apply() {
-    const [step, setSetp] = useState(1);
-    const { loading, setLoading } = useAuth();
-    const [formData, setFormData] = useState({});
+    const [step, setStep] = useState(1);
+    const { setLoading } = useAuth();
+
+    type FormDataType = {
+        email?: string;
+        searchType?: string;
+        [key: string]: any;
+    };
+
+    const [formData, setFormData] = useState<FormDataType>({});
 
     const submitFormData = async (email: string, informations: any) => {
         setLoading(true);
@@ -38,7 +45,7 @@ export default function Apply() {
 
             alert(successMessage.replace(/\s+/g, ' ').trim())
 
-            setSetp(4);
+            setStep(4);
         } catch (error: any) {
             console.error("Error posting data:", error.response?.data || error.message);
             alert(`Failed to submit: ${error.response?.data?.error || error.message}`);
@@ -52,7 +59,7 @@ export default function Apply() {
             ...formData,
             ...data,
         });
-        setSetp(2);
+        setStep(2);
     };
 
     const secondStepCallBack = (data: any) => {
@@ -60,7 +67,7 @@ export default function Apply() {
             ...prevState,
             ...data,
         }));
-        setSetp(3);
+        setStep(3);
     };
 
     const thirdStepCallBack = (data: any) => {
@@ -69,9 +76,10 @@ export default function Apply() {
             ...data,
         }));
 
-        const { email, ...information } = { ...formData, ...data } as any;
-        submitFormData(email, information);
+        const { email, searchType, ...information } = { ...formData, ...data } as any;
+        submitFormData(email, { ...information, searchType });
     };
+
 
     return (
         <div className="bg-white px-6 py-24 sm:py-32 lg:px-8">
@@ -91,16 +99,17 @@ export default function Apply() {
                     <StepTwo
                         callBack={secondStepCallBack}
                         goBack={() => {
-                            setSetp(1);
+                            setStep(1);
                         }}
                         defaultValues={formData}
                     />
                 )}
                 {step === 3 && (
                     <StepThree
+                        searchType={formData.searchType}
                         callBack={thirdStepCallBack}
                         goBack={() => {
-                            setSetp(2);
+                            setStep(2);
                         }}
                     />
                 )}

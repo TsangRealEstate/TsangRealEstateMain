@@ -551,7 +551,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     params.append('minPrice', minVal.toString());
                     params.append('maxPrice', maxVal.toString());
                 } else if (budgetRange.length === 1) {
-                    params.append('minPrice', budgetRange[0].toString());
+                    params.append('maxPrice', budgetRange[0].toString());
                 }
             }
 
@@ -860,6 +860,10 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     )}
                     {renderDetailItem("Availability-Date", "AvailabilityDate", formatDate(tenant.AvailabilityDate), <FiCalendar className="text-blue-500" />)}
                     {renderDetailItem("Time-For-Call", "timeForCall", tenant.timeForCall, <FiClock className="text-blue-500" />)}
+                    {renderDetailItem("Closing Timeline", "closingTimeline", tenant.closingTimeline, <FiClock className="text-blue-500" />)}
+                    {renderDetailItem("Pre-Approval", "preApproval", tenant.preApproval, <FaCheck className="text-blue-500" />)}
+                    {renderDetailItem("Pre-Approval Amount", "preApprovalAmount", tenant.preApprovalAmount, <AiOutlineDollarCircle className="text-blue-500" />)}
+
                 </div>
 
                 <LabelManager cardId={tenant._id} />

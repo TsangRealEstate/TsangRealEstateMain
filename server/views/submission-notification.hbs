@@ -88,116 +88,199 @@
     <div class="container">
         <div class="header">
             <h2>Hello {{firstName}} {{lastName}},</h2>
-            <p>✅ We've successfully received your preference application on <strong class="date-value">{{formatDate
-                    submittedAt}}</strong>.</p>
+            {{#if submittedAt}}
+            <p>✅ We've successfully received your preference application on
+                <strong class="date-value">{{formatDate submittedAt}}</strong>.
+            </p>
+            {{/if}}
         </div>
 
+        {{#if preferences.AvailabilityDate}}
         <div class="highlight-box">
-            <p>One of our agents will contact you on your preferred date <strong class="date-value">{{formatDate
-                    preferences.AvailabilityDate}}</strong>
-                at <strong>{{preferences.timeForCall}}</strong>.</p>
+            <p>
+                One of our agents will contact you on your preferred date
+                <strong class="date-value">{{formatDate preferences.AvailabilityDate}}</strong>
+                {{#if preferences.timeForCall}}at <strong>{{preferences.timeForCall}}</strong>{{/if}}.
+            </p>
         </div>
+        {{/if}}
 
         <h3>Your Contact Information:</h3>
         <ul class="preference-list">
+            {{#if mobileNumber}}
             <li class="preference-item">
                 <span class="preference-label">Mobile Number:</span>
                 <span class="preference-value">{{mobileNumber}}</span>
             </li>
+            {{/if}}
+
+            {{#if email}}
             <li class="preference-item">
                 <span class="preference-label">Email:</span>
                 <span class="preference-value">{{email}}</span>
             </li>
+            {{/if}}
+
+            {{#if instagram}}
             <li class="preference-item">
                 <span class="preference-label">Instagram:</span>
                 <span class="preference-value">{{instagram}}</span>
             </li>
+            {{/if}}
         </ul>
 
         <h3>Your Application Details:</h3>
         <ul class="preference-list">
+            {{#if preferences.searchType}}
             <li class="preference-item">
                 <span class="preference-label">Search Type:</span>
                 <span class="preference-value">{{capitalize preferences.searchType}}</span>
             </li>
+            {{/if}}
+
+            {{#if preferences.budget}}
             <li class="preference-item">
                 <span class="preference-label">Budget:</span>
                 <span class="preference-value">{{preferences.budget}}</span>
             </li>
+            {{/if}}
+
+            {{#if preferences.bedrooms}}
             <li class="preference-item">
                 <span class="preference-label">Bedrooms:</span>
                 <span class="preference-value">{{preferences.bedrooms}}</span>
             </li>
+            {{/if}}
+
+            {{#if preferences.bathrooms}}
             <li class="preference-item">
                 <span class="preference-label">Bathrooms:</span>
                 <span class="preference-value">{{preferences.bathrooms}}</span>
             </li>
+            {{/if}}
+
             <li class="preference-item">
                 <span class="preference-label">Desired Locations:</span>
                 <span class="preference-value">
+                    {{#if preferences.desiredLocation.length}}
                     {{#each preferences.desiredLocation}}
                     {{this}}{{#unless @last}}, {{/unless}}
+                    {{/each}}
                     {{else}}
                     Not specified
-                    {{/each}}
+                    {{/if}}
                 </span>
             </li>
+
+            {{#if preferences.grossIncome}}
             <li class="preference-item">
                 <span class="preference-label">Gross Income:</span>
                 <span class="preference-value">{{preferences.grossIncome}}</span>
             </li>
+            {{/if}}
+
+            {{#if preferences.creditScore}}
             <li class="preference-item">
                 <span class="preference-label">Credit Score:</span>
                 <span class="preference-value">{{preferences.creditScore}}</span>
             </li>
+            {{/if}}
+
+            {{#if preferences.OtherOnLease}}
             <li class="preference-item">
                 <span class="preference-label">Others on Lease:</span>
                 <span class="preference-value">{{capitalize preferences.OtherOnLease}}</span>
             </li>
+            {{/if}}
+
+            {{#if preferences.othersOnLeasevalue}}
             <li class="preference-item">
                 <span class="preference-label">Others Details:</span>
                 <span class="preference-value">{{preferences.othersOnLeasevalue}}</span>
             </li>
+            {{/if}}
+
             <li class="preference-item">
                 <span class="preference-label">Broken Lease History:</span>
                 <span class="preference-value">
+                    {{#if preferences.brokenLease.length}}
                     {{#each preferences.brokenLease}}
                     {{this}}{{#unless @last}}, {{/unless}}
+                    {{/each}}
                     {{else}}
                     None
-                    {{/each}}
+                    {{/if}}
                 </span>
             </li>
+
+            {{#if preferences.AvailabilityDate}}
             <li class="preference-item">
                 <span class="preference-label">Availability Date:</span>
                 <span class="preference-value date-value">{{formatDate preferences.AvailabilityDate}}</span>
             </li>
+            {{/if}}
+
+            {{#if preferences.timeForCall}}
             <li class="preference-item">
-                <span class="preference-label">Time-For-Call</span>
+                <span class="preference-label">Time-For-Call:</span>
                 <span class="preference-value date-value">{{preferences.timeForCall}}</span>
             </li>
+            {{/if}}
+
+            {{#if preferences.closingTimeline}}
+            <li class="preference-item">
+                <span class="preference-label">Closing Timeline:</span>
+                <span class="preference-value date-value">{{preferences.closingTimeline}}</span>
+            </li>
+            {{/if}}
+
+            {{#if preferences.preApproval}}
+            <li class="preference-item">
+                <span class="preference-label">Pre-Approval:</span>
+                <span class="preference-value date-value">{{preferences.preApproval}}</span>
+            </li>
+            {{/if}}
+
+            {{#if preferences.preApprovalAmount}}
+            <li class="preference-item">
+                <span class="preference-label">Pre-Approval Amount:</span>
+                <span class="preference-value date-value">{{preferences.preApprovalAmount}}</span>
+            </li>
+            {{/if}}
+
+            {{#if preferences.leaseStartDate}}
             <li class="preference-item">
                 <span class="preference-label">Lease Start Date:</span>
                 <span class="preference-value date-value">{{formatDate preferences.leaseStartDate}}</span>
             </li>
+            {{/if}}
+
+            {{#if preferences.leaseEndDate}}
             <li class="preference-item">
                 <span class="preference-label">Lease End Date:</span>
                 <span class="preference-value date-value">{{formatDate preferences.leaseEndDate}}</span>
             </li>
+            {{/if}}
+
             <li class="preference-item">
                 <span class="preference-label">Non-Negotiables:</span>
                 <span class="preference-value">
+                    {{#if preferences.nonNegotiables.length}}
                     {{#each preferences.nonNegotiables}}
                     {{this}}{{#unless @last}}, {{/unless}}
+                    {{/each}}
                     {{else}}
                     None specified
-                    {{/each}}
+                    {{/if}}
                 </span>
             </li>
+
+            {{#if preferences.propertyOwnerName}}
             <li class="preference-item">
                 <span class="preference-label">Property Owner Name:</span>
                 <span class="preference-value">{{preferences.propertyOwnerName}}</span>
             </li>
+            {{/if}}
         </ul>
 
         <p class="thank-you">We'll review your application and be in touch with property matches soon. 🎯</p>
@@ -207,6 +290,7 @@
             <strong>The Property Match Team</strong>
         </div>
     </div>
+
 </body>
 
 </html>
