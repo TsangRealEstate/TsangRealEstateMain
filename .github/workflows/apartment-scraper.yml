@@ -1,6 +1,6 @@
 name: Run Apartment Scraper
 
-on:
+on: 
   schedule:
     - cron: "0 14 * * *" # 8AM CST (which is 14:00 UTC)
     - cron: "0 18 * * *" # 12PM CST (which is 18:00 UTC)
