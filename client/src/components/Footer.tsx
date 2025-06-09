@@ -19,9 +19,9 @@ const servicesLink = [
 ];
 
 const socialLinks = [
-    { icon: "instagram", url: "https://www.instagram.com" },
-    { icon: "facebook", url: "https://www.facebook.com" },
-    { icon: "TikTok ", url: "https://twitter.com" },
+    { icon: "instagram", url: "https://www.instagram.com/alextsangrealestate/" },
+    { icon: "facebook", url: "https://www.facebook.com/share/1FNYp6bsd9/?mibextid=wwXIfr" },
+    { icon: "TikTok ", url: "https://www.tiktok.com/@alexandertsang" },
 ];
 
 export function Footer() {

@@ -58,12 +58,18 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
     // Set up hotkey listeners
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            // Check if we're pressing 1-0 (key codes 49-58)
-            if (e.keyCode >= 49 && e.keyCode <= 58) {
-                const index = e.keyCode - 49;
-                if (index < allLabels.length) {
-                    toggleLabel(allLabels[index]._id);
-                }
+            let index = -1;
+
+            if (e.keyCode >= 49 && e.keyCode <= 57) {
+                // Keys 1–9
+                index = e.keyCode - 49;
+            } else if (e.keyCode === 48) {
+                // Key 0 maps to index 9 (10th label)
+                index = 9;
+            }
+
+            if (index >= 0 && index < allLabels.length) {
+                toggleLabel(allLabels[index]._id);
             }
         };
 
@@ -271,7 +277,7 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
                         {allLabels.slice(0, 10).map((label, index) => (
                             <div key={label._id} className="flex items-center gap-1 text-xs">
                                 <span className="font-mono bg-gray-200 px-1.5 py-0.5 rounded">
-                                    {index + 1}
+                                    {index === 9 ? 0 : index + 1}
                                 </span>
                                 <span>{label.name}</span>
                             </div>
@@ -303,7 +309,7 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
                                     />
                                     {index < 10 && (
                                         <span className="absolute -top-2 -right-2 bg-white text-xs font-bold border border-gray-300 rounded-full w-5 h-5 flex items-center justify-center">
-                                            {index + 1}
+                                            {index === 9 ? 0 : index + 1}
                                         </span>
                                     )}
                                 </div>
