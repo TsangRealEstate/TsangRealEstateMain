@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 
-// Centralized color definitions (export for frontend if needed)
 const PREDEFINED_COLORS = [
   { name: "Red", value: "#ef4444", isPredefined: true },
   { name: "Light Blue", value: "#7dd3fc", isPredefined: true },
@@ -14,7 +13,6 @@ const PREDEFINED_COLORS = [
   { name: "Beige", value: "#f5f5dc", isPredefined: true },
 ];
 
-// In your Label model file
 const labelSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -73,6 +71,13 @@ const CardLabel = mongoose.model("CardLabel", cardLabelSchema);
 
 // Initialize with predefined colors
 const createPredefinedLabels = async () => {
+  const existing = await Label.find({ isPredefined: true });
+
+  if (existing.length >= PREDEFINED_COLORS.length) {
+    console.log("Predefined labels already exist — skipping initialization");
+    return;
+  }
+
   for (const color of PREDEFINED_COLORS) {
     await Label.findOneAndUpdate(
       { name: color.name },
@@ -84,6 +89,7 @@ const createPredefinedLabels = async () => {
       { upsert: true }
     );
   }
+
   console.log("Predefined color labels initialized");
 };
 
@@ -91,11 +97,11 @@ module.exports = {
   Label,
   CardLabel,
   createPredefinedLabels,
-  PREDEFINED_COLORS, // Export for frontend if needed
+  PREDEFINED_COLORS,
   cleanupLabelCollection: async () => {
     try {
       await Label.collection.dropIndexes();
-      console.log("Dropped all indexes from labels collection");
+      console.log("Dropped all indexes from labels collection"); 
     } catch (err) {
       console.error("Error dropping indexes:", err);
     }

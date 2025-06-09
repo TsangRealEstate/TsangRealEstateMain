@@ -44,7 +44,6 @@ app.get("/", (req, res) => {
 
 // Connect to DB and start server
 connectDB().then(async () => {
-  await cleanupLabelCollection();
   await createPredefinedLabels();
 
   app.listen(PORT, () => {
