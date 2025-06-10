@@ -408,11 +408,16 @@ const ApartmentListings = () => {
                                             <div className="mt-4">
                                                 <div className="mt-2 flex items-center text-sm text-gray-500">
                                                     <FaClock className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
+                                                    <p>Created: {formatDate(listing.createdAt)}</p>
+                                                </div>
+
+                                                <div className="mt-2 flex items-center text-sm text-gray-500">
+                                                    <FaClock className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
                                                     <p>Updated: {formatDate(listing.updatedAt)}</p>
                                                 </div>
 
                                                 {listing.available_units && (
-                                                    <div className="mt-2 flex items-center text-sm text-gray-500">
+                                                    <div className="mt-4 flex items-center text-sm text-gray-500">
                                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                                             {listing.available_units.reduce((acc, unit) => acc + (unit.units?.length || 0), 0)} units
                                                         </span>
