@@ -159,7 +159,7 @@ const ApartmentListings = () => {
                             <button
                                 onClick={fetchListings}
                                 disabled={loading}
-                                className={`inline-flex mt-4 lg:mt-0 w-fit items-center px-4 py-2 border border-transparent text-lg font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`inline-flex mt-4 lg:mt-0 w-fit items-center px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 <FiRefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
                                 Refresh
@@ -168,9 +168,9 @@ const ApartmentListings = () => {
                             <Link href={'/filter'} >
                                 <button
                                     disabled={loading}
-                                    className={`inline-flex mt-3  w-fit lg:mt-0 items-center px-4 py-2 border border-transparent text-lg font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`inline-flex mt-3  w-fit lg:mt-0 items-center px-4 py-2 border border-transparent font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
-                                    <FaSortAmountDown className="h-5 w-5 text-white mr-2" />
+                                    <FaSortAmountDown className="size-4 text-white mr-2" />
                                     Apply Filters
                                 </button>
                             </Link>
