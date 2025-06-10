@@ -17,3 +17,27 @@ export const getLocalDesiredLocations = (tenantId: string): string[] => {
 export const setLocalDesiredLocations = (tenantId: string, items: string[]) => {
     localStorage.setItem(`desiredLocation_${tenantId}`, JSON.stringify(items));
 };
+
+export const getLocalBudget = (tenantId: string): string[] => {
+    const saved = localStorage.getItem(`budget_${tenantId}`);
+    try {
+        const parsed = saved ? JSON.parse(saved) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch {
+        return [];
+    }
+};
+
+
+export const setLocalBudget = (tenantId: string, items: string[]) => {
+    localStorage.setItem(`budget_${tenantId}`, JSON.stringify(items));
+};
+
+export const getLocalBrokenLease = (tenantId: string): string[] => {
+    const saved = localStorage.getItem(`brokenLease_${tenantId}`);
+    return saved ? JSON.parse(saved) : [];
+};
+
+export const setLocalBrokenLease = (tenantId: string, items: string[]) => {
+    localStorage.setItem(`brokenLease_${tenantId}`, JSON.stringify(items));
+};

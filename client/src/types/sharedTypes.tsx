@@ -44,6 +44,9 @@ export interface DetailItemProps {
   icon: React.ReactNode;
 }
 export interface AuthContextType {
+  zipCodes: ZipCode[];
+  searchedResults: Record<string, any>;
+  fetchSearchedResults: (searchTerm: string) => Promise<void>;
   authenticated: boolean;
   fetchListings: () => Promise<void>;
   setAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
@@ -151,6 +154,13 @@ export interface Listing {
   Information?: {
     neighborhood?: string;
   };
+}
+
+export interface ZipCode {
+  PropertyId: string;
+  PropertyZip: string;
+  PropertyDisplayName: string;
+  PropertyNeighborhood: string | null;
 }
 
 interface AvailableUnit {

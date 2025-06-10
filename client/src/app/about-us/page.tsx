@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import React from 'react';
 import {
     FaLightbulb,
@@ -125,9 +126,11 @@ const AboutPage = () => {
                         <p className="text-xl mb-8">
                             Get in touch today and let us sprinkle some fairy dust on your property journey!
                         </p>
-                        <button className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-md">
-                            Contact Us
-                        </button>
+                        <Link href="/apply" >
+                            <button className="bg-white text-blue-600 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-all duration-300 hover:scale-105 shadow-md">
+                                Contact Us
+                            </button>
+                        </Link>
                     </div>
                 </section>
             </div>

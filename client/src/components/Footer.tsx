@@ -1,30 +1,38 @@
+"use client"
 import Link from "next/link";
 import { FiChevronRight, FiMapPin, FiMail, FiPhone } from "react-icons/fi";
-import { FaInstagram, FaFacebook, FaLinkedin, FaTwitter } from "react-icons/fa";
+import { FaInstagram, FaFacebook, FaLinkedin, FaTwitter, FaTiktok } from "react-icons/fa";
+import { useState } from "react";
+import { IoClose } from "react-icons/io5";
 
 const quickLinks = [
     { title: "Home", url: "/" },
-    { title: "About", url: "#" },
-    { title: "FAQ", url: "#" },
-    { title: "Properties", url: "#" },
+    { title: "About us", url: "/about-us" },
+    { title: "IABS form", url: "#", isModal: true, pdf: "/IABSAlex.pdf" },
+    { title: "CPN form", url: "#", isModal: true, pdf: "/TexasCPN.pdf" },
 ];
 
 const servicesLink = [
     { title: "Rent", url: "#" },
-    { title: "Buy", url: "#" },
-    { title: "Sell", url: "#" },
     { title: "Tour", url: "#" },
     { title: "Submit request", url: "#" },
 ];
 
 const socialLinks = [
-    { icon: "instagram", url: "https://www.instagram.com" },
-    { icon: "facebook", url: "https://www.facebook.com" },
-    { icon: "linkedin", url: "https://www.linkedin.com" },
-    { icon: "twitter", url: "https://twitter.com" },
+    { icon: "instagram", url: "https://www.instagram.com/alextsangrealestate/" },
+    { icon: "facebook", url: "https://www.facebook.com/share/1FNYp6bsd9/?mibextid=wwXIfr" },
+    { icon: "TikTok ", url: "https://www.tiktok.com/@alexandertsang" },
 ];
 
 export function Footer() {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentPdf, setCurrentPdf] = useState("");
+
+    const openPdfModal = (pdfUrl: string) => {
+        setCurrentPdf(pdfUrl);
+        setIsModalOpen(true);
+    };
+
     return (
         <footer className="relative bg-slate-900 dark:bg-slate-800">
             <div className="container relative mx-auto max-w-7xl">
@@ -50,13 +58,13 @@ export function Footer() {
                                             Tsang
                                         </span>
                                     </Link>
-                                    <p className="mt-6 text-gray-300 text-center md:text-left">
+                                    <p className="mt-6 text-gray-300 text-center md:text-left hidden">
                                         Lorem Ipsum is simply dummy text of the printing and
                                         typesetting industry. Lorem Ipsum has been the
                                         industry&apos;s standard dummy text ever since the 1500s
                                     </p>
 
-                                    <ul className="flex mt-4">
+                                    <ul className="flex mt-6">
                                         {socialLinks.map((socialLink, index) => (
                                             <li key={index} className="mr-4">
                                                 <a
@@ -71,11 +79,8 @@ export function Footer() {
                                                     {socialLink.icon === "facebook" && (
                                                         <FaFacebook className="w-5 h-5" />
                                                     )}
-                                                    {socialLink.icon === "linkedin" && (
-                                                        <FaLinkedin className="w-5 h-5" />
-                                                    )}
-                                                    {socialLink.icon === "twitter" && (
-                                                        <FaTwitter className="w-5 h-5" />
+                                                    {socialLink.icon === "TikTok " && (
+                                                        <FaTiktok className="w-5 h-5" />
                                                     )}
                                                 </a>
                                             </li>
@@ -90,13 +95,23 @@ export function Footer() {
                                     <ul className="list-none footer-list mt-6">
                                         {quickLinks.map((link, index) => (
                                             <li key={index} className="mb-3">
-                                                <a
-                                                    href={link.url}
-                                                    className="text-slate-300 hover:text-slate-400 duration-500 ease-in-out flex items-center"
-                                                >
-                                                    <FiChevronRight className="w-5 h-5 text-blue-600 me-3" />
-                                                    {link.title}
-                                                </a>
+                                                {link.isModal ? (
+                                                    <button
+                                                        onClick={() => openPdfModal(link.pdf)}
+                                                        className="text-slate-300 hover:text-slate-400 duration-500 ease-in-out flex items-center"
+                                                    >
+                                                        <FiChevronRight className="w-5 h-5 text-blue-600 me-3" />
+                                                        {link.title}
+                                                    </button>
+                                                ) : (
+                                                    <a
+                                                        href={link.url}
+                                                        className="text-slate-300 hover:text-slate-400 duration-500 ease-in-out flex items-center"
+                                                    >
+                                                        <FiChevronRight className="w-5 h-5 text-blue-600 me-3" />
+                                                        {link.title}
+                                                    </a>
+                                                )}
                                             </li>
                                         ))}
                                     </ul>
@@ -191,6 +206,46 @@ export function Footer() {
                     </div>
                 </div>
             </div>
+
+            {isModalOpen && (
+                <div className="fixed inset-0 bg-black/15 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col">
+                        {/* Modal header */}
+                        <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
+                            <h3 className="text-xl font-semibold dark:text-white">
+                                {currentPdf.includes('IABSAlex') ? 'IABS Form' : 'CPN Form'}
+                            </h3>
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                                aria-label="Close modal"
+                            >
+                                <IoClose className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                            </button>
+                        </div>
+
+                        {/* Modal content */}
+                        <div className="flex-1 overflow-hidden">
+                            <iframe
+                                src={`${currentPdf}#toolbar=0&navpanes=0`}
+                                className="w-full h-full min-h-[70vh]"
+                                frameBorder="0"
+                                title="PDF Form"
+                            />
+                        </div>
+
+                        {/* Modal footer (optional) */}
+                        <div className="p-4 border-t dark:border-gray-700 flex justify-end">
+                            <button
+                                onClick={() => setIsModalOpen(false)}
+                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </footer>
     );
 }

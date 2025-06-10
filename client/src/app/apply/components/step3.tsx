@@ -6,7 +6,7 @@ import { OptionInput } from "./Options";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 
-const schema = yup.object().shape({
+const rentalSchema = yup.object().shape({
     instagram: yup.string().required("Instagram value is not valid"),
     leaseEndDate: yup.string().required("Select lease end date"),
     leaseStartDate: yup.string().required("Select lease start date"),
@@ -25,9 +25,26 @@ const schema = yup.object().shape({
         .min(1, "select at least one options"),
 });
 
+const purchaseSchema = yup.object().shape({
+    closingTimeline: yup.string().required("Closing timeline is required"),
+    preApproval: yup.string().required("Pre-approval status is required"),
+    preApprovalAmount: yup.string().when('preApproval', {
+        is: (val: string) => ['Yes', 'Purchasing via cash offer'].includes(val),
+        then: (schema) => schema.required("Pre-approval amount is required"),
+        otherwise: (schema) => schema.notRequired()
+    }),
+    budget: yup.string().required("Budget is required"),
+    bedrooms: yup.string().required("Bedrooms selection is required"),
+    bathrooms: yup.string().required("Bathrooms selection is required"),
+    desiredLocation: yup.array().min(1, "Select at least one location"),
+    AvailabilityDate: yup.string().required("Availability date is required"),
+    timeForCall: yup.string().required("Preferred call time is required")
+});
+
 type stepProps = {
     callBack: (data: any) => void;
     goBack: () => void;
+    searchType?: string;
 };
 
 const inputContainerClass =
@@ -64,8 +81,7 @@ const formFields = {
             { value: "1", label: "1" },
             { value: "2", label: "2" },
             { value: "3", label: "3" },
-            { value: "4", label: "4" },
-            { value: "5+", label: "5+" },
+            { value: "4+", label: "4+" },
         ],
     },
     bathrooms: {
@@ -76,8 +92,7 @@ const formFields = {
             { value: "1", label: "1" },
             { value: "2", label: "2" },
             { value: "3", label: "3" },
-            { value: "4", label: "4" },
-            { value: "5+", label: "5+" },
+            { value: "4+", label: "4+" },
         ],
     },
     desiredLocation: {
@@ -131,16 +146,16 @@ const formFields = {
             },
             { value: "$1400 - $1500", label: "$1400 - $1500" },
             {
-                value: "$1500 - $1600 (average pricing of two-bedrooms as of Jan 2023)",
-                label: "$1500 - $1600 (average pricing of two-bedrooms as of Jan 2023)",
+                value: "$1500 - $1600",
+                label: "$1500 - $1600",
             },
             { value: "$1600 - $1700", label: "$1600 - $1700" },
             { value: "$1700 - $1800", label: "$1700 - $1800" },
             {
                 value:
-                    "$1800 - $1900 (average pricing of three-bedrooms as of July 2023)",
+                    "$1800 - $1900",
                 label:
-                    "$1800 - $1900 (average pricing of three-bedrooms as of July 2023)",
+                    "$1800 - $1900",
             },
             { value: "$1900+", label: "$1900+" },
             { value: "inp1", label: "Other", input: true },
@@ -238,21 +253,105 @@ const formFields = {
     },
 };
 
-export function StepThree({ callBack, goBack }: stepProps) {
+const purchaseFields = {
+
+    closingTimeline: {
+        name: "closingTimeline",
+        labelText: "When are you looking to close?",
+        inputType: "radio",
+        options: [
+            { value: "ASAP", label: "ASAP" },
+            { value: "1-3 months", label: "1-3 months" },
+            { value: "3-6 months", label: "3-6 months" },
+            { value: "6+ months", label: "6+ months" },
+            { value: "Not sure yet", label: "Not sure yet" },
+        ],
+    },
+
+    preApproval: {
+        name: "preApproval",
+        labelText: "Do you have a pre-approval letter from a lender?",
+        inputType: "radio",
+        options: [
+            { value: "Yes", label: "Yes" },
+            { value: "No", label: "No" },
+            { value: "Purchasing via cash offer", label: "Purchasing via cash offer" },
+        ],
+    },
+
+    preApprovalAmount: {
+        name: "preApprovalAmount",
+        labelText: "How much are you pre-approved or have cash for?",
+        inputType: "radio",
+        options: [
+            { value: "$100k - $150k", label: "$100k - $150k" },
+            { value: "$150k - $200k", label: "$150k - $200k" },
+            { value: "$200k - $250k", label: "$200k - $250k" },
+            { value: "$250k - $300k", label: "$250k - $300k" },
+            { value: "$300k - $350k", label: "$300k - $350k" },
+            { value: "$350k - $400k", label: "$350k - $400k" },
+            { value: "$400k - $450k", label: "$400k - $450k" },
+            { value: "$450k - $500k", label: "$450k - $500k" },
+            { value: "$500k+", label: "$500k+" },
+        ],
+    },
+
+    budget: {
+        name: "budget",
+        labelText: "What is your budget for purchase?",
+        inputType: "radio",
+        options: [
+            { value: "$100k - $150k", label: "$100k - $150k" },
+            {
+                value:
+                    "$150k - $200k",
+                label:
+                    "$150k - $200k",
+            },
+            { value: "$200k - $250k", label: "$200k - $250k" },
+            {
+                value: "$250k - $300k",
+                label: "$250k - $300k",
+            },
+            { value: "$300k - $350k", label: "$300k - $350k" },
+            { value: "$350k - $400k", label: "$350k - $400k" },
+            {
+                value:
+                    "$400k - $450k",
+                label:
+                    "$400k - $450k",
+            },
+            { value: "$450k - $500k", label: "$450k - $500k" },
+            { value: "$500k+", label: "$500k+" },
+        ],
+    },
+
+
+};
+
+export function StepThree({ callBack, goBack, searchType }: stepProps) {
     const { loading } = useAuth()
     const [isConsentChecked, setIsConsentChecked] = useState(false);
+    const [noLease, setNoLease] = useState(false);
+
 
     const formState = useForm({
         mode: "onChange",
         reValidateMode: "onBlur",
-        resolver: yupResolver(schema),
+        resolver: yupResolver(
+            (searchType === 'purchase' ? purchaseSchema : rentalSchema) as yup.ObjectSchema<any>
+        ),
     });
+
     const {
-        formState: { errors, dirtyFields },
         handleSubmit,
         control,
+        setValue,
+        watch,
     } = formState;
 
+    const preApprovalValue = watch('preApproval');
+    const showPreApprovalAmount = ['Yes', 'Purchasing via cash offer'].includes(preApprovalValue);
 
     const SubmitForm = async (data: any) => {
         if (!isConsentChecked) {
@@ -270,176 +369,324 @@ export function StepThree({ callBack, goBack }: stepProps) {
             <div className="space-y-12 w-full">
                 <div className="border-b border-gray-900/10 pb-12">
                     <h2 className="text-base font-semibold leading-7 text-gray-900">
-                        Step 3
+                        Step 3 - {searchType === 'purchase' ? 'Purchase' : 'Rental'} Application
                     </h2>
 
-                    <div className="mt-10 text-left">
-                        {/* instagram */}
-                        <TextInput formState={formState} field={formFields.instagram} />
+                    {searchType === 'rent' ? (
+                        <>
+                            {/* Rental-specific fields */}
+                            <div className="mt-10 text-left">
+                                {/* instagram */}
+                                <TextInput formState={formState} field={formFields.instagram} />
 
-                        {/* leaseStartDate */}
-                        <div className="mt-4">
-                            <label
-                                htmlFor="leaseStartDate"
-                                className="text-sm font-semibold leading-6 text-gray-900"
-                            >
-                                What is the ideal lease start date?
-                            </label>
-                            <div className={inputContainerClass}>
-                                <Controller
-                                    control={control}
-                                    name="leaseStartDate"
-                                    rules={{ required: true }}
-                                    render={({ field, fieldState: { invalid, error } }) => {
-                                        // Convert Date object to YYYY-MM-DD format for input
-                                        const value = field.value ? new Date(field.value).toISOString().split('T')[0] : '';
+                                {/* leaseStartDate */}
+                                <div className="mt-4">
+                                    <label
+                                        htmlFor="leaseStartDate"
+                                        className="text-sm font-semibold leading-6 text-gray-900"
+                                    >
+                                        What is the ideal lease start date?
+                                    </label>
+                                    <div className={inputContainerClass}>
+                                        <Controller
+                                            control={control}
+                                            name="leaseStartDate"
+                                            rules={{ required: true }}
+                                            render={({ field, fieldState: { invalid, error } }) => {
+                                                // Convert Date object to YYYY-MM-DD format for input
+                                                const value = field.value ? new Date(field.value).toISOString().split('T')[0] : '';
 
-                                        return (
-                                            <input
-                                                type="date"
-                                                id="leaseStartDate"
-                                                min={new Date().toISOString().split('T')[0]} // Set min date to today
-                                                className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
-                                                    }`}
-                                                value={value}
-                                                onChange={(e) => {
-                                                    // Convert back to Date object when value changes
-                                                    field.onChange(e.target.value ? new Date(e.target.value) : null);
+                                                return (
+                                                    <input
+                                                        type="date"
+                                                        id="leaseStartDate"
+                                                        min={new Date().toISOString().split('T')[0]} // Set min date to today
+                                                        className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
+                                                            }`}
+                                                        value={value}
+                                                        onChange={(e) => {
+                                                            // Convert back to Date object when value changes
+                                                            field.onChange(e.target.value ? new Date(e.target.value) : null);
+                                                        }}
+                                                    />
+                                                );
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* leaseEndDate */}
+                                <div className="mt-4">
+                                    <label
+                                        htmlFor="leaseEndDate"
+                                        className="text-sm font-semibold leading-6 text-gray-900"
+                                    >
+                                        When does your current lease end?
+                                    </label>
+
+                                    {/* Checkbox to indicate no current lease */}
+                                    <div className="flex items-center space-x-2 mt-2">
+                                        <input
+                                            type="checkbox"
+                                            id="noLeaseCheckbox"
+                                            checked={noLease}
+                                            onChange={(e) => {
+                                                setNoLease(e.target.checked);
+                                                if (e.target.checked) {
+                                                    setValue("leaseEndDate", "Not on a current lease");
+                                                }
+                                            }}
+                                        />
+                                        <label htmlFor="noLeaseCheckbox" className="text-sm text-gray-700">
+                                            Not on a current lease
+                                        </label>
+                                    </div>
+
+                                    {/* Date input, only shown when not "noLease" */}
+                                    {!noLease && (
+                                        <div className={inputContainerClass}>
+                                            <Controller
+                                                control={control}
+                                                name="leaseEndDate"
+                                                rules={{ required: true }}
+                                                render={({ field, fieldState: { invalid, error } }) => {
+                                                    const value = field.value
+                                                        ? new Date(field.value).toISOString().split("T")[0]
+                                                        : "";
+
+                                                    return (
+                                                        <input
+                                                            type="date"
+                                                            id="leaseEndDate"
+                                                            min={new Date().toISOString().split("T")[0]}
+                                                            className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
+                                                                }`}
+                                                            value={value}
+                                                            onChange={(e) => {
+                                                                field.onChange(
+                                                                    e.target.value ? new Date(e.target.value) : null
+                                                                );
+                                                            }}
+                                                        />
+                                                    );
                                                 }}
                                             />
-                                        );
-                                    }}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* propertyOwnername  */}
+                                <TextInput
+                                    formState={formState}
+                                    field={formFields.propertyOwnerName}
                                 />
+
+                                {/* bedrooms */}
+                                <OptionInput formState={formState} field={formFields.bedrooms} />
+
+                                {/* bathrooms */}
+                                <OptionInput formState={formState} field={formFields.bathrooms} />
+
+                                {/* desiredLocation */}
+                                <OptionInput
+                                    formState={formState}
+                                    field={formFields.desiredLocation}
+                                />
+
+                                {/* budget */}
+                                <OptionInput formState={formState} field={formFields.budget} />
+
+                                {/* brokenLease */}
+                                <OptionInput formState={formState} field={formFields.brokenLease} />
+
+                                {/* grossIncome */}
+                                <TextInput formState={formState} field={formFields.grossIncome} />
+
+                                {/* creditScore */}
+                                <OptionInput formState={formState} field={formFields.creditScore} />
+
+                                {/* nonNegotiables */}
+                                <OptionInput
+                                    formState={formState}
+                                    field={formFields.nonNegotiables}
+                                />
+
+                                {/* AvailabilityDate */}
+                                <div className="mt-4">
+                                    <label
+                                        htmlFor="AvailabilityDate"
+                                        className="text-sm font-semibold leading-6 text-gray-900"
+                                    >
+                                        When can our agent call you to discuss your application?
+                                    </label>
+                                    <div className={inputContainerClass}>
+                                        <Controller
+                                            control={control}
+                                            name="AvailabilityDate"
+                                            rules={{ required: true }}
+                                            render={({ field, fieldState: { invalid, error } }) => {
+                                                // Convert Date object to YYYY-MM-DD format for input
+                                                const value = field.value ? new Date(field.value).toISOString().split('T')[0] : '';
+
+                                                return (
+                                                    <input
+                                                        type="date"
+                                                        id="AvailabilityDate"
+                                                        min={new Date().toISOString().split('T')[0]} // Set min date to today
+                                                        className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
+                                                            }`}
+                                                        value={value}
+                                                        onChange={(e) => {
+                                                            // Convert back to Date object when value changes
+                                                            field.onChange(e.target.value ? new Date(e.target.value) : null);
+                                                        }}
+                                                    />
+                                                );
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* timeForCall  */}
+                                <TextInput
+                                    formState={formState}
+                                    field={formFields.timeForCall}
+                                />
+
+                                <div className="mt-4">
+                                    <label className="flex items-start space-x-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={isConsentChecked}
+                                            onChange={handleConsentChange}
+                                            className="mt-1"
+                                        />
+                                        <span className="text-sm font-bold text-gray-700">
+                                            By clicking “Submit” below, I am providing my ESIGN signature and express written consent to receive phone calls, text messages, and emails from Tsang Real Estate Corporation (“Tsang Real Estate”) and its affiliates, including via automated technology, SMS/MMS messages, AI generated voice, and prerecorded and/or artificial voice messages. I acknowledge my consent is required to obtain any goods or services. To opt out from texts, I can reply, ‘out’ at any time. To opt out from emails, I can click on the ‘unsubscribe’ link in the emails. Message and data rates may apply.
+                                        </span>
+                                    </label>
+                                </div>
+
                             </div>
-                        </div>
+                        </>
+                    ) : (
+                        <>
+                            {/* Purchase-specific fields */}
+                            <div className="mt-10 text-left">
 
-                        {/* leaseEndDate */}
-                        <div className="mt-4">
-                            <label
-                                htmlFor="leaseEndDate"
-                                className="text-sm font-semibold leading-6 text-gray-900"
-                            >
-                                When does your current lease end?
-                            </label>
-                            <div className={inputContainerClass}>
-                                <Controller
-                                    control={control}
-                                    name="leaseEndDate"
-                                    rules={{ required: true }}
-                                    render={({ field, fieldState: { invalid, error } }) => {
-                                        const value = field.value ? new Date(field.value).toISOString().split('T')[0] : '';
+                                {/* Purchase Timeline */}
+                                <div className="closingTimeline">
+                                    <label
+                                        htmlFor="closingTimeline"
+                                        className="text-sm font-semibold leading-6 text-gray-900"
+                                    >
+                                        When are you looking to close?
+                                    </label>
+                                    <div className={inputContainerClass}>
+                                        <Controller
+                                            control={control}
+                                            name="closingTimeline"
+                                            rules={{ required: true }}
+                                            render={({ field, fieldState: { invalid, error } }) => {
+                                                const value = field.value ? new Date(field.value).toISOString().split('T')[0] : '';
+                                                return (
+                                                    <input
+                                                        type="date"
+                                                        id="closingTimeline"
+                                                        min={new Date().toISOString().split('T')[0]}
+                                                        className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
+                                                            }`}
+                                                        value={value}
+                                                        onChange={(e) => {
+                                                            field.onChange(e.target.value ? new Date(e.target.value) : null);
+                                                        }}
+                                                    />
+                                                );
+                                            }}
+                                        />
+                                    </div>
+                                </div>
 
-                                        return (
-                                            <input
-                                                type="date"
-                                                id="leaseEndDate"
-                                                min={new Date().toISOString().split('T')[0]}
-                                                className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
-                                                    }`}
-                                                value={value}
-                                                onChange={(e) => {
-                                                    field.onChange(e.target.value ? new Date(e.target.value) : null);
-                                                }}
-                                            />
-                                        );
-                                    }}
+                                {/* Financing */}
+                                <OptionInput formState={formState} field={purchaseFields.preApproval} />
+                                {showPreApprovalAmount && (
+                                    <OptionInput formState={formState} field={purchaseFields.preApprovalAmount} />
+                                )}
+
+                                {/* budget */}
+                                <OptionInput formState={formState} field={purchaseFields.budget} />
+
+                                {/* bedrooms */}
+                                <OptionInput formState={formState} field={formFields.bedrooms} />
+
+                                {/* bathrooms */}
+                                <OptionInput formState={formState} field={formFields.bathrooms} />
+
+                                {/* desiredLocation */}
+                                <OptionInput
+                                    formState={formState}
+                                    field={formFields.desiredLocation}
                                 />
+
+                                {/* AvailabilityDate */}
+                                <div className="mt-4">
+                                    <label
+                                        htmlFor="AvailabilityDate"
+                                        className="text-sm font-semibold leading-6 text-gray-900"
+                                    >
+                                        When can our agent call you to discuss your application?
+                                    </label>
+                                    <div className={inputContainerClass}>
+                                        <Controller
+                                            control={control}
+                                            name="AvailabilityDate"
+                                            rules={{ required: true }}
+                                            render={({ field, fieldState: { invalid, error } }) => {
+                                                // Convert Date object to YYYY-MM-DD format for input
+                                                const value = field.value ? new Date(field.value).toISOString().split('T')[0] : '';
+
+                                                return (
+                                                    <input
+                                                        type="date"
+                                                        id="AvailabilityDate"
+                                                        min={new Date().toISOString().split('T')[0]} // Set min date to today
+                                                        className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
+                                                            }`}
+                                                        value={value}
+                                                        onChange={(e) => {
+                                                            // Convert back to Date object when value changes
+                                                            field.onChange(e.target.value ? new Date(e.target.value) : null);
+                                                        }}
+                                                    />
+                                                );
+                                            }}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* timeForCall  */}
+                                <TextInput
+                                    formState={formState}
+                                    field={formFields.timeForCall}
+                                />
+
+                                <div className="mt-4">
+                                    <label className="flex items-start space-x-2">
+                                        <input
+                                            type="checkbox"
+                                            checked={isConsentChecked}
+                                            onChange={handleConsentChange}
+                                            className="mt-1"
+                                        />
+                                        <span className="text-sm font-bold text-gray-700">
+                                            By clicking “Submit” below, I am providing my ESIGN signature and express written consent to receive phone calls, text messages, and emails from Tsang Real Estate Corporation (“Tsang Real Estate”) and its affiliates, including via automated technology, SMS/MMS messages, AI generated voice, and prerecorded and/or artificial voice messages. I acknowledge my consent is required to obtain any goods or services. To opt out from texts, I can reply, ‘out’ at any time. To opt out from emails, I can click on the ‘unsubscribe’ link in the emails. Message and data rates may apply.
+                                        </span>
+                                    </label>
+                                </div>
+
                             </div>
-                        </div>
-
-                        {/* propertyOwnername  */}
-                        <TextInput
-                            formState={formState}
-                            field={formFields.propertyOwnerName}
-                        />
-
-                        {/* bedrooms */}
-                        <OptionInput formState={formState} field={formFields.bedrooms} />
-
-                        {/* bathrooms */}
-                        <OptionInput formState={formState} field={formFields.bathrooms} />
-
-                        {/* desiredLocation */}
-                        <OptionInput
-                            formState={formState}
-                            field={formFields.desiredLocation}
-                        />
-
-                        {/* budget */}
-                        <OptionInput formState={formState} field={formFields.budget} />
-
-                        {/* brokenLease */}
-                        <OptionInput formState={formState} field={formFields.brokenLease} />
-
-                        {/* grossIncome */}
-                        <TextInput formState={formState} field={formFields.grossIncome} />
-
-                        {/* creditScore */}
-                        <OptionInput formState={formState} field={formFields.creditScore} />
-
-                        {/* nonNegotiables */}
-                        <OptionInput
-                            formState={formState}
-                            field={formFields.nonNegotiables}
-                        />
-
-                        {/* AvailabilityDate */}
-                        <div className="mt-4">
-                            <label
-                                htmlFor="AvailabilityDate"
-                                className="text-sm font-semibold leading-6 text-gray-900"
-                            >
-                                When can our agent call you to discuss your application?
-                            </label>
-                            <div className={inputContainerClass}>
-                                <Controller
-                                    control={control}
-                                    name="AvailabilityDate"
-                                    rules={{ required: true }}
-                                    render={({ field, fieldState: { invalid, error } }) => {
-                                        // Convert Date object to YYYY-MM-DD format for input
-                                        const value = field.value ? new Date(field.value).toISOString().split('T')[0] : '';
-
-                                        return (
-                                            <input
-                                                type="date"
-                                                id="AvailabilityDate"
-                                                min={new Date().toISOString().split('T')[0]} // Set min date to today
-                                                className={`w-full px-3 py-1 rounded-md focus:ring-0 font-normal border-gray-300 ${error && !field.value ? "border-red-500" : ""
-                                                    }`}
-                                                value={value}
-                                                onChange={(e) => {
-                                                    // Convert back to Date object when value changes
-                                                    field.onChange(e.target.value ? new Date(e.target.value) : null);
-                                                }}
-                                            />
-                                        );
-                                    }}
-                                />
-                            </div>
-                        </div>
-
-                        {/* timeForCall  */}
-                        <TextInput
-                            formState={formState}
-                            field={formFields.timeForCall}
-                        />
-
-                        <div className="mt-4">
-                            <label className="flex items-start space-x-2">
-                                <input
-                                    type="checkbox"
-                                    checked={isConsentChecked}
-                                    onChange={handleConsentChange}
-                                    className="mt-1"
-                                />
-                                <span className="text-sm font-bold text-gray-700">
-                                    By clicking “Submit” below, I am providing my ESIGN signature and express written consent to receive phone calls, text messages, and emails from Tsang Real Estate Corporation (“Tsang Real Estate”) and its affiliates, including via automated technology, SMS/MMS messages, AI generated voice, and prerecorded and/or artificial voice messages. I acknowledge my consent is required to obtain any goods or services. To opt out from texts, I can reply, ‘out’ at any time. To opt out from emails, I can click on the ‘unsubscribe’ link in the emails. Message and data rates may apply.
-                                </span>
-                            </label>
-                        </div>
-
-                    </div>
+                        </>
+                    )}
                 </div>
             </div>
 

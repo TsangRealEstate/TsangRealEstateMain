@@ -1,7 +1,6 @@
 import * as yup from "yup";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useState } from "react";
 
 const schema = yup.object().shape({
     OtherOnLease: yup.string().required("Select one option"),

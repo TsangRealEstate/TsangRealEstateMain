@@ -1,6 +1,6 @@
 "use client"
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { AuthContextType, Column, Listing } from "@/types/sharedTypes";
+import { AuthContextType, Column, Listing, ZipCode } from "@/types/sharedTypes";
 import axiosInstance from "@/api/axiosInstance";
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
@@ -13,6 +13,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     const [tenants, setTenants] = useState<any[]>([]);
     const [columns, setColumns] = useState<Column[]>([]);
     const [listings, setListings] = useState<Listing[]>([]);
+    const [zipCodes, setZipCodes] = useState<ZipCode[]>([]);
+    const [tenantName, setTenantName] = useState<string | null>(null);
+    const [searchedResults, setSearchedResults] = useState({});
+
     const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
 
     type Card = {
@@ -27,6 +31,18 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
         newCard: string;
     };
 
+    const fetchZipCodes = async () => {
+        try {
+            setLoading(true);
+            const response = await axiosInstance.get('/scrape-list/zip-codes');
+            setZipCodes(response.data.data)
+        } catch (error) {
+            console.error('Error fetching zip codes:', error);
+            throw error;
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const fetchTenants = async (adminPassword: string) => {
         setLoading(true);
@@ -61,6 +77,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
                         id: tenant._id,
                         content: `${tenant.firstName || "No Firstname"} ${tenant.lastName || "No Lastname"}`,
                     };
+
+                    setTenantName(
+                        `${tenant.firstName || ""} ${tenant.lastName || ""}`.trim()
+                    );
 
                     const lastPosition = cardPositions[tenant._id];
                     const targetColumn = initialColumns.find(col =>
@@ -112,9 +132,25 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
         }
     };
 
+    const fetchSearchedResults = async (tenantName: string) => {
+        try {
+            const response = await axiosInstance.get(
+                `/tenants/search-results/${encodeURIComponent(tenantName ?? '')}`
+            );
+
+            const data = response.data;
+            setSearchedResults({ count: data.count });
+        } catch (error) {
+            console.error('Fetch error:', error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (localStorage.getItem("authenticated") === "true") {
             fetchListings()
+            fetchZipCodes()
         }
     }, [])
 
@@ -138,7 +174,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
                 listings,
                 neighborhoods,
                 setListings,
-                setLoading
+                setLoading,
+                zipCodes,
+                searchedResults,
+                fetchSearchedResults,
             }}
         >
             {children}

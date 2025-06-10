@@ -1,19 +1,36 @@
-// components/LabelManager.tsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { FiPlus, FiX, FiEdit, FiTrash2 } from "react-icons/fi";
 import axiosInstance from "@/api/axiosInstance";
 import { LabelManagerProps, Label, CardLabel2 } from "@/types/sharedTypes";
 
+const PREDEFINED_COLORS = [
+    { name: "Red", value: "#ef4444" },
+    { name: "Light Blue", value: "#7dd3fc" },
+    { name: "Light Green", value: "#86efac" },
+    { name: "Grey", value: "#9ca3af" },
+    { name: "Yellow", value: "#fde047" },
+    { name: "Purple", value: "#c084fc" },
+    { name: "Pink", value: "#f9a8d4" },
+    { name: "Orange", value: "#fdba74" },
+    { name: "Indigo", value: "#818cf8" },
+    { name: "Beige", value: "#f5f5dc" },
+];
 
 const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
     const [allLabels, setAllLabels] = useState<Label[]>([]);
     const [cardLabels, setCardLabels] = useState<CardLabel2[]>([]);
     const [showNewLabelForm, setShowNewLabelForm] = useState(false);
     const [newLabelName, setNewLabelName] = useState("");
-    const [newLabelColor, setNewLabelColor] = useState("#3b82f6");
+    const [newLabelColor, setNewLabelColor] = useState(PREDEFINED_COLORS[0].value);
     const [isLoading, setIsLoading] = useState(false);
     const [editingLabelId, setEditingLabelId] = useState<string | null>(null);
     const [editedLabelName, setEditedLabelName] = useState("");
+
+    // Get available colors (not used by other labels)
+    const getAvailableColors = useCallback(() => {
+        const usedColors = new Set(allLabels.map(label => label.color));
+        return PREDEFINED_COLORS.filter(color => !usedColors.has(color.value));
+    }, [allLabels]);
 
     // Fetch all available labels and card-specific assignments
     useEffect(() => {
@@ -37,6 +54,28 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
 
         if (cardId) fetchLabels();
     }, [cardId]);
+
+    // Set up hotkey listeners
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            let index = -1;
+
+            if (e.keyCode >= 49 && e.keyCode <= 57) {
+                // Keys 1–9
+                index = e.keyCode - 49;
+            } else if (e.keyCode === 48) {
+                // Key 0 maps to index 9 (10th label)
+                index = 9;
+            }
+
+            if (index >= 0 && index < allLabels.length) {
+                toggleLabel(allLabels[index]._id);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [allLabels]);
 
     // Get full label object from labelId
     const getLabelDetails = (labelId: string | Label): Label | null => {
@@ -79,6 +118,13 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
                 return;
             }
 
+            // Check if color is available
+            const availableColors = getAvailableColors();
+            if (!availableColors.some(c => c.value === newLabelColor)) {
+                alert("This color is already in use. Please select another one.");
+                return;
+            }
+
             const res = await axiosInstance.post("/labels", {
                 name: newLabelName,
                 color: newLabelColor,
@@ -87,7 +133,7 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
             setAllLabels((prev) => [...prev, res.data]);
             setShowNewLabelForm(false);
             setNewLabelName("");
-            setNewLabelColor("#3b82f6");
+            setNewLabelColor(availableColors[0]?.value || PREDEFINED_COLORS[0].value);
         } catch (error) {
             console.error("Failed to create label", error);
             alert("Failed to create label");
@@ -146,6 +192,33 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
         }
     };
 
+    const updateLabel = async (labelId: string, newName: string, newColor: string) => {
+        try {
+            const confirmed = window.confirm(
+                "This will update this label for ALL cards. Are you sure?"
+            );
+            if (!confirmed) return;
+
+            await axiosInstance.put(`/labels/${labelId}`, {
+                name: newName,
+                color: newColor,
+            });
+
+            // Refresh the labels
+            const [allLabelsRes, cardLabelsRes] = await Promise.all([
+                axiosInstance.get("/labels"),
+                axiosInstance.get(`/labels/card/${cardId}`),
+            ]);
+
+            setAllLabels(allLabelsRes.data);
+            setCardLabels(cardLabelsRes.data);
+            setEditingLabelId(null);
+        } catch (error) {
+            console.error("Failed to update label", error);
+            alert("Failed to update label");
+        }
+    };
+
     // Get active labels with full label details
     const activeLabels = cardLabels
         .filter((cl) => cl.isActive)
@@ -154,6 +227,8 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
             labelDetails: getLabelDetails(cl.labelId),
         }))
         .filter((cl) => cl.labelDetails);
+
+    const availableColors = getAvailableColors();
 
     return (
         <div className="space-y-6">
@@ -195,9 +270,34 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
             </div>
 
             <div className="space-y-6 p-6 bg-white rounded-lg shadow-lg mt-5">
+                {/* Hotkey Legend */}
+                <div className="mb-6 p-4 bg-gray-50 dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        Keyboard Shortcuts
+                    </h4>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                        {allLabels.slice(0, 10).map((label, index) => (
+                            <div
+                                key={label._id}
+                                className="flex items-center gap-2 p-2 bg-white dark:bg-gray-700 rounded-lg border border-gray-100 dark:border-gray-600 hover:shadow transition-shadow"
+                            >
+                                <span className="font-mono bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 px-2 py-1 rounded-md text-xs font-bold">
+                                    {index === 9 ? 0 : index + 1}
+                                </span>
+                                <span className="text-sm text-gray-700 dark:text-gray-300 truncate">
+                                    {label.name}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
                 {/* Label Selection Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {allLabels.map((label) => {
+                <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                    {allLabels.map((label, index) => {
                         const isActive = isLabelActive(label._id);
                         const cardLabel = cardLabels.find((cl) =>
                             typeof cl.labelId === "string" ? cl.labelId === label._id : cl.labelId._id === label._id
@@ -207,105 +307,135 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
                         return (
                             <div
                                 key={label._id}
-                                className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg"
+                                className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-lg group"
+                                onClick={() => toggleLabel(label._id)}
+                                style={{ cursor: "pointer" }}
                             >
-                                {/* Color Preview */}
-                                <div
-                                    className="w-8 h-8 rounded-full border border-gray-200 shadow-sm flex-shrink-0"
-                                    style={{ backgroundColor: label.color }}
-                                />
-
-                                {/* Toggle Switch */}
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        className="sr-only peer"
-                                        checked={isActive}
-                                        onChange={() => toggleLabel(label._id)}
-                                        disabled={isLoading}
+                                {/* Color Preview with hotkey indicator */}
+                                <div className="relative">
+                                    <div
+                                        className="w-8 h-8 rounded-full border border-gray-200 shadow-sm flex-shrink-0"
+                                        style={{ backgroundColor: label.color }}
                                     />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5"></div>
-                                </label>
+                                    {index < 10 && (
+                                        <span className="absolute -top-2 -right-2 bg-white text-xs font-bold border border-gray-300 rounded-full w-5 h-5 flex items-center justify-center">
+                                            {index === 9 ? 0 : index + 1}
+                                        </span>
+                                    )}
+                                </div>
 
                                 {/* Label Name */}
                                 <div className="flex-grow flex items-center gap-2">
                                     {editingLabelId === label._id ? (
-                                        <input
-                                            type="text"
-                                            className="border border-gray-300 p-1 rounded-md text-sm flex-grow focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                            value={editedLabelName}
-                                            onChange={(e) => setEditedLabelName(e.target.value)}
-                                            onBlur={() => {
-                                                if (label.isPredefined) {
-                                                    updateCustomName(label._id, editedLabelName);
-                                                }
-                                                setEditingLabelId(null);
-                                            }}
-                                            onKeyPress={(e) => {
-                                                if (e.key === "Enter") {
-                                                    if (label.isPredefined) {
-                                                        updateCustomName(label._id, editedLabelName);
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="text"
+                                                className="border border-gray-300 p-1 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                                value={editedLabelName}
+                                                onChange={(e) => setEditedLabelName(e.target.value)}
+                                                onKeyDown={(e) => {
+                                                    if (e.key === "Enter") {
+                                                        e.preventDefault();
+                                                        updateLabel(label._id, editedLabelName, label.color);
                                                     }
-                                                    setEditingLabelId(null);
-                                                }
-                                            }}
-                                            autoFocus
-                                        />
+                                                }}
+
+                                                autoFocus
+                                            />
+                                            <input
+                                                type="color"
+                                                value={label.color}
+                                                onChange={(e) => {
+                                                    // Update the color in the local state temporarily
+                                                    setAllLabels(prev => prev.map(l =>
+                                                        l._id === label._id ? { ...l, color: e.target.value } : l
+                                                    ));
+                                                }}
+                                                className="w-6 h-6 cursor-pointer"
+                                            />
+                                            <button
+                                                onClick={() => updateLabel(label._id, editedLabelName, label.color)}
+                                                className="text-sm bg-blue-500 text-white px-2 py-1 rounded"
+                                            >
+                                                Save
+                                            </button>
+                                            <button
+                                                onClick={() => setEditingLabelId(null)}
+                                                className="text-sm bg-gray-200 px-2 py-1 rounded"
+                                            >
+                                                Cancel
+                                            </button>
+                                        </div>
                                     ) : (
                                         <span className="text-sm font-medium truncate">
                                             {displayName}
                                         </span>
                                     )}
-
-                                    {isActive && (
-                                        <button
-                                            onClick={() => {
-                                                setEditingLabelId(label._id);
-                                                setEditedLabelName(displayName);
-                                            }}
-                                            className="text-gray-500 hover:text-gray-700"
-                                            title="Edit label name"
-                                        >
-                                            <FiEdit size={14} />
-                                        </button>
-                                    )}
                                 </div>
 
-                                {/* Delete button - only for non-predefined labels */}
-                                {!label.isPredefined && (
+                                {/* Edit button */}
+                                {isActive && (
                                     <button
-                                        onClick={() => deleteLabel(label._id)}
-                                        className="text-red-500 hover:text-red-700 ml-2"
-                                        title="Delete label"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditingLabelId(label._id);
+                                            setEditedLabelName(displayName);
+                                        }}
+                                        className="text-gray-500 hover:text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                                        title="Edit label name"
                                     >
-                                        <FiTrash2 size={14} />
+                                        <FiEdit size={14} />
                                     </button>
                                 )}
+
+                                {/* Delete button */}
+                                <button
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        deleteLabel(label._id);
+                                    }}
+                                    className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    title="Delete label"
+                                >
+                                    <FiTrash2 size={14} />
+                                </button>
                             </div>
                         );
                     })}
 
-                    {/* Add New Label Button */}
-                    <button
-                        className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-500 hover:text-blue-500 hover:bg-blue-50"
-                        onClick={() => setShowNewLabelForm(true)}
-                        disabled={isLoading}
-                    >
-                        <FiPlus className="w-4 h-4" />
-                        <span>Add New Label</span>
-                    </button>
+                    {/* Add New Label Button - only show if we have available colors */}
+                    {availableColors.length > 0 && (
+                        <button
+                            className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-gray-300 rounded-lg text-gray-500 hover:border-blue-500 hover:text-blue-500 hover:bg-blue-50"
+                            onClick={() => setShowNewLabelForm(true)}
+                            disabled={isLoading}
+                        >
+                            <FiPlus className="w-4 h-4" />
+                            <span>Add New Label</span>
+                        </button>
+                    )}
                 </div>
 
                 {/* New Label Form */}
                 {showNewLabelForm && (
                     <div className="flex flex-col gap-4 mt-4 p-4 bg-gray-50 rounded-lg animate-fade-in">
                         <div className="flex items-center gap-3">
-                            <input
-                                type="color"
-                                value={newLabelColor}
-                                onChange={(e) => setNewLabelColor(e.target.value)}
-                                className="w-10 h-10 cursor-pointer border border-gray-300 rounded-md"
-                            />
+                            <div className="relative">
+                                <input
+                                    type="color"
+                                    value={newLabelColor}
+                                    onChange={(e) => setNewLabelColor(e.target.value)}
+                                    className="w-10 h-10 cursor-pointer border border-gray-300 rounded-md"
+                                    list="colorOptions"
+                                />
+                                <datalist id="colorOptions">
+                                    {availableColors.map((color) => (
+                                        <option key={color.value} value={color.value}>
+                                            {color.name}
+                                        </option>
+                                    ))}
+                                </datalist>
+                            </div>
                             <input
                                 type="text"
                                 placeholder="New label name"

@@ -41,15 +41,6 @@ function MobileNavigation({ isOpen, toggleMenu }: { isOpen: boolean; toggleMenu:
                 </Link>
 
                 <Link
-                    href="#buy"
-                    className={`text-xl font-medium hover:text-blue-600 ${pathname === "/buy" ? "text-blue-600 font-semibold" : "text-gray-700"
-                        }`}
-                    onClick={toggleMenu}
-                >
-                    Buy / Sell
-                </Link>
-
-                <Link
                     href="/how-is-this-free"
                     className={`text-xl font-medium hover:text-blue-600 ${pathname === "/how-is-this-free" ? "text-blue-600 font-semibold" : "text-gray-700"
                         }`}
@@ -123,14 +114,6 @@ export function Header() {
                                 }`}
                         >
                             About us
-                        </Link>
-
-                        <Link
-                            href="#buy"
-                            className={`font-medium transition-colors hover:text-blue-600 ${pathname === "/buy" ? "text-blue-600 font-semibold" : "text-gray-700"
-                                }`}
-                        >
-                            Buy / Sell
                         </Link>
 
                         <Link

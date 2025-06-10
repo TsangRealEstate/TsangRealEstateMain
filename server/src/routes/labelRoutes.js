@@ -6,6 +6,7 @@ const {
   getLabelsByCard,
   getAllCardLabels,
   updateCardLabels,
+  updateLabel,
   deleteLabel,
 } = require("../controllers/labelController");
 
@@ -21,9 +22,10 @@ router.get("/card/:cardId", getLabelsByCard);
 // Update label assignments for a card
 router.post("/card", updateCardLabels);
 
+router.put('/:labelId', updateLabel);
 // Delete a label
 router.delete("/:labelId", deleteLabel);
 // Get all card labels
 router.get("/card-labels/all", getAllCardLabels);
 
-module.exports = router;
+module.exports = router; 
