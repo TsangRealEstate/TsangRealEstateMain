@@ -13,6 +13,8 @@ import { FaCheck, FaTimes, FaUsers } from "react-icons/fa";
 import { getLocalBrokenLease, getLocalBudget, getLocalDesiredLocations, getLocalNonNegotiables, setLocalBrokenLease, setLocalBudget, setLocalDesiredLocations, setLocalNonNegotiables } from "@/utils/localStorageUtils";
 import MultiSelectModal from "./MultiSelectModal";
 import TenantComments from "./TenantComments";
+import { sanAntonioAreas } from "@/data/sanAntonioAreas";
+import { allLocationOptions } from "@/data/allLocations";
 
 interface TenantModalProps {
     tenant: any;
@@ -149,19 +151,6 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
         }
 
         if (field === "desiredLocation") {
-            const allLocationOptions = [
-                "Dominion/Rim/La Cantera/UTSA",
-                "Boerne",
-                "Stone Oak",
-                "North Central/Castle Hills",
-                "Medical Center",
-                "Alamo Ranch/Westover Hills",
-                "Downtown",
-                "Alamo Heights",
-                "Thousand Oaks/Far Northeast/Live Oak/Schertz/Converse",
-                "Southeast/South Central/Brooks City Base",
-                "New Braunfels",
-            ];
 
             const [currentLocations, setCurrentLocations] = useState<string[]>(() => {
                 const local = getLocalDesiredLocations(tenant._id);
@@ -608,13 +597,25 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             const desiredLocations = localLocations.length > 0 ? localLocations : tenantLocations;
 
             if (desiredLocations?.length > 0) {
-
+                // Clean and split the locations
                 const cleanedAreas = desiredLocations
                     .flatMap((area: string) => area.split(','))
                     .map((area: string) => area.trim())
                     .filter((area: string) => area.length > 0);
 
-                params.append('area', cleanedAreas.join(','));
+                // Convert area names to zip codes
+                const selectedZips = cleanedAreas.flatMap((area: string) => {
+                    // Find matching area (case-insensitive)
+                    const matchedArea = sanAntonioAreas.find(a =>
+                        a.area_name.toLowerCase().includes(area.toLowerCase())
+                    );
+                    return matchedArea?.zip_codes || [];
+                });
+
+                // Only append if we found matching zips
+                if (selectedZips.length > 0) {
+                    params.append('area', selectedZips.join(','));
+                }
             }
 
             const response = await axiosInstance.get('/scrape-list/filter', { params });

@@ -91,7 +91,7 @@ export default function Apply() {
                     Fill out the form below and we will contact you soon
                 </p>
             </div>
-            <div className="container mx-auto max-w-xl w-full bg-white flex flex-col items-center mt-10 mb-20 shadow-[5px_10px_20px_1px_rgba(152,152,152,0.15)] text-center rounded-lg border border-blue-50 border-b-4 hover:border-blue-600 py-5 px-8">
+            <div className="container mx-auto max-w-xl w-full bg-white flex flex-col items-center mt-10 mb-20 shadow-[5px_10px_20px_1px_rgba(152,152,152,0.15)] text-center rounded-lg border border-blue-50 border-b-4 hover:border-blue-600 py-5">
                 {step === 1 && (
                     <StepOne callBack={firstStepCallBack} defaultValues={formData} />
                 )}

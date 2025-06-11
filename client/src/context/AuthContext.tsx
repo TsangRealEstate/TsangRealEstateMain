@@ -2,6 +2,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { AuthContextType, Column, Listing, ZipCode } from "@/types/sharedTypes";
 import axiosInstance from "@/api/axiosInstance";
+import { sanAntonioAreas } from "@/data/sanAntonioAreas";
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
@@ -14,6 +15,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     const [columns, setColumns] = useState<Column[]>([]);
     const [listings, setListings] = useState<Listing[]>([]);
     const [zipCodes, setZipCodes] = useState<ZipCode[]>([]);
+    const [frontendZipCodes, setFrontendZipCodes] = useState<string[]>([]);
     const [tenantName, setTenantName] = useState<string | null>(null);
     const [searchedResults, setSearchedResults] = useState({});
 
@@ -117,14 +119,10 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
             const listings = response.data.data;
             setListings(listings);
 
-            // Extract neighborhoods directly from each listing
-            const allNeighborhoods = listings
-                .map((listing: any) => listing.neighborhood)
-                .filter((neighborhood: string | undefined): neighborhood is string => !!neighborhood);
-
-            // Get unique neighborhoods and filter out any undefined values
-            const uniqueNeighborhoods: string[] = [...new Set(allNeighborhoods)].filter((n): n is string => typeof n === "string");
-            setNeighborhoods(uniqueNeighborhoods);
+            const allAreas = sanAntonioAreas.map(area => area.area_name);
+            const allZips = sanAntonioAreas.flatMap(area => area.zip_codes);
+            setFrontendZipCodes([...new Set(allZips)]);
+            setNeighborhoods(allAreas);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An unknown error occurred');
         } finally {
@@ -178,6 +176,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
                 zipCodes,
                 searchedResults,
                 fetchSearchedResults,
+                frontendZipCodes
             }}
         >
             {children}

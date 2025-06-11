@@ -22,9 +22,19 @@ const MultiSelectModal = ({ title, items, selectedItems, onSave, onClose }: Prop
 
     return (
         <div className="fixed inset-0 bg-black/15 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <div className={
+                title === "Edit Desired Locations"
+                    ? "bg-white rounded-lg p-6 w-full max-w-2xl"
+                    : "bg-white rounded-lg p-6 w-full max-w-md"
+            }>
                 <h3 className="text-lg font-semibold mb-4">{title}</h3>
-                <div className="space-y-2 max-h-60 overflow-y-auto">
+                <div
+                    className={
+                        title === "Edit Desired Locations"
+                            ? "grid grid-cols-2 md:grid-cols-3 gap-2 max-h-60 overflow-y-auto"
+                            : "space-y-2 max-h-60 overflow-y-auto"
+                    }
+                >
                     {items.map((item) => (
                         <div key={item} className="flex items-center">
                             <input

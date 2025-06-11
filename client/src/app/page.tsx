@@ -66,7 +66,7 @@ export default function Home() {
                   Get started
                 </Link>
                 <Link
-                  href="/how-it-works"
+                  href="/how-is-this-free"
                   className="text-lg font-semibold leading-6 text-gray-900 hover:text-blue-600 transition-colors duration-200"
                 >
                   Learn how it works <span aria-hidden="true">→</span>
