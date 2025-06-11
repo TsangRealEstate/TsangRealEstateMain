@@ -151,7 +151,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
         }
 
         if (field === "desiredLocation") {
-           
+
             const [currentLocations, setCurrentLocations] = useState<string[]>(() => {
                 const local = getLocalDesiredLocations(tenant._id);
                 if (local.length > 0) return local;
