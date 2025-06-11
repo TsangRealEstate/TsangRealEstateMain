@@ -44,6 +44,7 @@ export interface DetailItemProps {
   icon: React.ReactNode;
 }
 export interface AuthContextType {
+  frontendZipCodes: string[];
   zipCodes: ZipCode[];
   searchedResults: Record<string, any>;
   fetchSearchedResults: (searchTerm: string) => Promise<void>;

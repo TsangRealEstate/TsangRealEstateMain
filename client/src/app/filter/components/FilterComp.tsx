@@ -8,6 +8,7 @@ import FloorPlanGallery from './FloorPlanGallery';
 import axiosInstance from '@/api/axiosInstance';
 import { formatAvailabilityDate } from '@/utils/dateUtils';
 import ZipCodesModal from './ZipCodesModal';
+import { sanAntonioAreas } from '@/data/sanAntonioAreas';
 interface Photo {
     type: string;
     id: string;
@@ -79,7 +80,7 @@ interface PropertyData {
 }
 
 export default function FilterComp() {
-    const { neighborhoods, zipCodes } = useAuth();
+    const { neighborhoods, zipCodes, frontendZipCodes } = useAuth();
     const [filters, setFilters] = useState({
         area: [] as string[],
         minPrice: '',
@@ -167,15 +168,21 @@ export default function FilterComp() {
             if (filters.amenities.includes('Balcony')) params.append('balcony', 'true');
             if (filters.amenities.includes('Yard')) params.append('yard', 'true');
 
-            // Add areas (joined with &)
+            // Add areas (joined with ,)
             if (filters.area.length > 0) {
-                params.append('area', filters.area.join(','));
+                const selectedZips = sanAntonioAreas
+                    .filter(area => filters.area.includes(area.area_name))
+                    .flatMap(area => area.zip_codes);
+
+                // Append just the zip codes to params
+                params.append('area', selectedZips.join(','));
             }
 
             // Make API call
             const response = await axiosInstance.get('/scrape-list/filter', {
                 params
             });
+            //console.log(params.toString());
 
             //console.log('Filtered results:', response.data);
             setResults(response.data);

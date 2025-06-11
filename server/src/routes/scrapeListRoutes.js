@@ -149,7 +149,7 @@ router.get("/filter", async (req, res) => {
         .split(",")
         .map((a) => a.trim())
         .filter((a) => a.length > 0);
-      propertyFilter["Information.neighborhood"] = { $in: areas };
+      propertyFilter["Information.zip"] = { $in: areas };
     }
 
     // Amenities filters
