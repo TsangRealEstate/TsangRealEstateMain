@@ -1,18 +1,3 @@
-To generate a well-documented README for your app, I'll need to understand its core features, structure, setup, and usage by scanning through the repository. Since you provided the URL for the client directory on the p2 branch, I’ll focus primarily on that, but will also check the root and any key files to cover the full context.
-
-I'll extract information such as:
-- Project purpose and features
-- Installation and setup instructions
-- Usage guidelines
-- Project structure
-- Technologies used
-- Contribution guidelines
-- License (if present)
-
-Let me start by locating important files (like package.json, main entry points, and documentation) and then assemble a detailed README draft.Here’s a detailed, well-structured README template for your TsangRealEstate app based on the available code structure and configuration. Please note: The scan was limited to the first 10 items in the client directory, so you should review and supplement this with additional details as needed. For a complete view, visit the client directory on GitHub: [View more files](https://github.com/Asin-Junior-Honore/TsangRealEstate/tree/p2/client).
-
----
-
 # Tsang Real Estate
 
 A modern real estate web application built with Next.js, React, and TypeScript, designed for efficient property browsing and management.
@@ -29,7 +14,6 @@ A modern real estate web application built with Next.js, React, and TypeScript, 
 - [Contributing](#contributing)
 - [License](#license)
 
----
 
 ## Features
 
@@ -144,7 +128,7 @@ Pull requests and suggestions are welcome! Please fork the repository and use a 
 
 [Specify your license here, e.g., MIT]
 
----
+
 
 **Note:**  
 - This README is based on a partial scan of the `client` directory.  
