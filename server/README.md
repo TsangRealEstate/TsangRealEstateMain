@@ -1,9 +1,3 @@
-To generate a well-documented README for the server directory, I need to review the contents of the server/ folder in your repo. I’ll scan for configuration files, entry points, major modules, and any documentation or code comments to accurately describe how the backend works, its setup, and usage.
-
-Let me start by listing the files and folders inside server/ to get an overview.Here’s a detailed and well-structured README draft for the server directory of the TsangRealEstate project. This is based on the available files and inferred architecture. For a complete list of all files, please visit the server/src directory on GitHub: server/src directory on GitHub.
-
----
-
 # TsangRealEstate Server
 
 This is the backend server for the TsangRealEstate application, providing APIs, database management, scraping utilities, authentication, and email/meeting integrations.
@@ -18,8 +12,6 @@ This is the backend server for the TsangRealEstate application, providing APIs, 
 - [Key Dependencies](#key-dependencies)
 - [API & Scraping](#api--scraping)
 - [Email & Meeting Templates](#email--meeting-templates)
-- [Contributing](#contributing)
-- [License](#license)
 
 ---
 
@@ -62,6 +54,7 @@ server/
 │   └── units-email.hbs         # Template for unit-related emails
 └── .gitignore
 ```
+
 > Note: For a full directory listing, see the [src folder](https://github.com/Asin-Junior-Honore/TsangRealEstate/tree/p2/server/src).
 
 ---
@@ -69,17 +62,20 @@ server/
 ## Setup & Installation
 
 1. **Clone the repository:**
+
    ```bash
    git clone https://github.com/Asin-Junior-Honore/TsangRealEstate.git
    cd TsangRealEstate/server
    ```
 
 2. **Install dependencies:**
+
    ```bash
    npm install
    ```
 
 3. **Configure environment variables:**
+
    - Copy `.env.example` to `.env` and fill out your actual credentials and configuration.
 
 4. **Start the development server:**
@@ -97,14 +93,14 @@ server/
 
 Configure the following in your `.env` file (see `.env.example` for more):
 
-| Variable                  | Purpose                                 |
-|---------------------------|-----------------------------------------|
-| DB_URL, MONGODB_URI       | MongoDB connection strings              |
-| CALENDLY_TOKEN, CALENDLY_EVENT_LINK | Calendly integration         |
-| EMAIL_USER, EMAIL_PASS    | Email sending credentials               |
-| ADMIN_SECRET              | Secret for admin authentication         |
-| CLIENT_URL                | URL of the client application           |
-| CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET | Cloudinary credentials |
+| Variable                                                         | Purpose                         |
+| ---------------------------------------------------------------- | ------------------------------- |
+| DB_URL, MONGODB_URI                                              | MongoDB connection strings      |
+| CALENDLY_TOKEN, CALENDLY_EVENT_LINK                              | Calendly integration            |
+| EMAIL_USER, EMAIL_PASS                                           | Email sending credentials       |
+| ADMIN_SECRET                                                     | Secret for admin authentication |
+| CLIENT_URL                                                       | URL of the client application   |
+| CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET | Cloudinary credentials          |
 
 ---
 
@@ -152,25 +148,3 @@ Handlebars templates in `views/` are used to send rich HTML emails:
 - [`meeting-invite.hbs`](https://github.com/Asin-Junior-Honore/TsangRealEstate/blob/p2/server/views/meeting-invite.hbs)
 - [`submission-notification.hbs`](https://github.com/Asin-Junior-Honore/TsangRealEstate/blob/p2/server/views/submission-notification.hbs)
 - [`units-email.hbs`](https://github.com/Asin-Junior-Honore/TsangRealEstate/blob/p2/server/views/units-email.hbs)
-
----
-
-## Contributing
-
-1. Fork the repository, create a feature branch.
-2. Make your changes with clear commit messages.
-3. Push to your branch and create a Pull Request.
-
----
-
-## License
-
-This project is licensed under the ISC License.
-
----
-
-> For additional details or to explore all files, visit the [server/src directory](https://github.com/Asin-Junior-Honore/TsangRealEstate/tree/p2/server/src).
-
----
-
-Let me know if you'd like to include API endpoint documentation, contribution guidelines, or anything else specific!

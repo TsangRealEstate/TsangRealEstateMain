@@ -11,9 +11,6 @@ A modern real estate web application built with Next.js, React, and TypeScript, 
 - [Directory Structure](#directory-structure)
 - [Configuration](#configuration)
 - [Deployment](#deployment)
-- [Contributing](#contributing)
-- [License](#license)
-
 
 ## Features
 
@@ -71,12 +68,12 @@ npm run lint
 
 ## Available Scripts
 
-| Script      | Description                       |
-| ----------- | --------------------------------- |
-| `dev`       | Start Next.js in development mode |
-| `build`     | Build for production              |
-| `start`     | Start production server           |
-| `lint`      | Run ESLint checks                 |
+| Script  | Description                       |
+| ------- | --------------------------------- |
+| `dev`   | Start Next.js in development mode |
+| `build` | Build for production              |
+| `start` | Start production server           |
+| `lint`  | Run ESLint checks                 |
 
 ## Directory Structure (Partial)
 
@@ -119,19 +116,3 @@ Refer to [`package.json`](https://github.com/Asin-Junior-Honore/TsangRealEstate/
 ## Deployment
 
 This app is configured for deployment on Netlify. You can use the provided `netlify.toml` for custom build settings.
-
-## Contributing
-
-Pull requests and suggestions are welcome! Please fork the repository and use a feature branch. Issues and feature requests are also appreciated.
-
-## License
-
-[Specify your license here, e.g., MIT]
-
-
-
-**Note:**  
-- This README is based on a partial scan of the `client` directory.  
-- For a more comprehensive guide, explore the full repo: [client directory on GitHub](https://github.com/Asin-Junior-Honore/TsangRealEstate/tree/p2/client).
-
-Let me know if you want to add project-specific sections like API documentation or feature walkthroughs!
