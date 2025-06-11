@@ -14,6 +14,7 @@ import { getLocalBrokenLease, getLocalBudget, getLocalDesiredLocations, getLocal
 import MultiSelectModal from "./MultiSelectModal";
 import TenantComments from "./TenantComments";
 import { sanAntonioAreas } from "@/data/sanAntonioAreas";
+import { allLocationOptions } from "@/data/allLocations";
 
 interface TenantModalProps {
     tenant: any;
@@ -150,20 +151,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
         }
 
         if (field === "desiredLocation") {
-            const allLocationOptions = [
-                "Dominion/Rim/La Cantera/UTSA",
-                "Boerne",
-                "Stone Oak",
-                "North Central/Castle Hills",
-                "Medical Center",
-                "Alamo Ranch/Westover Hills",
-                "Downtown",
-                "Alamo Heights",
-                "Thousand Oaks/Far Northeast/Live Oak/Schertz/Converse",
-                "Southeast/South Central/Brooks City Base",
-                "New Braunfels",
-            ];
-
+           
             const [currentLocations, setCurrentLocations] = useState<string[]>(() => {
                 const local = getLocalDesiredLocations(tenant._id);
                 if (local.length > 0) return local;

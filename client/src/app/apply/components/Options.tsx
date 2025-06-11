@@ -38,9 +38,11 @@ export function OptionInput(props: OptionsProps) {
             <fieldset>
                 <legend className="text-sm font-semibold leading-6">{labelText}</legend>
                 <div
-                    className={`mt-2 space-y-2 ring-1 ring-inset px-4 py-2 ${errors?.[name] ? "ring-rose-600" : "ring-transparent"
-                        } 
-                  ${dirtyFields?.[name] && errors?.[name] ? "ring-rose-600" : ""
+                    className={`mt-2 ${labelText === "What part(s) of San Antonio are you looking to move to?"
+                        ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"
+                        : "space-y-2"
+                        } ring-1 ring-inset px-4 py-2 ${errors?.[name] ? "ring-rose-600" : "ring-transparent"
+                        } ${dirtyFields?.[name] && errors?.[name] ? "ring-rose-600" : ""
                         }`}
                 >
                     {options.map(
