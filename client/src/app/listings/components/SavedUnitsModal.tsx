@@ -62,7 +62,6 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
             minimumFractionDigits: 0,
         }).format(price);
 
-
     const sendUnitToTenant = async () => {
         setLoading(true);
         try {
@@ -76,6 +75,44 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
         }
     };
 
+    const sendClientInfoToPropertyOwner = async () => {
+        setLoading(true);
+        try {
+            const res = await axiosInstance.post(`/meetings/send-info/${tenantId}`);
+
+            const notifications = res.data.data?.notifications || [];
+
+            const successfulSends = notifications.filter((n: { sent: boolean }) => n.sent);
+            const failedSends = notifications.filter((n: { sent: boolean }) => !n.sent);
+
+            let alertMessage = '';
+
+            if (successfulSends.length > 0) {
+                alertMessage += `✅ Emails sent to:\n${successfulSends
+                    .map((p: { propertyArea: string; email: string }) => `• ${p.propertyArea} (${p.email})`)
+                    .join('\n')}`;
+            }
+
+            if (failedSends.length > 0) {
+                alertMessage += `\n\n❌ Failed to send to:\n${failedSends
+                    .map((p: { propertyArea: string; reason?: string }) =>
+                        `• ${p.propertyArea}${p.reason ? ` (${p.reason})` : ''}`)
+                    .join('\n')}`;
+            }
+
+            if (alertMessage) {
+                alert(alertMessage);
+            } else {
+                alert('No property emails were processed');
+            }
+
+        } catch (err: any) {
+            console.error('Error sending units to tenant:', err.response?.data || err.message);
+            alert(err.response?.data?.error || 'Failed to send client information');
+        } finally {
+            setLoading(false);
+        }
+    };
     const sortedUnits = [...savedUnits].sort((a, b) =>
         sortBy === 'price' ? a.price - b.price : a.sqft - b.sqft
     );
@@ -224,18 +261,26 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
                 </div>
 
                 {/* Footer */}
-                <div className="p-4 flex justify-center border-t border-gray-200 bg-gray-50 rounded-b-xl">
+                <div className="p-4 flex justify-between border-t border-gray-200 bg-gray-50 rounded-b-xl">
                     {
                         Object.keys(groupedUnits).length > 0 && (
                             <button
                                 onClick={sendUnitToTenant}
                                 disabled={loading}
-                                className="w-full lg:w-[30%] py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                                className="w-fit py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
                             >
                                 {loading ? 'Sending...' : 'Send Units to Client Mail'}
                             </button>
                         )
                     }
+
+                    <button
+                        onClick={sendClientInfoToPropertyOwner}
+                        disabled={loading}
+                        className="w-fit py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                    >
+                        {loading ? 'Sending...' : 'Send Client Info to property owner'}
+                    </button>
 
                 </div>
             </div>

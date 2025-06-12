@@ -15,6 +15,10 @@ const propertyEmailSchema = new Schema(
       ref: "ScrapeList",
       required: true,
     },
+    scrapeListName: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,

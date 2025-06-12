@@ -23,7 +23,8 @@ const AddPropertyEmailModal = ({ listingId, onClose, onSuccess, listingName }: A
         try {
             await axiosInstance.post('/property-emails', {
                 email,
-                scrapeListId: listingId
+                scrapeListId: listingId,
+                scrapeListName: listingName,
             });
             setSuccess(true);
             onSuccess();

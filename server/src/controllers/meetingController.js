@@ -1,5 +1,6 @@
 const Tenant = require("../models/Tenant");
 const SavedUnit = require("../models/SavedUnit");
+const PropertyEmailModel = require("../models/PropertyEmail");
 const nodemailer = require("nodemailer");
 const hbs = require("hbs");
 const fs = require("fs");
@@ -16,6 +17,10 @@ const transporter = nodemailer.createTransport({
 
 const templatePath = path.join(__dirname, "../../views/meeting-invite.hbs");
 const unitsTemplatePath = path.join(__dirname, "../../views/units-email.hbs");
+const propertyNotificationPath = path.join(
+  __dirname,
+  "../../views/property-notification.hbs"
+);
 const submissionTemplatePath = path.join(
   __dirname,
   "../../views/submission-notification.hbs"
@@ -132,6 +137,112 @@ const sendUnitsToTenant = async (tenantId) => {
   }
 };
 
+const sendPropertyNotification = async (
+  propertyEmail,
+  tenant,
+  propertyArea
+) => {
+  try {
+    const template = await fs.promises.readFile(
+      propertyNotificationPath,
+      "utf8"
+    );
+
+    const html = renderTemplate(template, {
+      propertyArea,
+      client: {
+        firstName: tenant.firstName,
+        lastName: tenant.lastName,
+        mobileNumber: tenant.mobileNumber,
+        email: tenant.email,
+        instagram: tenant.instagram,
+      },
+      supportEmail: process.env.SUPPORT_EMAIL || "support@tsangrealestate.com",
+    });
+
+    const mailOptions = {
+      from: `"Tsang Real Estate" <${process.env.EMAIL_USER}>`,
+      to: propertyEmail,
+      subject: `New Client Interest for ${propertyArea}`,
+      html,
+    };
+
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error(`Error sending notification for ${propertyArea}:`, error);
+    return false;
+  }
+};
+
+const sendClientInfoToPropertyOwner = async (tenantId) => {
+  try {
+    const tenant = await Tenant.findById(tenantId);
+    if (!tenant) throw new Error("Tenant not found.");
+
+    const savedUnitsDocs = await SavedUnit.find({ tenantId })
+      .sort({ timestamp: -1 })
+      .lean()
+      .exec();
+    if (!savedUnitsDocs?.length) throw new Error("No saved units found.");
+
+    const allAreas = [
+      ...new Set(
+        savedUnitsDocs.flatMap((doc) =>
+          doc.selectedUnits.map((unit) => unit.propertyArea).filter(Boolean)
+        )
+      ),
+    ];
+
+    if (!allAreas.length) throw new Error("No property areas found.");
+
+    const areaEmails = await PropertyEmailModel.find({
+      scrapeListName: { $in: allAreas },
+    }).lean();
+
+    const areasWithEmails = allAreas.map((area) => {
+      const match = areaEmails.find((e) => e.scrapeListName === area);
+      return {
+        propertyArea: area,
+        email: match?.email || null,
+        scrapeListId: match?.scrapeListId || null,
+      };
+    });
+
+    const emailResults = await Promise.all(
+      areasWithEmails.map(async (area) => {
+        if (area.email) {
+          const success = await sendPropertyNotification(
+            area.email,
+            tenant,
+            area.propertyArea
+          );
+          return {
+            propertyArea: area.propertyArea,
+            sent: success,
+            email: area.email,
+          };
+        }
+        return {
+          propertyArea: area.propertyArea,
+          sent: false,
+          reason: "No email on file",
+        };
+      })
+    );
+
+    return {
+      success: true,
+      tenant: `${tenant.firstName} ${tenant.lastName}`,
+      notifications: emailResults,
+      timestamp: new Date(),
+    };
+  } catch (error) {
+    console.error("Error in sendClientInfoToPropertyOwner:", error);
+    throw error;
+  }
+};
+
 const sendSubmissionNotification = async (tenantId) => {
   try {
     const tenant = await Tenant.findById(tenantId).lean();
@@ -187,7 +298,7 @@ const sendSubmissionNotification = async (tenantId) => {
         OtherOnLease: capitalize(tenant.OtherOnLease),
         othersOnLeasevalue: tenant.othersOnLeasevalue,
         brokenLease: tenant.brokenLease,
-        AvailabilityDate: formatDate(tenant.AvailabilityDate), 
+        AvailabilityDate: formatDate(tenant.AvailabilityDate),
         leaseStartDate: formatDate(tenant.leaseStartDate),
         leaseEndDate: formatDate(tenant.leaseEndDate),
         timeForCall: tenant.timeForCall,
@@ -231,4 +342,5 @@ module.exports = {
   sendMeetingInvite,
   sendUnitsToTenant,
   sendSubmissionNotification,
+  sendClientInfoToPropertyOwner,
 };

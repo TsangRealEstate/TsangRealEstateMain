@@ -4,6 +4,7 @@ const Tenant = require("../models/Tenant");
 const {
   sendMeetingInvite,
   sendUnitsToTenant,
+  sendClientInfoToPropertyOwner,
 } = require("../controllers/meetingController");
 
 router.post("/send-invite/:id", async (req, res) => {
@@ -65,6 +66,15 @@ router.post("/:id/send-units", async (req, res) => {
       error: "Internal server error",
       details: error.message,
     });
+  }
+});
+
+router.post("/send-info/:tenantId", async (req, res) => {
+  try {
+    const result = await sendClientInfoToPropertyOwner(req.params.tenantId);
+    res.json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 module.exports = router;

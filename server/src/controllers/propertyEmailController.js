@@ -4,7 +4,7 @@ const { ScrapeListModel } = require("../models/scrapeList");
 const propertyEmailController = {
     create: async (req, res) => {
         try {
-            const { email, scrapeListId } = req.body;
+            const { email, scrapeListId,scrapeListName } = req.body;
 
             if (!email || !scrapeListId) {
                 return res
@@ -32,7 +32,7 @@ const propertyEmailController = {
                 });
             }
 
-            const newPropertyEmail = new PropertyEmailModel({ email, scrapeListId });
+            const newPropertyEmail = new PropertyEmailModel({ email, scrapeListId,scrapeListName });
             await newPropertyEmail.save();
 
             res.status(201).json({
