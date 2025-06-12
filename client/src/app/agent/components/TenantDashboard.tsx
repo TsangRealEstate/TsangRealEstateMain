@@ -685,14 +685,15 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     .map((area: string) => area.trim())
                     .filter((area: string) => area.length > 0);
 
-                // Convert area names to zip codes
-                const selectedZips = cleanedAreas.flatMap((area: string) => {
-                    // Find matching area (case-insensitive)
-                    const matchedArea = sanAntonioAreas.find(a =>
-                        a.area_name.toLowerCase().includes(area.toLowerCase())
-                    );
-                    return matchedArea?.zip_codes || [];
-                });
+                // Convert area names to zip codes and remove duplicates
+                const selectedZips = cleanedAreas
+                    .flatMap((area: string) => {
+                        const matchedArea = sanAntonioAreas.find(a =>
+                            a.area_name.toLowerCase().includes(area.toLowerCase())
+                        );
+                        return matchedArea?.zip_codes || [];
+                    })
+                    .filter((zip: any, index: any, self: string | any[]) => self.indexOf(zip) === index); // Remove duplicates
 
                 // Only append if we found matching zips
                 if (selectedZips.length > 0) {
