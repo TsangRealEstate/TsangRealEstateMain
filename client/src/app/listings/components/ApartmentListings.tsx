@@ -355,7 +355,7 @@ const ApartmentListings = () => {
                                         >
                                             <button
                                                 onClick={() => setEmailModalListingId(listing._id)}
-                                                className="p-2 text-gray-400 hover:text-blue-500 absolute top-2 right-10"
+                                                className="p-2 text-gray-400 hover:text-blue-500 absolute top-0 right-10"
                                                 title="Add property email"
                                             >
                                                 <FaEnvelope className="h-4 w-4" />
@@ -374,7 +374,7 @@ const ApartmentListings = () => {
 
                                             <button
                                                 onClick={() => handleDeleteListing(listing.destinationURL)}
-                                                className="absolute top-2 right-2 p-2 text-gray-400 hover:text-red-500"
+                                                className="absolute top-0 right-2 p-2 text-gray-400 hover:text-red-500"
                                                 title="Delete listing"
                                             >
                                                 <FaTrash className="h-4 w-4" />
@@ -400,7 +400,7 @@ const ApartmentListings = () => {
                                         {/* Delete button in top-right corner */}
                                         <button
                                             onClick={() => handleDeleteListing(listing.destinationURL)}
-                                            className="absolute top-2 right-2 p-2 text-gray-400 hover:text-red-500 transition-colors duration-200"
+                                            className="absolute top-0 right-2 p-2 text-gray-400 hover:text-red-500 transition-colors duration-200"
                                             title="Delete listing"
                                         >
                                             <FaTrash className="h-4 w-4" />
@@ -408,7 +408,7 @@ const ApartmentListings = () => {
 
                                         <button
                                             onClick={() => setEmailModalListingId(listing._id)}
-                                            className="p-2 text-gray-400 hover:text-blue-500 absolute top-2 right-10"
+                                            className="p-2 text-gray-400 hover:text-blue-500 absolute top-0 right-10"
                                             title="Add property email"
                                         >
                                             <FaEnvelope className="h-4 w-4" />

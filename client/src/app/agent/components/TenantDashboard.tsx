@@ -241,7 +241,8 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
 
             const [showBudgetModal, setShowBudgetModal] = useState(false);
             const [isEditing, setIsEditing] = useState(false);
-            const [editValue, setEditValue] = useState('');
+            const [editMinValue, setEditMinValue] = useState(currentBudget[0] || '');
+            const [editMaxValue, setEditMaxValue] = useState(currentBudget[1] || '');
             const [isSaving, setIsSaving] = useState(false);
 
             const handleSaveBudget = (selected: string[]) => {
@@ -253,10 +254,10 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             const handleInlineSave = async () => {
                 try {
                     setIsSaving(true);
-                    const parts = editValue.replace(/\$/g, '').trim().split('-');
-                    if (parts.length === 2) {
-                        const min = parts[0].trim();
-                        const max = parts[1].trim();
+                    const min = editMinValue.trim();
+                    const max = editMaxValue.trim();
+
+                    if (min && max) {
                         const newBudget = [min, max];
                         const budgetString = newBudget.join('-');
 
@@ -277,11 +278,8 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                 }
             };
 
-            const formatBudget = (budget: string[]) => {
-                if (budget.length === 2) {
-                    return `$${Math.min(Number(budget[0]), Number(budget[1]))} - $${Math.max(Number(budget[0]), Number(budget[1]))}`;
-                }
-                return budget.length === 1 ? `$${budget[0]}` : "N/A";
+            const formatBudget = (value: string) => {
+                return value ? `$${value}` : "N/A";
             };
 
             return (
@@ -292,28 +290,38 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                             value={
                                 isEditing ? (
                                     <div className="flex items-center gap-2">
-                                        <input
-                                            type="text"
-                                            value={editValue}
-                                            onChange={(e) => setEditValue(e.target.value)}
-                                            onKeyDown={(e) => e.key === 'Enter' && handleInlineSave()}
-                                            autoFocus
-                                            className="border-b border-blue-500 outline-none w-full"
-                                            defaultValue={formatBudget(currentBudget)}
-                                        />
+                                        <div className="flex gap-2 w-fit">
+                                            <input
+                                                type="text"
+                                                placeholder="Min"
+                                                value={editMinValue}
+                                                onChange={(e) => setEditMinValue(e.target.value.replace(/[^0-9]/g, ''))}
+                                                onKeyDown={(e) => e.key === 'Enter' && handleInlineSave()}
+                                                autoFocus
+                                                className="border px-2 border-blue-500 w-[80px]"
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Max"
+                                                value={editMaxValue}
+                                                onChange={(e) => setEditMaxValue(e.target.value.replace(/[^0-9]/g, ''))}
+                                                onKeyDown={(e) => e.key === 'Enter' && handleInlineSave()}
+                                                className="border px-2 border-blue-500 w-[80px]"
+                                            />
+                                        </div>
                                         {isSaving ? (
                                             <span className="text-sm text-gray-500">Saving...</span>
                                         ) : (
                                             <button
                                                 onClick={handleInlineSave}
-                                                className="text-sm text-blue-500 hover:text-blue-700"
+                                                className="text-sm text-blue-500 hover:text-blue-700 whitespace-nowrap"
                                             >
                                                 Save
                                             </button>
                                         )}
                                     </div>
                                 ) : (
-                                    formatBudget(currentBudget)
+                                    `${formatBudget(currentBudget[0] || '')} - ${formatBudget(currentBudget[1] || '')}`
                                 )
                             }
                             icon={<FiDollarSign className="text-blue-500" />}
@@ -324,7 +332,8 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                                     if (isEditing) {
                                         setIsEditing(false);
                                     } else {
-                                        setEditValue(formatBudget(currentBudget));
+                                        setEditMinValue(currentBudget[0] || '');
+                                        setEditMaxValue(currentBudget[1] || '');
                                         setIsEditing(true);
                                     }
                                 }}
@@ -332,17 +341,18 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                                 disabled={isSaving}
                             >
                                 <AiOutlineEdit
-                                    size={18}
+                                    size={25}
                                     className={
-                                        isEditing ? "text-red-500" :
-                                            isSaving ? "text-gray-400" :
-                                                "text-gray-400 group-hover:text-green-600 transition-colors"
+                                        isEditing ? "text-blue-400" :
+                                            isSaving ? "text-blue-400" :
+                                                "text-blue-500 group-hover:text-green-600 transition-colors"
                                     }
                                 />
                             </button>
+
                             <button
                                 onClick={() => setShowBudgetModal(true)}
-                                className="text-xs text-blue-500 hover:text-blue-700"
+                                className="text-xs text-blue-500 hidden hover:text-blue-700"
                                 disabled={isSaving}
                             >
                                 Range
