@@ -233,16 +233,16 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                 return [];
             })();
 
-
             const [currentBudget, setCurrentBudget] = useState<string[]>(() => {
                 const local = getLocalBudget(tenant._id);
                 if (Array.isArray(local) && local.length > 0) return local;
-
                 return budgetOptions;
             });
 
-
             const [showBudgetModal, setShowBudgetModal] = useState(false);
+            const [isEditing, setIsEditing] = useState(false);
+            const [editValue, setEditValue] = useState('');
+            const [isSaving, setIsSaving] = useState(false);
 
             const handleSaveBudget = (selected: string[]) => {
                 setLocalBudget(tenant._id, selected);
@@ -250,31 +250,103 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                 setShowBudgetModal(false);
             };
 
+            const handleInlineSave = async () => {
+                try {
+                    setIsSaving(true);
+                    const parts = editValue.replace(/\$/g, '').trim().split('-');
+                    if (parts.length === 2) {
+                        const min = parts[0].trim();
+                        const max = parts[1].trim();
+                        const newBudget = [min, max];
+                        const budgetString = newBudget.join('-');
+
+                        await axiosInstance.put(`/tenants/${tenant._id}`, {
+                            budget: `$${budgetString}`
+                        });
+
+                        setLocalBudget(tenant._id, newBudget);
+                        setCurrentBudget(newBudget);
+                        tenant.budget = `$${budgetString}`;
+                    }
+                } catch (err) {
+                    console.error("Error saving budget:", err);
+                    alert('Failed to update budget.');
+                } finally {
+                    setIsSaving(false);
+                    setIsEditing(false);
+                }
+            };
+
+            const formatBudget = (budget: string[]) => {
+                if (budget.length === 2) {
+                    return `$${Math.min(Number(budget[0]), Number(budget[1]))} - $${Math.max(Number(budget[0]), Number(budget[1]))}`;
+                }
+                return budget.length === 1 ? `$${budget[0]}` : "N/A";
+            };
+
             return (
                 <>
-                    <div
-                        className="relative group cursor-pointer"
-                        onClick={() => setShowBudgetModal(true)}
-                    >
+                    <div className="relative group">
                         <DetailItem
                             label="Budget"
-
                             value={
-                                currentBudget.length === 2
-                                    ? `$${Math.min(Number(currentBudget[0]), Number(currentBudget[1]))} - $${Math.max(Number(currentBudget[0]), Number(currentBudget[1]))}`
-                                    : currentBudget.length === 1
-                                        ? `$${currentBudget[0]}`
-                                        : "N/A"
+                                isEditing ? (
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            value={editValue}
+                                            onChange={(e) => setEditValue(e.target.value)}
+                                            onKeyDown={(e) => e.key === 'Enter' && handleInlineSave()}
+                                            autoFocus
+                                            className="border-b border-blue-500 outline-none w-full"
+                                            defaultValue={formatBudget(currentBudget)}
+                                        />
+                                        {isSaving ? (
+                                            <span className="text-sm text-gray-500">Saving...</span>
+                                        ) : (
+                                            <button
+                                                onClick={handleInlineSave}
+                                                className="text-sm text-blue-500 hover:text-blue-700"
+                                            >
+                                                Save
+                                            </button>
+                                        )}
+                                    </div>
+                                ) : (
+                                    formatBudget(currentBudget)
+                                )
                             }
-
-
                             icon={<FiDollarSign className="text-blue-500" />}
                         />
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                            <AiOutlineEdit
-                                size={22}
-                                className="text-gray-400 group-hover:text-green-600 transition-colors opacity-0 group-hover:opacity-100"
-                            />
+                            <button
+                                onClick={() => {
+                                    if (isEditing) {
+                                        setIsEditing(false);
+                                    } else {
+                                        setEditValue(formatBudget(currentBudget));
+                                        setIsEditing(true);
+                                    }
+                                }}
+                                className="p-1 rounded-full hover:bg-gray-100"
+                                disabled={isSaving}
+                            >
+                                <AiOutlineEdit
+                                    size={18}
+                                    className={
+                                        isEditing ? "text-red-500" :
+                                            isSaving ? "text-gray-400" :
+                                                "text-gray-400 group-hover:text-green-600 transition-colors"
+                                    }
+                                />
+                            </button>
+                            <button
+                                onClick={() => setShowBudgetModal(true)}
+                                className="text-xs text-blue-500 hover:text-blue-700"
+                                disabled={isSaving}
+                            >
+                                Range
+                            </button>
                         </div>
                     </div>
 
