@@ -446,6 +446,19 @@ const ApartmentListings = () => {
                                                 </div>
                                             </div>
 
+                                            <div className="flex justify-between flex-col my-4">
+                                                <h4 className="text-lg font-semibold text-blue-800 flex items-center">
+                                                    Current Specials
+                                                </h4>
+
+                                                <p className="text-sm my-2.5 font-medium text-gray-800 break-words whitespace-pre-wrap overflow-hidden">
+                                                    {listing.specials.replace("*", "")}
+                                                </p>
+
+                                                <p className="text-sm font-bold text-gray-800">
+                                                    Phone: {listing.phone.replace("*", "")}
+                                                </p>
+                                            </div>
                                             <div className="mt-4">
                                                 <div className="mt-2 flex items-center text-sm text-gray-500">
                                                     <FaClock className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />

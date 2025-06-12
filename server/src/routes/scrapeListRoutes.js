@@ -80,6 +80,8 @@ router.get("/", async (req, res) => {
       rental_type: entry.Information?.rental_type || null,
       available_units: entry.Information?.available_units || null,
       neighborhood: entry.Information?.neighborhood || null,
+      specials: entry.Information?.specials[0]?.raw_text || "No Specials",
+      phone: entry.Information?.phone || "No Phone Number",
     }));
 
     res.json({

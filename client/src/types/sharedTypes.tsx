@@ -145,6 +145,8 @@ export interface ApiResponse {
 
 
 export interface Listing {
+  phone: any;
+  specials: string;
   _id: string;
   destinationURL: string;
   lastScrapeInfo: string;
