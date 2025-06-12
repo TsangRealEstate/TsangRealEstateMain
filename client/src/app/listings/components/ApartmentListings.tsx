@@ -1,5 +1,6 @@
 "use client"
 import axiosInstance from '@/api/axiosInstance';
+import AddPropertyEmailModal from '@/app/agent/components/AddPropertyEmailModal';
 import { useAuth } from '@/context/AuthContext';
 import { Listing } from '@/types/sharedTypes';
 import { formatAvailabilityDate } from '@/utils/dateUtils';
@@ -18,6 +19,7 @@ import {
     FaRulerCombined,
     FaTimes,
     FaTrash,
+    FaEnvelope,
 } from 'react-icons/fa';
 import { FiRefreshCw } from 'react-icons/fi';
 
@@ -34,7 +36,7 @@ const ApartmentListings = () => {
     const [sortBy, setSortBy] = useState<'default' | 'price' | 'date'>('default');
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [selectedListing, setSelectedListing] = useState<Listing | null>(null);
-
+    const [emailModalListingId, setEmailModalListingId] = useState<string | null>(null);
 
     const handleViewDetails = (listing: Listing) => {
         setSelectedListing(listing);
@@ -352,6 +354,25 @@ const ApartmentListings = () => {
                                             style={{ minHeight: '120px' }}
                                         >
                                             <button
+                                                onClick={() => setEmailModalListingId(listing._id)}
+                                                className="p-2 text-gray-400 hover:text-blue-500 absolute top-2 right-10"
+                                                title="Add property email"
+                                            >
+                                                <FaEnvelope className="h-4 w-4" />
+                                            </button>
+
+                                            {emailModalListingId === listing._id && (
+                                                <AddPropertyEmailModal
+                                                    listingId={listing._id}
+                                                    listingName={getPropertyNameFromUrl(listing.destinationURL)}
+                                                    onClose={() => setEmailModalListingId(null)}
+                                                    onSuccess={() => {
+                                                        "property email added successfully";
+                                                    }}
+                                                />
+                                            )}
+
+                                            <button
                                                 onClick={() => handleDeleteListing(listing.destinationURL)}
                                                 className="absolute top-2 right-2 p-2 text-gray-400 hover:text-red-500"
                                                 title="Delete listing"
@@ -361,7 +382,7 @@ const ApartmentListings = () => {
 
                                             {/* Perfectly centered status message */}
                                             <p className="text-blue-600 text-sm text-center px-4">
-                                                Listing just added. Data will populate after scraping.
+                                                {getPropertyNameFromUrl(listing.destinationURL)} was just added. Data will populate after scraping.
                                             </p>
                                         </div>
                                     );
@@ -384,6 +405,26 @@ const ApartmentListings = () => {
                                         >
                                             <FaTrash className="h-4 w-4" />
                                         </button>
+
+                                        <button
+                                            onClick={() => setEmailModalListingId(listing._id)}
+                                            className="p-2 text-gray-400 hover:text-blue-500 absolute top-2 right-10"
+                                            title="Add property email"
+                                        >
+                                            <FaEnvelope className="h-4 w-4" />
+                                        </button>
+
+                                        {/* Modal - only show for this specific listing */}
+                                        {emailModalListingId === listing._id && (
+                                            <AddPropertyEmailModal
+                                                listingId={listing._id}
+                                                listingName={propertyName}
+                                                onClose={() => setEmailModalListingId(null)}
+                                                onSuccess={() => {
+                                                    "property email added successfully";
+                                                }}
+                                            />
+                                        )}
 
                                         {/* Initial Listing details before modal */}
                                         <div className="px-4 py-5 sm:p-6">

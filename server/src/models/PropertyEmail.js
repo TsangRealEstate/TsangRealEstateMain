@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
-const { ScrapeListModel } = require("./scrapeList"); // Import the ScrapeList model
 
 const propertyEmailSchema = new Schema(
   {

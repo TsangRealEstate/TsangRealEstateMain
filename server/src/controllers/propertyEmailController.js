@@ -2,38 +2,55 @@ const PropertyEmailModel = require("../models/PropertyEmail");
 const { ScrapeListModel } = require("../models/scrapeList");
 
 const propertyEmailController = {
-    // Create a new property email
     create: async (req, res) => {
         try {
             const { email, scrapeListId } = req.body;
 
-            // Check if the scrapeList exists
-            const scrapeList = await ScrapeListModel.findById(scrapeListId);
-            if (!scrapeList) {
+            if (!email || !scrapeListId) {
+                return res
+                    .status(400)
+                    .json({ error: "Email and scrapeListId are required" });
+            }
+
+            
+            const scrapeListExists = await ScrapeListModel.exists({
+                _id: scrapeListId,
+            });
+            if (!scrapeListExists) {
                 return res.status(404).json({ error: "ScrapeList not found" });
             }
 
-            // Check if email already exists for this scrapeList
-            const existingEmail = await PropertyEmailModel.findOne({
-                email,
-                scrapeListId,
-            });
-            if (existingEmail) {
-                return res
-                    .status(400)
-                    .json({ error: "Email already exists for this property" });
+            // First check if email exists for this scrapeListId
+            const existingRecord = await PropertyEmailModel.findOne({ scrapeListId });
+
+            if (existingRecord) {
+                existingRecord.email = email;
+                await existingRecord.save();
+                return res.status(200).json({
+                    message: "Email updated successfully",
+                    data: existingRecord,
+                });
             }
 
-            const propertyEmail = new PropertyEmailModel({ email, scrapeListId });
-            await propertyEmail.save();
+            const newPropertyEmail = new PropertyEmailModel({ email, scrapeListId });
+            await newPropertyEmail.save();
 
-            res.status(201).json(propertyEmail);
+            res.status(201).json({
+                message: "Email created successfully",
+                data: newPropertyEmail,
+            });
         } catch (error) {
+            // Handle duplicate key errors specifically
+            if (error.code === 11000) {
+                return res.status(400).json({
+                    error: "This email already exists for another property",
+                });
+            }
             res.status(500).json({ error: error.message });
         }
     },
 
-    // Get all property emails
+    
     getAll: async (req, res) => {
         try {
             const propertyEmails = await PropertyEmailModel.find().populate(
@@ -45,7 +62,6 @@ const propertyEmailController = {
         }
     },
 
-    // Get property emails by scrapeList ID
     getByScrapeListId: async (req, res) => {
         try {
             const { scrapeListId } = req.params;
