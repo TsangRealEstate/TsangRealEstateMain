@@ -451,7 +451,7 @@ const ApartmentListings = () => {
                                                     Current Specials
                                                 </h4>
 
-                                                <p className="text-sm my-2.5 font-medium text-gray-800 break-words whitespace-pre-wrap overflow-hidden">
+                                                <p className="text-sm mb-2.5 font-medium text-gray-800 break-words whitespace-pre-wrap overflow-hidden">
                                                     {listing.specials.replace("*", "")}
                                                 </p>
 
