@@ -1,0 +1,29 @@
+const mongoose = require("mongoose");
+const { Schema, model } = mongoose;
+const { ScrapeListModel } = require("./scrapeList"); // Import the ScrapeList model
+
+const propertyEmailSchema = new Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      trim: true,
+      lowercase: true,
+      match: [/.+\@.+\..+/, "Please fill a valid email address"],
+    },
+    scrapeListId: {
+      type: Schema.Types.ObjectId,
+      ref: "ScrapeList",
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const PropertyEmailModel =
+  mongoose.models.PropertyEmail ||
+  model("PropertyEmail", propertyEmailSchema, "propertyEmails");
+
+module.exports = PropertyEmailModel;
