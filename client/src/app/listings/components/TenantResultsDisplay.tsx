@@ -38,7 +38,7 @@ interface Unit {
 
 interface Listing {
     property_zip: string;
-    property_specials: { raw_text: string; html: string };
+    property_specials: { raw_text: string; html: string }[];
     _id: string;
     scrapeListId: string;
     display_name: string;
