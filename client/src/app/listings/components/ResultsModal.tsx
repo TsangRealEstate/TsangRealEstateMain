@@ -29,6 +29,7 @@ export default function ResultsModal({
             scrapeListId: listing._id,
             display_name: listing.Information.display_name,
             property_zip: listing.Information.zip,
+            property_specials: listing.Information.specials,
             street_address: listing.Information.street_address,
             available_units: listing.Information.available_units.map((unit: any) => ({
                 id: unit.id,

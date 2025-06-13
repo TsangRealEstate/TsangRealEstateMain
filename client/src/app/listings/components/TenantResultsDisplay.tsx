@@ -38,6 +38,7 @@ interface Unit {
 
 interface Listing {
     property_zip: string;
+    property_specials: { raw_text: string; html: string };
     _id: string;
     scrapeListId: string;
     display_name: string;
@@ -294,6 +295,17 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
                                 </p>
                             )}
                         </div>
+                    </div>
+
+                    <div className='mt-4'>
+                        <h4 className="text-lg font-semibold text-blue-800 flex items-center">
+                            Current Specials
+                        </h4>
+
+                        <p className="text-sm mb-2.5 font-medium text-gray-800 break-words whitespace-pre-wrap overflow-hidden">
+                            {/* {listing.property_specials.replace("*", "")} */}
+                            {listing.property_specials[0]?.raw_text || 'No specials available'}
+                        </p>
                     </div>
 
                     <div className="mt-4">
