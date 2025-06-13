@@ -31,7 +31,7 @@ const MultiSelectModal = ({ title, items, selectedItems, onSave, onClose }: Prop
                 <div
                     className={
                         title === "Edit Desired Locations"
-                            ? "grid grid-cols-2 md:grid-cols-3 gap-2 max-h-60 overflow-y-auto"
+                            ? "grid grid-cols-1 lg:gap-2 gap-y-3 max-h-60 overflow-y-auto"
                             : "space-y-2 max-h-60 overflow-y-auto"
                     }
                 >

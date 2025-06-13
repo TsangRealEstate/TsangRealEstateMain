@@ -15,6 +15,7 @@ import MultiSelectModal from "./MultiSelectModal";
 import TenantComments from "./TenantComments";
 import { sanAntonioAreas } from "@/data/sanAntonioAreas";
 import { allLocationOptions } from "@/data/allLocations";
+import { logMovement } from "./Agent";
 
 interface TenantModalProps {
     tenant: any;
@@ -42,7 +43,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
     const [editedValue, setEditedValue] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const { setTenants, setColumns, searchedResults, fetchSearchedResults } = useAuth();
+    const { setTenants, setColumns, columns, searchedResults, fetchSearchedResults } = useAuth();
     const [movements, setMovements] = useState<Movement[]>([]);
     if (!tenant) return null;
 
@@ -67,6 +68,37 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             console.error('Update failed', error);
             alert('Failed to update tenant information.');
         }
+    };
+
+    const handleColumnChange = (selectedColumnId: string) => {
+        if (!tenant) return;
+
+        const currentColumnIndex = columns.findIndex(col =>
+            col.cards.some((card: { id: any; }) => card.id === tenant._id)
+        );
+
+        if (currentColumnIndex === -1) return;
+
+        const targetColumnIndex = columns.findIndex(col => col.id === selectedColumnId);
+        if (targetColumnIndex === -1) return;
+
+        if (currentColumnIndex === targetColumnIndex) return;
+
+        const updatedColumns = [...columns];
+        const currentColumn = updatedColumns[currentColumnIndex];
+        const targetColumn = updatedColumns[targetColumnIndex];
+
+        const cardIndex = currentColumn.cards.findIndex((card: { id: any; }) => card.id === tenant._id);
+        if (cardIndex === -1) return;
+
+        const [movedCard] = currentColumn.cards.splice(cardIndex, 1);
+
+        targetColumn.cards.push(movedCard);
+
+        // Update state
+        setColumns(updatedColumns);
+
+        logMovement(tenant._id, currentColumn.title, targetColumn.title);
     };
 
     const renderDetailItem = (label: string, field: string, value: any, icon: JSX.Element) => {
@@ -233,16 +265,17 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                 return [];
             })();
 
-
             const [currentBudget, setCurrentBudget] = useState<string[]>(() => {
                 const local = getLocalBudget(tenant._id);
                 if (Array.isArray(local) && local.length > 0) return local;
-
                 return budgetOptions;
             });
 
-
             const [showBudgetModal, setShowBudgetModal] = useState(false);
+            const [isEditing, setIsEditing] = useState(false);
+            const [editMinValue, setEditMinValue] = useState(currentBudget[0] || '');
+            const [editMaxValue, setEditMaxValue] = useState(currentBudget[1] || '');
+            const [isSaving, setIsSaving] = useState(false);
 
             const handleSaveBudget = (selected: string[]) => {
                 setLocalBudget(tenant._id, selected);
@@ -250,31 +283,112 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                 setShowBudgetModal(false);
             };
 
+            const handleInlineSave = async () => {
+                try {
+                    setIsSaving(true);
+                    const min = editMinValue.trim();
+                    const max = editMaxValue.trim();
+
+                    if (min && max) {
+                        const newBudget = [min, max];
+                        const budgetString = newBudget.join('-');
+
+                        await axiosInstance.put(`/tenants/${tenant._id}`, {
+                            budget: `$${budgetString}`
+                        });
+
+                        setLocalBudget(tenant._id, newBudget);
+                        setCurrentBudget(newBudget);
+                        tenant.budget = `$${budgetString}`;
+                    }
+                } catch (err) {
+                    console.error("Error saving budget:", err);
+                    alert('Failed to update budget.');
+                } finally {
+                    setIsSaving(false);
+                    setIsEditing(false);
+                }
+            };
+
+            const formatBudget = (value: string) => {
+                return value ? `$${value}` : "N/A";
+            };
+
             return (
                 <>
-                    <div
-                        className="relative group cursor-pointer"
-                        onClick={() => setShowBudgetModal(true)}
-                    >
+                    <div className="relative group">
                         <DetailItem
                             label="Budget"
-
                             value={
-                                currentBudget.length === 2
-                                    ? `$${Math.min(Number(currentBudget[0]), Number(currentBudget[1]))} - $${Math.max(Number(currentBudget[0]), Number(currentBudget[1]))}`
-                                    : currentBudget.length === 1
-                                        ? `$${currentBudget[0]}`
-                                        : "N/A"
+                                isEditing ? (
+                                    <div className="flex items-center gap-2">
+                                        <div className="flex gap-2 w-fit">
+                                            <input
+                                                type="text"
+                                                placeholder="Min"
+                                                value={editMinValue}
+                                                onChange={(e) => setEditMinValue(e.target.value.replace(/[^0-9]/g, ''))}
+                                                onKeyDown={(e) => e.key === 'Enter' && handleInlineSave()}
+                                                autoFocus
+                                                className="border px-2 border-blue-500 w-[80px]"
+                                            />
+                                            <input
+                                                type="text"
+                                                placeholder="Max"
+                                                value={editMaxValue}
+                                                onChange={(e) => setEditMaxValue(e.target.value.replace(/[^0-9]/g, ''))}
+                                                onKeyDown={(e) => e.key === 'Enter' && handleInlineSave()}
+                                                className="border px-2 border-blue-500 w-[80px]"
+                                            />
+                                        </div>
+                                        {isSaving ? (
+                                            <span className="text-sm text-gray-500">Saving...</span>
+                                        ) : (
+                                            <button
+                                                onClick={handleInlineSave}
+                                                className="text-sm text-blue-500 hover:text-blue-700 whitespace-nowrap"
+                                            >
+                                                Save
+                                            </button>
+                                        )}
+                                    </div>
+                                ) : (
+                                    `${formatBudget(currentBudget[0] || '')} - ${formatBudget(currentBudget[1] || '')}`
+                                )
                             }
-
-
                             icon={<FiDollarSign className="text-blue-500" />}
                         />
                         <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
-                            <AiOutlineEdit
-                                size={22}
-                                className="text-gray-400 group-hover:text-green-600 transition-colors opacity-0 group-hover:opacity-100"
-                            />
+                            <button
+                                onClick={() => {
+                                    if (isEditing) {
+                                        setIsEditing(false);
+                                    } else {
+                                        setEditMinValue(currentBudget[0] || '');
+                                        setEditMaxValue(currentBudget[1] || '');
+                                        setIsEditing(true);
+                                    }
+                                }}
+                                className="p-1 rounded-full hover:bg-gray-100"
+                                disabled={isSaving}
+                            >
+                                <AiOutlineEdit
+                                    size={25}
+                                    className={
+                                        isEditing ? "text-blue-400" :
+                                            isSaving ? "text-blue-400" :
+                                                "text-blue-500 group-hover:text-green-600 transition-colors"
+                                    }
+                                />
+                            </button>
+
+                            <button
+                                onClick={() => setShowBudgetModal(true)}
+                                className="text-xs text-blue-500 hidden hover:text-blue-700"
+                                disabled={isSaving}
+                            >
+                                Range
+                            </button>
                         </div>
                     </div>
 
@@ -603,14 +717,15 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                     .map((area: string) => area.trim())
                     .filter((area: string) => area.length > 0);
 
-                // Convert area names to zip codes
-                const selectedZips = cleanedAreas.flatMap((area: string) => {
-                    // Find matching area (case-insensitive)
-                    const matchedArea = sanAntonioAreas.find(a =>
-                        a.area_name.toLowerCase().includes(area.toLowerCase())
-                    );
-                    return matchedArea?.zip_codes || [];
-                });
+                // Convert area names to zip codes and remove duplicates
+                const selectedZips = cleanedAreas
+                    .flatMap((area: string) => {
+                        const matchedArea = sanAntonioAreas.find(a =>
+                            a.area_name.toLowerCase().includes(area.toLowerCase())
+                        );
+                        return matchedArea?.zip_codes || [];
+                    })
+                    .filter((zip: any, index: any, self: string | any[]) => self.indexOf(zip) === index); // Remove duplicates
 
                 // Only append if we found matching zips
                 if (selectedZips.length > 0) {
@@ -738,10 +853,36 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             <div className="bg-white relative rounded-xl p-6 w-full max-w-5xl max-h-[90vh] overflow-y-auto">
                 <div className="flex justify-between flex-col lg:flex-row items-start mb-4 Top_CTA_BTNS">
                     <span>
-                        <h2 className="text-2xl font-semibold capitalize text-blue-500">
-                            {tenant.firstName.charAt(0).toUpperCase() + tenant.firstName.slice(1)}{" "}
-                            {tenant.lastName.charAt(0).toUpperCase() + tenant.lastName.slice(1)}
-                        </h2>
+
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-2xl font-semibold capitalize text-blue-500">
+                                {tenant.firstName.charAt(0).toUpperCase() + tenant.firstName.slice(1)}{" "}
+                                {tenant.lastName.charAt(0).toUpperCase() + tenant.lastName.slice(1)}
+                            </h2>
+
+                            <div className="relative w-48 ml-5">
+                                <select
+                                    id="column-select"
+                                    onChange={(e) => handleColumnChange(e.target.value)}
+                                    className="block appearance-none w-full bg-white border border-blue-400 hover:border-gray-300 px-4 py-2 pr-8 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200"
+                                    value={columns.find(col =>
+                                        col.cards.some((card: { id: any; }) => card.id === tenant._id)
+                                    )?.id || ""}
+                                >
+                                    {columns.map(column => (
+                                        <option key={column.id} value={column.id}>
+                                            {column.title}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="flex lg:flex-col gap-y-1.5 mt-2">
                             <p className="text-sm text-gray-600">
                                 Joined :{" "}

@@ -28,6 +28,8 @@ export default function ResultsModal({
         const simplifiedResults = results?.map((listing: any) => ({
             scrapeListId: listing._id,
             display_name: listing.Information.display_name,
+            property_zip: listing.Information.zip,
+            property_specials: listing.Information.specials,
             street_address: listing.Information.street_address,
             available_units: listing.Information.available_units.map((unit: any) => ({
                 id: unit.id,
@@ -78,7 +80,7 @@ export default function ResultsModal({
                     <div className="mb-4">
                         <p className="font-semibold">Matching properties:</p>
                         <ul className="list-disc pl-5 mt-2">
-                            {results?.map((result, index) => (
+                            {results?.slice(0, 3).map((result, index) => (
                                 <li key={index}>{result.Information.display_name}</li>
                             ))}
                         </ul>

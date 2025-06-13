@@ -1,0 +1,23 @@
+<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+    <h2 style="color: #2d3748;">Hello from Tsang Real Estate</h2>
+
+    <p>We're reaching out regarding your property: <strong>{{propertyArea}}</strong></p>
+
+    <div style="background: #f7fafc; padding: 16px; border-radius: 8px; margin: 16px 0;">
+        <h3 style="color: #4a5568;">Client Information:</h3>
+        <p><strong>Name:</strong> {{client.firstName}} {{client.lastName}}</p>
+        <p><strong>Contact:</strong> {{client.mobileNumber}}</p>
+        <p><strong>Email:</strong> {{client.email}}</p>
+        {{#if client.instagram}}
+        <p><strong>Instagram:</strong> {{client.instagram}}</p>
+        {{/if}}
+    </div>
+
+    <p>We've forwarded your available apartment to this client and believe they may be interested in your property.</p>
+
+    <p style="margin-top: 24px;">
+        <strong>Our contact information:</strong><br>
+        Tsang Real Estate Team<br>
+        {{supportEmail}}
+    </p>
+</div>

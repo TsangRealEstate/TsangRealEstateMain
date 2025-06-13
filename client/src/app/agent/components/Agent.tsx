@@ -7,9 +7,21 @@ import { useAuth } from "@/context/AuthContext";
 import axiosInstance from "@/api/axiosInstance";
 import TenantSearch from "./TenantSearch";
 import AgentLoginForm from "./AgentLoginForm";
-import { randomUUID } from "crypto";
 
 type CardLabelsMap = Record<string, CardLabel[]>;
+
+export const logMovement = async (cardId: any, fromColumn: any, toColumn: any) => {
+    try {
+        await axiosInstance.post('/movements', {
+            cardId,
+            fromColumn,
+            toColumn,
+        });
+        // console.log('Movement logged successfully!');
+    } catch (error) {
+        console.error('Failed to log movement', error);
+    }
+};
 
 export default function Agent() {
     const {
@@ -120,9 +132,23 @@ export default function Agent() {
                 const tomorrow = new Date(today);
                 tomorrow.setDate(tomorrow.getDate() + 1);
 
+                const fullName = columns[index].newCard.trim();
+
+                const nameParts = fullName.split(/\s+/);
+
+                let firstName, lastName;
+
+                if (nameParts.length === 1) {
+                    firstName = nameParts[0];
+                    lastName = "Doe";
+                } else {
+                    firstName = nameParts.slice(0, -1).join(' ');
+                    lastName = nameParts[nameParts.length - 1];
+                }
+
                 const tenantPayload = {
-                    firstName: columns[index].newCard.trim(),
-                    lastName: "Doe",
+                    firstName: firstName,
+                    lastName: lastName,
                     mobileNumber: "0000000000",
                     email: "default@example.com",
                     searchType: "rent",
@@ -170,19 +196,6 @@ export default function Agent() {
         const updatedColumns = [...columns];
         updatedColumns[index].newCard = value;
         setColumns(updatedColumns);
-    };
-
-    const logMovement = async (cardId: any, fromColumn: any, toColumn: any) => {
-        try {
-            await axiosInstance.post('/movements', {
-                cardId,
-                fromColumn,
-                toColumn,
-            });
-            // console.log('Movement logged successfully!');
-        } catch (error) {
-            console.error('Failed to log movement', error);
-        }
     };
 
     // Drag and drop functionality

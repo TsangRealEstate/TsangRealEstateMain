@@ -100,72 +100,55 @@ const formFields = {
         labelText: "What part(s) of San Antonio are you looking to move to?",
         inputType: "checkbox",
         options: [
-            // Dominion area options
-            { value: "Dominion", label: "Dominion" },
-            { value: "Leon Springs", label: "Leon Springs" },
-            { value: "The Rim", label: "The Rim" },
-            { value: "La Cantera", label: "La Cantera" },
-            { value: "UTSA", label: "UTSA" },
-            { value: "I-10 & 1604", label: "I-10 & 1604" },
-
-            // Boerne (stays the same)
-            { value: "Boerne", label: "Boerne" },
-
-            // Stone Oak area options
-            { value: "Stone Oak", label: "Stone Oak" },
-            { value: "Rogers Ranch", label: "Rogers Ranch" },
-            { value: "TPC Areas", label: "TPC Areas" },
-            { value: "Timberwood Park", label: "Timberwood Park" },
-            { value: "Hwy 281 & 1604", label: "Hwy 281 & 1604" },
-
-            // North Central area options
-            { value: "North Central", label: "North Central" },
-            { value: "Castle Hills", label: "Castle Hills" },
-            { value: "Shavano Park", label: "Shavano Park" },
-            { value: "Wurzbach Parkway & Blanco", label: "Wurzbach Parkway & Blanco" },
-
-            // Continue with all other areas similarly...
-            { value: "Medical Center", label: "Medical Center" },
-            { value: "Leon Valley", label: "Leon Valley" },
-            { value: "Ingram Area", label: "Ingram Area" },
-            { value: "I-10 & 410", label: "I-10 & 410" },
-
-            // Far West area
-            { value: "Far West", label: "Far West" },
-            { value: "Alamo Ranch", label: "Alamo Ranch" },
-            { value: "Westover Hills", label: "Westover Hills" },
-            { value: "Helotes", label: "Helotes" },
-            { value: "Potranco Rd & 1604", label: "Potranco Rd & 1604" },
-            { value: "I-90 & 1604", label: "I-90 & 1604" },
-
-            // Simple ones
-            { value: "Downtown", label: "Downtown" },
-            { value: "Alamo Heights", label: "Alamo Heights" },
-
-            // Northeast area
-            { value: "Northeast", label: "Northeast" },
-            { value: "Thousand Oaks", label: "Thousand Oaks" },
-            { value: "Live Oak", label: "Live Oak" },
-            { value: "Schertz", label: "Schertz" },
-            { value: "Converse", label: "Converse" },
-            { value: "Windcrest", label: "Windcrest" },
-            { value: "Selma", label: "Selma" },
-            { value: "Cibolo", label: "Cibolo" },
-
-            // South areas
-            { value: "Brooks City Base", label: "Brooks City Base" },
-            { value: "Southeast", label: "Southeast" },
-            { value: "South Central", label: "South Central" },
-            { value: "Southwest", label: "Southwest" },
-            { value: "Far South", label: "Far South" },
-
-            // New Braunfels
-            { value: "New Braunfels", label: "New Braunfels" },
-            { value: "Gruene", label: "Gruene" },
-
-            // Unsure option
-            { value: "I am unsure.", label: "I am unsure." }
-        ],
+            {
+                value: "Dominion, Leon Springs, The Rim, La Cantera, UTSA, I-10 & 1604",
+                label: "Dominion, Leon Springs, The Rim, La Cantera, UTSA, I-10 & 1604"
+            },
+            {
+                value: "Boerne",
+                label: "Boerne"
+            },
+            {
+                value: "Stone Oak, Rogers Ranch, TPC Areas, Timberwood Park, Hwy 281 & 1604",
+                label: "Stone Oak, Rogers Ranch, TPC Areas, Timberwood Park, Hwy 281 & 1604"
+            },
+            {
+                value: "North Central, Castle Hills, Shavano Park, Wurzbach Parkway & Blanco",
+                label: "North Central, Castle Hills, Shavano Park, Wurzbach Parkway & Blanco"
+            },
+            {
+                value: "Medical Center, Leon Valley, Ingram Area, I-10 & 410",
+                label: "Medical Center, Leon Valley, Ingram Area, I-10 & 410"
+            },
+            {
+                value: "Far West, Alamo Ranch, Westover Hills, Helotes, Potranco Rd & 1604, I-90 & 1604",
+                label: "Far West, Alamo Ranch, Westover Hills, Helotes, Potranco Rd & 1604, I-90 & 1604"
+            },
+            {
+                value: "Downtown",
+                label: "Downtown"
+            },
+            {
+                value: "Alamo Heights",
+                label: "Alamo Heights"
+            },
+            {
+                value: "Northeast, Thousand Oaks, Live Oak, Schertz, Converse, Windcrest, Selma, Cibolo",
+                label: "Northeast, Thousand Oaks, Live Oak, Schertz, Converse, Windcrest, Selma, Cibolo"
+            },
+            {
+                value: "Brooks City Base, Southeast, South Central, Southwest, Far South",
+                label: "Brooks City Base, Southeast, South Central, Southwest, Far South"
+            },
+            {
+                value: "New Braunfels, Gruene",
+                label: "New Braunfels, Gruene"
+            },
+            {
+                value: "I am unsure. I am new to San Antonio.",
+                label: "I am unsure. I am new to San Antonio."
+            }
+        ]
     },
     budget: {
         name: "budget",
