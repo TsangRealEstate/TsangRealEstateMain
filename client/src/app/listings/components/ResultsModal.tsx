@@ -28,6 +28,7 @@ export default function ResultsModal({
         const simplifiedResults = results?.map((listing: any) => ({
             scrapeListId: listing._id,
             display_name: listing.Information.display_name,
+            property_zip: listing.Information.zip,
             street_address: listing.Information.street_address,
             available_units: listing.Information.available_units.map((unit: any) => ({
                 id: unit.id,

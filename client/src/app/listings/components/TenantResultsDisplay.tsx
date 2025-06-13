@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { FaBed, FaBath, FaRulerCombined, FaCalendarAlt, FaHome, FaClock, FaTimes } from 'react-icons/fa';
 import SavedUnitsModal from './SavedUnitsModal';
 import axiosInstance from '@/api/axiosInstance';
+import { sanAntonioAreas } from '@/data/sanAntonioAreas';
 
 interface Photo {
     type: string;
@@ -36,6 +37,7 @@ interface Unit {
 }
 
 interface Listing {
+    property_zip: string;
     _id: string;
     scrapeListId: string;
     display_name: string;
@@ -79,6 +81,15 @@ const formatAvailabilityDate = (dateString?: string) => {
     if (!dateString) return 'Available now';
     return new Date(dateString).toLocaleDateString();
 };
+interface Area {
+    area_name: string;
+    zip_codes: string[];
+}
+
+const getNeighborhoodByZip = (zip: string, areas: Area[]): string | null => {
+    const area = areas.find(area => area.zip_codes.includes(zip));
+    return area ? area.area_name : null;
+};
 
 export default function TenantResultsDisplay({ tenantName }: { tenantName: string }) {
     const [results, setResults] = useState<ResultsData | null>(null);
@@ -87,6 +98,42 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
     const [modalOpen, setModalOpen] = useState(false);
     const [showSavedUnits, setShowSavedUnits] = useState(false);
     const [selectedUnits, setSelectedUnits] = useState<SelectedUnit[]>([]);
+    const areas = sanAntonioAreas;
+
+    const listingsWithPrices = results?.listings.map(listing => {
+        const lowestPrice = listing.available_units?.reduce((min, unit) => {
+            const unitMin = unit.units?.reduce((unitMin, subUnit) =>
+                Math.min(unitMin, subUnit.price), Infinity) || Infinity;
+            return Math.min(min, unitMin);
+        }, Infinity);
+
+        return {
+            ...listing,
+            lowestPrice: isFinite(lowestPrice) ? lowestPrice : Infinity
+        };
+    }) || [];
+
+    // Then group and sort
+    const groupedListings = listingsWithPrices.reduce((acc, listing) => {
+        const neighborhood = getNeighborhoodByZip(listing.property_zip, areas) || 'Other Areas';
+
+        if (!acc[neighborhood]) {
+            acc[neighborhood] = [];
+        }
+        acc[neighborhood].push(listing);
+        return acc;
+    }, {} as Record<string, typeof listingsWithPrices>);
+
+    // Sort each neighborhood's listings by price
+    Object.keys(groupedListings).forEach(neighborhood => {
+        groupedListings[neighborhood].sort((a, b) => a.lowestPrice - b.lowestPrice);
+    });
+
+    const sortedNeighborhoods = Object.keys(groupedListings).sort((a, b) => {
+        if (a === 'Other Areas') return 1;
+        if (b === 'Other Areas') return -1;
+        return a.localeCompare(b);
+    });
 
     useEffect(() => {
         const fetchResults = async () => {
@@ -113,7 +160,7 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
         }
     }, [tenantName]);
 
-    // Handlers
+
     const handleViewDetails = (listing: Listing) => {
         setSelectedListing(listing);
         setModalOpen(true);
@@ -230,13 +277,7 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
         );
     };
 
-    const PropertyCard = ({ listing }: { listing: Listing }) => {
-        const lowestPrice = listing.available_units?.reduce((min, unit) => {
-            const unitMin = unit.units?.reduce((unitMin, subUnit) =>
-                Math.min(unitMin, subUnit.price), Infinity) || Infinity;
-            return Math.min(min, unitMin);
-        }, Infinity);
-
+    const PropertyCard = ({ listing }: { listing: Listing & { lowestPrice: number } }) => {
         return (
             <div className="bg-white overflow-hidden hover:shadow-xl rounded-lg shadow-lg transition-shadow duration-300">
                 <div className="px-4 py-5 sm:p-6">
@@ -247,9 +288,9 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
                         <div className="ml-4">
                             <h3 className="text-lg leading-6 font-medium text-gray-900">{listing.display_name}</h3>
                             <p className="text-sm text-gray-500">{listing.street_address}</p>
-                            {isFinite(lowestPrice) && (
+                            {listing.lowestPrice !== Infinity && (
                                 <p className="text-sm text-blue-600 font-medium mt-1">
-                                    From {formatPrice(lowestPrice)}
+                                    From {formatPrice(listing.lowestPrice)}
                                 </p>
                             )}
                         </div>
@@ -412,9 +453,18 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
             {results.listings.length === 0 ? (
                 <p>No matching properties found.</p>
             ) : (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {results.listings.map((listing, index) => (
-                        <PropertyCard key={index} listing={listing} />
+                <div className="space-y-8">
+                    {sortedNeighborhoods.map(neighborhood => (
+                        <div key={neighborhood} className="space-y-4">
+                            <div className="border-b border-gray-200 pb-2">
+                                <h2 className="text-xl font-bold text-gray-800">{neighborhood}</h2>
+                            </div>
+                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                {groupedListings[neighborhood].map((listing, index) => (
+                                    <PropertyCard key={index} listing={listing} />
+                                ))}
+                            </div>
+                        </div>
                     ))}
                 </div>
             )}
