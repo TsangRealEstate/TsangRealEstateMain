@@ -242,6 +242,7 @@ router.get("/filter", async (req, res) => {
       $group: {
         _id: "$_id",
         title: { $first: "$title" },
+        updatedAt: { $first: "$updatedAt" },
         destinationURL: { $first: "$destinationURL" },
         Information: { $first: "$Information" },
         available_units: { $push: "$Information.available_units" },
@@ -254,8 +255,10 @@ router.get("/filter", async (req, res) => {
         _id: 1,
         title: 1,
         destinationURL: 1,
+        updatedAt: 1,
         Information: {
           specials: "$Information.specials",
+          phone: "$Information.phone",
           prices: "$Information.prices",
           display_name: "$Information.display_name",
           street_address: "$Information.street_address",

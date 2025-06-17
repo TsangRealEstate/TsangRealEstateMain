@@ -39,6 +39,7 @@ interface Unit {
 interface Listing {
     property_zip: string;
     property_specials: { raw_text: string; html: string }[];
+    phone: string;
     _id: string;
     scrapeListId: string;
     display_name: string;
@@ -144,6 +145,7 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
                 );
 
                 const data = response.data;
+                console.log('Fetched results:', data);
                 setResults({
                     count: data.count,
                     listings: data.listings,
@@ -306,11 +308,17 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
                             {/* {listing.property_specials.replace("*", "")} */}
                             {listing.property_specials[0]?.raw_text || 'No specials available'}
                         </p>
+
+                        <p className="text-sm font-bold text-gray-800">
+                            Phone: {listing.phone.replace("*", "")}
+                        </p>
                     </div>
+
+
 
                     <div className="mt-4">
                         {listing.updatedAt && (
-                            <div className="mt-2 flex items-center text-sm text-gray-500">
+                            <div className="my-4 flex items-center text-sm text-gray-500">
                                 <FaClock className="flex-shrink-0 mr-1.5 h-4 w-4 text-gray-400" />
                                 <p>Updated: {formatDate(listing.updatedAt)}</p>
                             </div>

@@ -27,10 +27,12 @@ export default function ResultsModal({
     const handleNavigate = async () => {
         const simplifiedResults = results?.map((listing: any) => ({
             scrapeListId: listing._id,
+            updatedAt: listing.updatedAt,
             display_name: listing.Information.display_name,
             property_zip: listing.Information.zip,
             property_specials: listing.Information.specials,
             street_address: listing.Information.street_address,
+            phone: listing.Information.phone,
             available_units: listing.Information.available_units.map((unit: any) => ({
                 id: unit.id,
                 name: unit.name,
