@@ -922,17 +922,18 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         )}
 
 
-                        <button
+                        {/* <button
                             onClick={() => handleSendInvite()}
                             disabled={loading}
                             className="inline-block rounded-md bg-blue-600 px-5 py-2.5 font-normal text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                         >
                             {loading ? 'Sending...' : 'Send Meeting Invite'}
-                        </button>
+                        </button> */}
 
                         <button
                             onClick={onClose}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                            className="bg-gray-500 text-white px-4 py-2 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                             
                         >
                             X
                         </button>

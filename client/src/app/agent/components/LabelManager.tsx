@@ -13,7 +13,7 @@ const PREDEFINED_COLORS = [
     { name: "Pink", value: "#f9a8d4" },
     { name: "Orange", value: "#fdba74" },
     { name: "Indigo", value: "#818cf8" },
-    { name: "Beige", value: "#f5f5dc" },
+    { name: "Black", value: "#000000" },
 ];
 
 const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {

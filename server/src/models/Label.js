@@ -10,7 +10,7 @@ const PREDEFINED_COLORS = [
   { name: "Pink", value: "#f9a8d4", isPredefined: true },
   { name: "Orange", value: "#fdba74", isPredefined: true },
   { name: "Indigo", value: "#818cf8", isPredefined: true },
-  { name: "Beige", value: "#f5f5dc", isPredefined: true },
+  { name: "Black", value: "#000000", isPredefined: true },
 ];
 
 const labelSchema = new mongoose.Schema({
