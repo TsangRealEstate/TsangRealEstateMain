@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { FiPlus, FiX, FiEdit, FiTrash2 } from "react-icons/fi";
 import axiosInstance from "@/api/axiosInstance";
 import { LabelManagerProps, Label, CardLabel2 } from "@/types/sharedTypes";
@@ -25,6 +25,8 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [editingLabelId, setEditingLabelId] = useState<string | null>(null);
     const [editedLabelName, setEditedLabelName] = useState("");
+    const isEditing = useRef(false);
+
 
     // Get available colors (not used by other labels)
     const getAvailableColors = useCallback(() => {
@@ -55,21 +57,37 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
         if (cardId) fetchLabels();
     }, [cardId]);
 
+    useEffect(() => {
+        const handleFocus = () => {
+            isEditing.current = document.activeElement?.tagName === 'INPUT' ||
+                document.activeElement?.tagName === 'TEXTAREA';
+        };
+
+        document.addEventListener('focusin', handleFocus);
+        document.addEventListener('focusout', handleFocus);
+
+        return () => {
+            document.removeEventListener('focusin', handleFocus);
+            document.removeEventListener('focusout', handleFocus);
+        };
+    }, []);
+
     // Set up hotkey listeners
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            let index = -1;
+            if (isEditing.current) return;
 
-            if (e.keyCode >= 49 && e.keyCode <= 57) {
-                // Keys 1–9
-                index = e.keyCode - 49;
-            } else if (e.keyCode === 48) {
-                // Key 0 maps to index 9 (10th label)
-                index = 9;
-            }
+            const key = e.key;
 
-            if (index >= 0 && index < allLabels.length) {
-                toggleLabel(allLabels[index]._id);
+            if (key >= '1' && key <= '9') {
+                const index = parseInt(key) - 1;
+                if (index < allLabels.length) {
+                    toggleLabel(allLabels[index]._id);
+                }
+            } else if (key === '0') {
+                if (9 < allLabels.length) {
+                    toggleLabel(allLabels[9]._id);
+                }
             }
         };
 
