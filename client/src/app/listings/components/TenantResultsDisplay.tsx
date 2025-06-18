@@ -5,6 +5,7 @@ import { FaBed, FaBath, FaRulerCombined, FaCalendarAlt, FaHome, FaClock, FaTimes
 import SavedUnitsModal from './SavedUnitsModal';
 import axiosInstance from '@/api/axiosInstance';
 import { sanAntonioAreas } from '@/data/sanAntonioAreas';
+import EditableSpecial from './EditableSpecial';
 
 interface Photo {
     type: string;
@@ -304,10 +305,11 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
                             Current Specials
                         </h4>
 
-                        <p className="text-sm mb-2.5 font-medium text-gray-800 break-words whitespace-pre-wrap overflow-hidden">
-                            {/* {listing.property_specials.replace("*", "")} */}
-                            {listing.property_specials[0]?.raw_text || 'No specials available'}
-                        </p>
+                        <EditableSpecial
+                            propertyid={listing.scrapeListId}
+                            listing={listing}
+                        />
+
 
                         <p className="text-sm font-bold text-gray-800">
                             Phone: {listing.phone.replace("*", "")}

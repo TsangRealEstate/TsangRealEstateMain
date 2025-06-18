@@ -347,12 +347,10 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                     </div>
 
                     <div>
-                        {property.Information.specials && property.Information.specials.length > 0 && (
-                            <PropertySpecials
-                                property={property}
-                                onUpdate={handleSpecialsUpdate}
-                            />
-                        )}
+                        <PropertySpecials
+                            property={property}
+                            onUpdate={handleSpecialsUpdate}
+                        />
                     </div>
                 </div>
 
