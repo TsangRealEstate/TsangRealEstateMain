@@ -55,7 +55,6 @@ exports.saveSelectedUnits = async (req, res) => {
   }
 };
 
-// Get saved units by tenant
 exports.getSavedUnitsByTenant = async (req, res) => {
   try {
     const { tenantId } = req.params;
@@ -71,7 +70,44 @@ exports.getSavedUnitsByTenant = async (req, res) => {
   }
 };
 
-// Delete saved units by tenant (optionally delete specific units)
+exports.toggleFavoriteUnit = async (req, res) => {
+  try {
+    const { tenantId, unitId } = req.params;
+
+    const savedUnitDoc = await SavedUnit.findOne({ tenantId });
+
+    if (!savedUnitDoc) {
+      return res
+        .status(404)
+        .json({ error: "No saved units found for this tenant" });
+    }
+
+    const unitIndex = savedUnitDoc.selectedUnits.findIndex(
+      (unit) => unit.unitId === unitId
+    );
+
+    if (unitIndex === -1) {
+      return res.status(404).json({ error: "Unit not found in saved units" });
+    }
+
+    savedUnitDoc.selectedUnits[unitIndex].isFavorite =
+      !savedUnitDoc.selectedUnits[unitIndex].isFavorite;
+
+    const updatedDoc = await savedUnitDoc.save();
+
+    res.status(200).json({
+      message: "Favorite status toggled successfully",
+      isFavorite: updatedDoc.selectedUnits[unitIndex].isFavorite,
+      data: updatedDoc,
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: "Failed to toggle favorite status",
+      details: error.message,
+    });
+  }
+};
+
 exports.deleteSavedUnits = async (req, res) => {
   try {
     const { tenantId } = req.params;

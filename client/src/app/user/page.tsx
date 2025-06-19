@@ -7,7 +7,9 @@ import {
     FaVideo,
     FaPlay,
     FaVideoSlash,
-    FaMap
+    FaMap,
+    FaRegStar,
+    FaStar
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { IoMdClose } from 'react-icons/io';
@@ -15,6 +17,7 @@ import { CiLocationOn } from 'react-icons/ci';
 import { MapRedirectLink } from './components/MapRedirectLink';
 
 interface SavedUnit {
+    isFavorite: boolean;
     unitId: string;
     propertyName: string;
     propertyArea: string;
@@ -62,42 +65,41 @@ export default function TenantListingsPage() {
         if (id) setUserId(id);
     }, []);
 
+    const fetchSavedUnits = async () => {
+        try {
+            const res = await axiosInstance.get(`/saved-units/${userId}`);
+            const allUnits = res.data.flatMap((doc: any) => doc.selectedUnits);
+            setSavedUnits(allUnits);
+
+            // Get unique scrapeListIds
+            const uniqueScrapeListIds = [...new Set(allUnits.map((u: { scrapeListId: any; }) => u.scrapeListId))];
+
+            // Fetch videos for each scrapeListId
+            const videoPromises = uniqueScrapeListIds.map(async (id) => {
+                try {
+                    const res = await axiosInstance.get(`/properties/${id}/videos`);
+                    return res.data.videos || [];
+                } catch (err: any) {
+                    if (err.response?.status === 404) {
+                        return [];
+                    }
+                    throw err;
+                }
+            });
+
+            const videoResults = await Promise.all(videoPromises);
+            const allVideos = videoResults.flat();
+
+            setVideos(allVideos);
+        } catch (err) {
+            console.error('Error fetching saved units or videos:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (!userId) return;
-
-        const fetchSavedUnits = async () => {
-            try {
-                const res = await axiosInstance.get(`/saved-units/${userId}`);
-                const allUnits = res.data.flatMap((doc: any) => doc.selectedUnits);
-                setSavedUnits(allUnits);
-
-                // Get unique scrapeListIds
-                const uniqueScrapeListIds = [...new Set(allUnits.map((u: { scrapeListId: any; }) => u.scrapeListId))];
-
-                // Fetch videos for each scrapeListId
-                const videoPromises = uniqueScrapeListIds.map(async (id) => {
-                    try {
-                        const res = await axiosInstance.get(`/properties/${id}/videos`);
-                        return res.data.videos || [];
-                    } catch (err: any) {
-                        if (err.response?.status === 404) {
-                            return [];
-                        }
-                        throw err;
-                    }
-                });
-
-                const videoResults = await Promise.all(videoPromises);
-                const allVideos = videoResults.flat();
-
-                setVideos(allVideos);
-            } catch (err) {
-                console.error('Error fetching saved units or videos:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchSavedUnits();
     }, [userId]);
 
@@ -160,6 +162,17 @@ export default function TenantListingsPage() {
     const closeModal = () => {
         setActiveVideoUrl(null);
         setIsModalOpen(false);
+    };
+
+    const toggleFavorite = async (unitId: any) => {
+        try {
+            const response = await axiosInstance.patch(
+                `/saved-units/${userId}/toggle-favorite/${unitId}`
+            );
+            fetchSavedUnits();
+        } catch (error) {
+            console.error("Error toggling favorite:", error);
+        }
     };
 
     return (
@@ -267,7 +280,21 @@ export default function TenantListingsPage() {
 
                                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                                             {group.units.map((unit) => (
-                                                <div key={unit.unitId} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all">
+                                                <div key={unit.unitId} className="relative border border-gray-200 rounded-xl p-5 hover:shadow-md transition-all">
+
+                                                    {/* Favorite Star Button*/}
+                                                    <button
+                                                        onClick={() => toggleFavorite(unit.unitId)}
+                                                        className="absolute top-3 right-3 p-2 text-yellow-400 hover:text-yellow-500 transition-colors"
+                                                        aria-label={unit.isFavorite ? "Remove from favorites" : "Add to favorites"}
+                                                    >
+                                                        {unit.isFavorite ? (
+                                                            <FaStar className="h-5 w-5" />
+                                                        ) : (
+                                                            <FaRegStar className="h-5 w-5" />
+                                                        )}
+                                                    </button>
+
                                                     <div className="flex items-start">
                                                         <div className="flex-shrink-0 bg-blue-500 rounded-lg p-3 text-white">
                                                             <FaHome className="h-5 w-5" />

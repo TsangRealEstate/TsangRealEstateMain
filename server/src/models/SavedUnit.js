@@ -23,6 +23,10 @@ const savedUnitSchema = new mongoose.Schema({
       availableDate: String,
       bed: Number,
       bath: Number,
+      isFavorite: {  
+        type: Boolean,
+        default: false
+      },
       scrapeListId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "ScrapeList",
