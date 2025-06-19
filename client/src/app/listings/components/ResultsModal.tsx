@@ -66,7 +66,7 @@ export default function ResultsModal({
             await axiosInstance.post('/tenants/search-results', payload);
 
             const url = `/listings/Tenant/${encodeURIComponent(tenantName ?? '')}`;
-            window.open(url, '_blank', 'noopener,noreferrer');
+            window.location.href = url;
         } catch (error) {
             console.error('Error saving search results:', error);
         }

@@ -921,7 +921,6 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         {searchedResults.count > 0 && (
                             <Link
                                 href={`/listings/Tenant/${encodeURIComponent(`${tenant.firstName || ""} ${tenant.lastName || ""}`.trim())}`}
-                                target="_blank"
                             >
                                 <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                                     Searched Units
