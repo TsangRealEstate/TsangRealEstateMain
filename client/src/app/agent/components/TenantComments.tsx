@@ -21,45 +21,45 @@ const TenantComments = ({ tenantId }: Props) => {
     const [editingId, setEditingId] = useState<string | null>(null);
     const [editText, setEditText] = useState("");
 
+    const fetchComments = async () => {
+        try {
+            setLoading(true);
+            const res = await axiosInstance.get(`/comments/${tenantId}`);
+
+            if (Array.isArray(res.data)) {
+                setComments(res.data);
+                setError(null);
+            } else if (res.data.message) {
+                setComments([]);
+                setError(res.data.message);
+            } else {
+                setComments([]);
+                setError(null);
+            }
+            setLoading(false);
+        } catch (err) {
+            setError("Failed to load comments.");
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
         if (!tenantId) return;
-
-        const fetchComments = async () => {
-            try {
-                setLoading(true);
-                const res = await axiosInstance.get(`/comments/${tenantId}`);
-
-                if (Array.isArray(res.data)) {
-                    setComments(res.data);
-                    setError(null);
-                } else if (res.data.message) {
-                    setComments([]);
-                    setError(res.data.message);
-                } else {
-                    setComments([]);
-                    setError(null);
-                }
-                setLoading(false);
-            } catch (err) {
-                setError("Failed to load comments.");
-                setLoading(false);
-            }
-        };
 
         fetchComments();
     }, [tenantId]);
 
 
     const addComment = async () => {
-        if (!newComment.trim()) return;
+        if (!newComment) return;
         try {
             setLoading(true);
             const res = await axiosInstance.post(`/comments/${tenantId}`, {
                 comment: newComment.trim(),
             });
-            setComments([res.data, ...comments]);
             setNewComment("");
             setLoading(false);
+            fetchComments();
         } catch (err) {
             setError("Failed to add comment.");
             setLoading(false);
@@ -148,10 +148,13 @@ const TenantComments = ({ tenantId }: Props) => {
                         {editingId === _id ? (
                             <div className="bg-blue-50 p-3 rounded-lg">
                                 <textarea
-                                    className="w-full p-2 resize-none border border-gray-300 rounded-md mb-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full min-h-[120px] p-3 text-gray-800 border border-gray-300 rounded-lg 
+                                        focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm
+                                        transition-all duration-150 ease-in-out"
                                     value={editText}
                                     onChange={(e) => setEditText(e.target.value)}
-                                    rows={3}
+                                    placeholder="Type your comment here..."
+                                    rows={5}
                                 />
                                 <div className="flex gap-2">
                                     <button
@@ -173,7 +176,7 @@ const TenantComments = ({ tenantId }: Props) => {
                             <div className="group relative">
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1">
-                                        <p className="text-gray-800 break-all mb-2">{comment}</p>
+                                        <p className="text-gray-800 whitespace-pre-wrap mb-2">{comment}</p>
                                         <small className="text-gray-500">
                                             Created At:    {new Date(createdAt).toLocaleString()}
                                         </small>

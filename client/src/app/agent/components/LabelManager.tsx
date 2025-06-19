@@ -27,14 +27,37 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
     const [editedLabelName, setEditedLabelName] = useState("");
     const isEditing = useRef(false);
 
+    const toggleLabel = useCallback(async (labelId: string) => {
+        try {
+            const existingLabel = cardLabels.find((cl) =>
+                typeof cl.labelId === "string" ? cl.labelId === labelId : cl.labelId._id === labelId
+            );
 
-    // Get available colors (not used by other labels)
+            const isActive = existingLabel ? !existingLabel.isActive : true;
+
+            const res = await axiosInstance.post("/labels/card", {
+                cardId,
+                labelId,
+                isActive,
+            });
+
+            setCardLabels((prev) => {
+                const existing = prev.filter((cl) =>
+                    typeof cl.labelId === "string" ? cl.labelId !== labelId : cl.labelId._id !== labelId
+                );
+                return [...existing, res.data];
+            });
+        } catch (error) {
+            console.error("Failed to toggle label", error);
+            alert("Failed to update label");
+        }
+    }, [cardId, cardLabels]);
+
     const getAvailableColors = useCallback(() => {
         const usedColors = new Set(allLabels.map(label => label.color));
         return PREDEFINED_COLORS.filter(color => !usedColors.has(color.value));
     }, [allLabels]);
 
-    // Fetch all available labels and card-specific assignments
     useEffect(() => {
         const fetchLabels = async () => {
             setIsLoading(true);
@@ -78,54 +101,28 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
             if (isEditing.current) return;
 
             const key = e.key;
+            let index = -1;
 
             if (key >= '1' && key <= '9') {
-                const index = parseInt(key) - 1;
-                if (index < allLabels.length) {
-                    toggleLabel(allLabels[index]._id);
-                }
+                index = parseInt(key) - 1;
             } else if (key === '0') {
-                if (9 < allLabels.length) {
-                    toggleLabel(allLabels[9]._id);
-                }
+                index = 9;
+            }
+
+            if (index >= 0 && index < allLabels.length) {
+                e.preventDefault();
+                toggleLabel(allLabels[index]._id);
             }
         };
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [allLabels]);
+    }, [allLabels, toggleLabel]);
 
     // Get full label object from labelId
     const getLabelDetails = (labelId: string | Label): Label | null => {
         if (typeof labelId !== "string") return labelId;
         return allLabels.find((label) => label._id === labelId) || null;
-    };
-
-    // Toggle label on/off for this card
-    const toggleLabel = async (labelId: string) => {
-        try {
-            const existingLabel = cardLabels.find((cl) =>
-                typeof cl.labelId === "string" ? cl.labelId === labelId : cl.labelId._id === labelId
-            );
-
-            const isActive = existingLabel ? !existingLabel.isActive : true;
-
-            const res = await axiosInstance.post("/labels/card", {
-                cardId,
-                labelId,
-                isActive,
-            });
-
-            setCardLabels((prev) => {
-                const existing = prev.filter((cl) =>
-                    typeof cl.labelId === "string" ? cl.labelId !== labelId : cl.labelId._id !== labelId
-                );
-                return [...existing, res.data];
-            });
-        } catch (error) {
-            console.error("Failed to toggle label", error);
-            alert("Failed to update label");
-        }
     };
 
     // Create a new standard label
@@ -314,7 +311,7 @@ const LabelManager: React.FC<LabelManagerProps> = ({ cardId }) => {
                 </div>
 
                 {/* Label Selection Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-5 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     {allLabels.map((label, index) => {
                         const isActive = isLabelActive(label._id);
                         const cardLabel = cardLabels.find((cl) =>

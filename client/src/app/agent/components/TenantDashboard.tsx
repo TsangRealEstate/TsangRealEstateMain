@@ -47,6 +47,20 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
     const [movements, setMovements] = useState<Movement[]>([]);
     if (!tenant) return null;
 
+    const formatDate = (dateString: string | number | Date) => {
+        if (!dateString) return "N/A";
+        const date = new Date(dateString);
+
+        const options: Intl.DateTimeFormatOptions = {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        };
+
+        return date.toLocaleDateString('en-US', options);
+    };
+
     const handleEditClick = (field: string, value: string) => {
         setEditField(field);
         setEditedValue(value);
@@ -406,19 +420,27 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
         }
 
         if (field === "leaseStartDate" || field === "leaseEndDate") {
-            let dateValue = "";
-            if (value) {
-                const parsedDate = new Date(value);
-                if (!isNaN(parsedDate.getTime())) {
-                    dateValue = parsedDate.toISOString().slice(0, 10);
+            const parseDateValue = (dateStr: string | number | Date) => {
+                if (!dateStr) return "";
+
+                try {
+                    const date = new Date(dateStr);
+                    if (isNaN(date.getTime())) return "";
+
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    return `${year}-${month}-${day}`;
+                } catch {
+                    return "";
                 }
-            }
+            };
 
             return (
                 <div
                     className="relative group cursor-pointer"
                     onClick={() => {
-                        if (!isEditing) handleEditClick(field, dateValue);
+                        if (!isEditing) handleEditClick(field, parseDateValue(value));
                     }}
                 >
                     <DetailItem
@@ -428,7 +450,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                                 <input
                                     type="date"
                                     className="border border-gray-300 rounded px-2 py-1 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={editedValue || dateValue}
+                                    value={editedValue || parseDateValue(value)}
                                     onChange={(e) => setEditedValue(e.target.value)}
                                     onClick={(e) => e.stopPropagation()}
                                     autoFocus
@@ -827,20 +849,6 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
         }
     }, [tenant]);
 
-    const formatDate = (dateString: string | number | Date) => {
-        if (!dateString) return "N/A";
-        const date = new Date(dateString);
-
-        const options: Intl.DateTimeFormatOptions = {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-        };
-
-        return date.toLocaleDateString('en-US', options);
-    };
-
     return (
         <div
             className="fixed inset-0 flex items-center justify-center bg-black/15 z-50 p-4 cursor-default"
@@ -933,7 +941,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         <button
                             onClick={onClose}
                             className="bg-gray-500 text-white px-4 py-2 rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                             
+
                         >
                             X
                         </button>
