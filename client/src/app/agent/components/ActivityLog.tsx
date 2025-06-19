@@ -26,7 +26,7 @@ const ActivityLog: React.FC<ActivityLogProps> = ({
                 </div>
             )}
 
-            {movements.length === 0 ? (
+            {movements.length === 0 || (movements[0] && movements[0].fromColumn === "none") ? (
                 <div className="p-6 text-center">
                     <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -40,36 +40,38 @@ const ActivityLog: React.FC<ActivityLogProps> = ({
                             key={movement._id}
                             className="p-4 hover:bg-gray-50 transition-colors duration-150 ease-in-out"
                         >
-                            <div className="flex items-start">
-                                <div className="flex-shrink-0 mt-0.5">
-                                    <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
-                                        <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
-                                        </svg>
+                            {movement.fromColumn !== "none" && (
+                                <div className="flex items-start">
+                                    <div className="flex-shrink-0 mt-0.5">
+                                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
+                                            <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div className="ml-3 flex-1">
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-sm font-medium text-gray-900">
+                                                <span className="text-indigo-600">{movement.userName || userDisplayName}</span> moved {movement.cardName ? `"${movement.cardName}"` : 'this card'}
+                                            </p>
+                                            <span className="text-xs text-gray-500">
+                                                {formatDistanceToNow(new Date(movement.movedAt))} ago
+                                            </span>
+                                        </div>
+                                        <div className="mt-1 text-sm text-gray-600 flex items-center">
+                                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs font-medium mr-2">
+                                                {movement.fromColumn}
+                                            </span>
+                                            <svg className="w-4 h-4 text-gray-400 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                                            </svg>
+                                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs font-medium ml-2">
+                                                {movement.toColumn}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="ml-3 flex-1">
-                                    <div className="flex items-center justify-between">
-                                        <p className="text-sm font-medium text-gray-900">
-                                            <span className="text-indigo-600">{movement.userName || userDisplayName}</span> moved {movement.cardName ? `"${movement.cardName}"` : 'this card'}
-                                        </p>
-                                        <span className="text-xs text-gray-500">
-                                            {formatDistanceToNow(new Date(movement.movedAt))} ago
-                                        </span>
-                                    </div>
-                                    <div className="mt-1 text-sm text-gray-600 flex items-center">
-                                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-xs font-medium mr-2">
-                                            {movement.fromColumn}
-                                        </span>
-                                        <svg className="w-4 h-4 text-gray-400 mx-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-                                        </svg>
-                                        <span className="px-2 py-1 bg-green-100 text-green-800 rounded-md text-xs font-medium ml-2">
-                                            {movement.toColumn}
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                            )}
                         </li>
                     ))}
                 </ul>

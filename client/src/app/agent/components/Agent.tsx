@@ -171,10 +171,17 @@ export default function Agent() {
                 };
 
                 const response = await axiosInstance.post('/tenants', tenantPayload);
+                const newCardId = response.data.tenantId;
+
+                await axiosInstance.post('/movements', {
+                    cardId: newCardId,
+                    fromColumn: "none",
+                    toColumn: columns[index].title
+                });
 
                 const updatedColumns = [...columns];
                 updatedColumns[index].cards.push({
-                    id: crypto.randomUUID() || response.data._id,
+                    id: newCardId,
                     content: columns[index].newCard
                 });
                 updatedColumns[index].newCard = "";
