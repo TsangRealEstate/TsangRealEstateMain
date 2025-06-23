@@ -18,7 +18,7 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
     const [frontendZipCodes, setFrontendZipCodes] = useState<string[]>([]);
     const [tenantName, setTenantName] = useState<string | null>(null);
     const [searchedResults, setSearchedResults] = useState({});
-
+    const [isAdminViewing, setIsAdminViewing] = useState(false);
     const [neighborhoods, setNeighborhoods] = useState<string[]>([]);
 
     type Card = {
@@ -149,6 +149,11 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
         if (localStorage.getItem("authenticated") === "true") {
             fetchListings()
             fetchZipCodes()
+
+            const storedPassword = localStorage.getItem("authPassword");
+            if (storedPassword) {
+                setIsAdminViewing(true);
+            }
         }
     }, [])
 
@@ -176,7 +181,9 @@ export const AuthProvider: React.FC<React.PropsWithChildren<{}>> = ({ children }
                 zipCodes,
                 searchedResults,
                 fetchSearchedResults,
-                frontendZipCodes
+                frontendZipCodes,
+                setIsAdminViewing,
+                isAdminViewing,
             }}
         >
             {children}

@@ -44,6 +44,8 @@ export interface DetailItemProps {
   icon: React.ReactNode;
 }
 export interface AuthContextType {
+  isAdminViewing: boolean;
+  setIsAdminViewing: React.Dispatch<React.SetStateAction<boolean>>;
   frontendZipCodes: string[];
   zipCodes: ZipCode[];
   searchedResults: Record<string, any>;

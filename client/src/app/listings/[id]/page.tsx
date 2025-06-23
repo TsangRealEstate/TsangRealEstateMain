@@ -30,6 +30,7 @@ import FloorPlanGallery from '@/app/filter/components/FloorPlanGallery';
 import { formatAvailabilityDate } from '@/utils/dateUtils';
 import PropertySpecials from '../components/PropertySpecials';
 import { IoMdClose } from 'react-icons/io';
+import { useAuth } from '@/context/AuthContext';
 
 interface Photo {
     type: string;
@@ -169,17 +170,13 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
     const [selectedVideos, setSelectedVideos] = useState<SelectedVideos>({});
+    const {isAdminViewing} = useAuth();
     const [uploadingUnitId, setUploadingUnitId] = useState<string | null>(null);
     const [videos, setVideos] = useState<Video[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
-    const [isAdminViewing, setIsAdminViewing] = useState(false);
 
     useEffect(() => {
-        const storedPassword = localStorage.getItem("authPassword");
-        if (storedPassword) {
-            setIsAdminViewing(true);
-        }
         const fetchProperty = async () => {
             try {
                 const { id } = await params;
