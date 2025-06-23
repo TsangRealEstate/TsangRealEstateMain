@@ -421,8 +421,7 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
 
         if (field === "leaseStartDate" || field === "leaseEndDate") {
             const parseDateValue = (dateStr: string | number | Date) => {
-                if (!dateStr) return "";
-
+                if (!dateStr || dateStr === "Any") return "";
                 try {
                     const date = new Date(dateStr);
                     if (isNaN(date.getTime())) return "";
@@ -447,18 +446,28 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
                         label={label}
                         value={
                             isEditing ? (
-                                <input
-                                    type="date"
-                                    className="border border-gray-300 rounded px-2 py-1 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    value={editedValue || parseDateValue(value)}
-                                    onChange={(e) => setEditedValue(e.target.value)}
-                                    onClick={(e) => e.stopPropagation()}
-                                    autoFocus
-                                />
+                                <div className="flex items-center space-x-2">
+                                    <input
+                                        type="date"
+                                        className="border border-gray-300 rounded px-2 py-1 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        value={editedValue || parseDateValue(value)}
+                                        onChange={(e) => setEditedValue(e.target.value)}
+                                        onClick={(e) => e.stopPropagation()}
+                                        autoFocus
+                                    />
+                                    <button
+                                        className="px-2 py-1 bg-gray-200 hover:bg-gray-300 rounded text-sm"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setEditedValue(editedValue === "Any" ? parseDateValue(value) : "Any");
+                                        }}
+                                    >
+                                        {editedValue === "Any" ? "Set Date" : "Any"}
+                                    </button>
+                                </div>
                             ) : (
                                 <div className="flex items-center space-x-2 text-blue-600">
-
-                                    <span>{formatDate(value)}</span>
+                                    <span>{value === "Any" ? "Any" : formatDate(value)}</span>
                                 </div>
                             )
                         }
@@ -694,15 +703,23 @@ const TenantModal: React.FC<TenantModalProps> = ({ tenant, onClose }) => {
             // Handle move-in dates with validation
             if (tenant.leaseEndDate && tenant.leaseStartDate) {
                 try {
+                    const leaseStartDate = new Date(tenant.leaseStartDate);
                     const leaseEndDate = new Date(tenant.leaseEndDate);
-                    const leaseStartDate = new Date(tenant.leaseStartDate)
-                    if (!isNaN(leaseEndDate.getTime()) && !isNaN(leaseStartDate.getTime())) {
+
+                    const isStartValid = !isNaN(leaseStartDate.getTime());
+                    const isEndValid = !isNaN(leaseEndDate.getTime());
+
+                    if (isStartValid) {
                         params.append('earliestMoveInDate', leaseStartDate.toISOString().split('T')[0]);
+                    }
+
+                    if (isEndValid) {
                         params.append('latestMoveInDate', leaseEndDate.toISOString().split('T')[0]);
                     }
                 } catch (error) {
                     console.error('Error processing lease dates:', error);
                 }
+
             }
 
             // Add amenities with cleaning
