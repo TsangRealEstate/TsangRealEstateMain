@@ -16,6 +16,7 @@ const savedUnitRoutes = require("./routes/savedUnitRoutes");
 const propertiesVideoRoutes = require("./routes/propertiesVideo");
 const commentRoutes = require("./routes/commentRoutes");
 const propertyEmailRoutes = require('./routes/propertyEmailRoutes');
+const propertyTextRoutes = require('./routes/propertyTextRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -39,6 +40,7 @@ app.use("/api/v1/saved-units", savedUnitRoutes);
 app.use("/api/v1/properties", propertiesVideoRoutes);
 app.use("/api/v1/comments", commentRoutes);
 app.use('/api/v1/property-emails', propertyEmailRoutes);
+app.use('/api/v1/property-text', propertyTextRoutes);
 
 app.get("/", (req, res) => {
   res.json({ message: "Welcome. Server is up and running!" });

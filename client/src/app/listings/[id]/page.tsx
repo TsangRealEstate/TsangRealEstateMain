@@ -31,6 +31,7 @@ import { formatAvailabilityDate } from '@/utils/dateUtils';
 import PropertySpecials from '../components/PropertySpecials';
 import { IoMdClose } from 'react-icons/io';
 import { useAuth } from '@/context/AuthContext';
+import PropertyTextForm from '../components/PropertyTextForm';
 
 interface Photo {
     type: string;
@@ -353,6 +354,9 @@ export default function PropertyDetailPage({ params }: PropertyDetailPageProps) 
                             property={property}
                             onUpdate={handleSpecialsUpdate}
                         />
+
+                        <PropertyTextForm scrapeListId={property._id} />
+
                     </div>
                 </div>
 
