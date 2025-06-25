@@ -8,7 +8,7 @@ const savedUnitSchema = new mongoose.Schema({
   },
   tenantName: {
     type: String,
-    required: true,
+    required: true,  
   },
   selectedUnits: [
     {
@@ -23,9 +23,13 @@ const savedUnitSchema = new mongoose.Schema({
       availableDate: String,
       bed: Number,
       bath: Number,
-      isFavorite: {  
+      isSaved: {
         type: Boolean,
-        default: false
+        default: false,
+      },
+      isFavorite: {
+        type: Boolean,
+        default: false,
       },
       scrapeListId: {
         type: mongoose.Schema.Types.ObjectId,

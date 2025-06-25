@@ -13,7 +13,7 @@ import {
 } from 'react-icons/fa';
 import { formatAvailabilityDate } from '@/utils/dateUtils';
 
-interface SavedUnit {
+export interface SavedUnit {
     unitId: string;
     propertyId: string;
     propertyName: string;

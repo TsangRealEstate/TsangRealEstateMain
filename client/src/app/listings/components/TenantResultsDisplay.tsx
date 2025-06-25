@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { FaBed, FaBath, FaRulerCombined, FaCalendarAlt, FaHome, FaClock, FaTimes } from 'react-icons/fa';
-import SavedUnitsModal from './SavedUnitsModal';
+import SavedUnitsModal, { SavedUnit } from './SavedUnitsModal';
 import axiosInstance from '@/api/axiosInstance';
 import { sanAntonioAreas } from '@/data/sanAntonioAreas';
 import EditableSpecial from './EditableSpecial';
@@ -101,6 +101,7 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
     const [modalOpen, setModalOpen] = useState(false);
     const [showSavedUnits, setShowSavedUnits] = useState(false);
     const [selectedUnits, setSelectedUnits] = useState<SelectedUnit[]>([]);
+    const [savedUnits, setSavedUnits] = useState<SavedUnit[]>([]);
     const areas = sanAntonioAreas;
 
     const listingsWithPrices = results?.listings.map(listing => {
@@ -137,30 +138,45 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
         if (b === 'Other Areas') return -1;
         return a.localeCompare(b);
     });
+    
+    const savedResponse = async (tenantId: string) => {
+        const res = await axiosInstance.get(`/saved-units/${tenantId}`);
+        const allUnits = res.data.flatMap((doc: any) => doc.selectedUnits);
+        setSavedUnits(allUnits);
+    }
+
 
     useEffect(() => {
-        const fetchResults = async () => {
+        const fetchAll = async () => {
             try {
+                setLoading(true);
+
                 const response = await axiosInstance.get(
                     `/tenants/search-results/${encodeURIComponent(tenantName ?? '')}`
                 );
 
                 const data = response.data;
-                console.log('Fetched results:', data);
-                setResults({
+
+                const resultData = {
                     count: data.count,
                     listings: data.listings,
-                    tenantId: data.tenantId
-                });
+                    tenantId: data.tenantId,
+                };
+
+                setResults(resultData);
+
+                if (data.tenantId) {
+                    savedResponse(data.tenantId)
+                }
             } catch (error) {
-                console.error('Fetch error:', error);
+                console.error('Error during fetch:', error);
             } finally {
                 setLoading(false);
             }
         };
 
         if (tenantName) {
-            fetchResults();
+            fetchAll();
         }
     }, [tenantName]);
 
@@ -226,6 +242,7 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
             alert(`${selectedUnits.length} units saved successfully!`);
             setSelectedUnits([]);
             closeModal();
+            savedResponse(results?.tenantId || '');
         } catch (error: any) {
             console.error('Error saving units:', error);
             const errorMessage =
@@ -416,30 +433,40 @@ export default function TenantResultsDisplay({ tenantName }: { tenantName: strin
 
                                                 <div className="grid gap-6 max-h-[400px] overflow-y-auto">
                                                     {selectedListing.available_units
-                                                        .filter(unit => unit.units && unit.units.length > 0)
+                                                        .filter(unit =>
+                                                            unit.units &&
+                                                            unit.units.length > 0 &&
+                                                            unit.units.some(u => !savedUnits.some(saved => saved.unitName === u.name))
+                                                        )
                                                         .sort((a, b) => a.sqft - b.sqft)
-                                                        .map((unit) => (
-                                                            <div key={unit.id} className="space-y-3">
-                                                                <h3 className="text-lg font-semibold text-gray-900">
-                                                                    {unit.name} - {unit.bed} bed, {unit.bath} bath - {unit.sqft} sqft
-                                                                </h3>
-                                                                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                                                                    {(unit.units ?? [])
-                                                                        .sort((a, b) => {
-                                                                            const sqftDiff = a.sqft - b.sqft;
-                                                                            if (sqftDiff !== 0) return sqftDiff;
-                                                                            const priceDiff = a.price - b.price;
-                                                                            if (priceDiff !== 0) return priceDiff;
-                                                                            const dateA = new Date(a.available_on || '');
-                                                                            const dateB = new Date(b.available_on || '');
-                                                                            return dateA.getTime() - dateB.getTime();
-                                                                        })
-                                                                        .map((subUnit) => (
-                                                                            <UnitCard key={`${unit.id}-${subUnit.id}`} unit={unit} subUnit={subUnit} />
-                                                                        ))}
+                                                        .map((unit) => {
+                                                            const filteredSubUnits = unit.units?.filter(
+                                                                u => !savedUnits.some(saved => saved.unitName === u.name)
+                                                            ) || [];
+
+                                                            return (
+                                                                <div key={unit.id} className="space-y-3">
+                                                                    <h3 className="text-lg font-semibold text-gray-900">
+                                                                        {unit.name} - {unit.bed} bed, {unit.bath} bath - {unit.sqft} sqft
+                                                                    </h3>
+                                                                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                                                        {filteredSubUnits
+                                                                            .sort((a, b) => {
+                                                                                const sqftDiff = a.sqft - b.sqft;
+                                                                                if (sqftDiff !== 0) return sqftDiff;
+                                                                                const priceDiff = a.price - b.price;
+                                                                                if (priceDiff !== 0) return priceDiff;
+                                                                                const dateA = new Date(a.available_on || '');
+                                                                                const dateB = new Date(b.available_on || '');
+                                                                                return dateA.getTime() - dateB.getTime();
+                                                                            })
+                                                                            .map((subUnit) => (
+                                                                                <UnitCard key={`${unit.id}-${subUnit.id}`} unit={unit} subUnit={subUnit} />
+                                                                            ))}
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                        ))}
+                                                            );
+                                                        })}
                                                 </div>
                                             </div>
                                         ) : (

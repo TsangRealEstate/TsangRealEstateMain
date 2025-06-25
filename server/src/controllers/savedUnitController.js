@@ -8,11 +8,17 @@ exports.saveSelectedUnits = async (req, res) => {
       return res.status(400).json({ error: "No units selected" });
     }
 
+    // Add isSaved: true to all selected units
+    const unitsWithSavedStatus = selectedUnits.map(unit => ({
+      ...unit,
+      isSaved: true
+    }));
+
     const existingSavedUnits = await SavedUnit.findOne({ tenantId });
 
     let savedData;
     if (existingSavedUnits) {
-      const uniqueNewUnits = selectedUnits.filter(
+      const uniqueNewUnits = unitsWithSavedStatus.filter(
         (newUnit) =>
           !existingSavedUnits.selectedUnits.some(
             (existingUnit) => existingUnit.unitId === newUnit.unitId
@@ -37,7 +43,7 @@ exports.saveSelectedUnits = async (req, res) => {
       savedData = await SavedUnit.create({
         tenantId,
         tenantName,
-        selectedUnits,
+        selectedUnits: unitsWithSavedStatus,
         timestamp: new Date(),
       });
     }
