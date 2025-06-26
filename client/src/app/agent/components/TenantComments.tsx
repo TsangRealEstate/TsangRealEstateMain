@@ -175,13 +175,13 @@ const TenantComments = ({ tenantId }: Props) => {
                         ) : (
                             <div className="group relative">
                                 <div className="flex justify-between items-start">
-                                    <div className="flex-1">
-                                        <p className="text-gray-800 whitespace-pre-wrap mb-2">{comment}</p>
+                                    <div className="flex-1 overflow-hidden">
+                                        <p className="text-gray-800 whitespace-pre-wrap break-words overflow-x-auto mb-2 max-w-full">{comment}</p>
                                         <small className="text-gray-500">
                                             Created At:    {new Date(createdAt).toLocaleString()}
                                         </small>
                                     </div>
-                                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="action-btns flex gap-2 lg:opacity-0 lg:group-hover:opacity-100 lg:transition-opacity">
                                         <button
                                             onClick={() => startEditing({ _id, comment, createdAt, tenantId })}
                                             className="text-blue-600 hover:text-blue-800"
