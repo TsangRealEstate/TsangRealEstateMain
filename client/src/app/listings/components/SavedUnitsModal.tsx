@@ -12,6 +12,8 @@ import {
     FaTrash,
 } from 'react-icons/fa';
 import { formatAvailabilityDate } from '@/utils/dateUtils';
+import { FiEdit } from 'react-icons/fi';
+import AgentNoteForm from './AgentNoteForm';
 
 export interface SavedUnit {
     unitId: string;
@@ -24,6 +26,11 @@ export interface SavedUnit {
     availableDate: string;
     bed: number;
     bath: number;
+    scrapeListId: string;
+}
+interface GroupedUnitsByArea {
+    scrapeListId: string;
+    units: SavedUnit[];
 }
 
 interface Props {
@@ -36,6 +43,23 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
     const [savedUnits, setSavedUnits] = useState<SavedUnit[]>([]);
     const [loading, setLoading] = useState(true);
     const [sortBy, setSortBy] = useState<'price' | 'sqft'>('price');
+    const [userId, setUserID] = useState("")
+    const [noteModalOpen, setNoteModalOpen] = useState(false);
+    const [currentNoteData, setCurrentNoteData] = useState({
+        tenantId: '',
+        scrapeListId: '',
+        propertyArea: ''
+    });
+
+    // Function to open note modal with required data
+    const openNoteForm = (tenantId: string, scrapeListId: string, propertyArea: string) => {
+        setCurrentNoteData({
+            tenantId,
+            scrapeListId,
+            propertyArea
+        });
+        setNoteModalOpen(true);
+    };
 
     useEffect(() => {
         if (!tenantId) return;
@@ -44,6 +68,7 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
             try {
                 const res = await axiosInstance.get(`/saved-units/${tenantId}`);
                 const allUnits = res.data.flatMap((doc: any) => doc.selectedUnits);
+                setUserID(res.data[0].tenantId)
                 setSavedUnits(allUnits);
             } catch (err) {
                 console.error('Error fetching saved units:', err);
@@ -132,9 +157,14 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
         }
     };
 
-    const groupedUnits = sortedUnits.reduce<Record<string, SavedUnit[]>>((acc, unit) => {
-        acc[unit.propertyArea] = acc[unit.propertyArea] || [];
-        acc[unit.propertyArea].push(unit);
+    const groupedUnits = sortedUnits.reduce<Record<string, GroupedUnitsByArea>>((acc, unit) => {
+        if (!acc[unit.propertyArea]) {
+            acc[unit.propertyArea] = {
+                scrapeListId: unit.scrapeListId,
+                units: [],
+            };
+        }
+        acc[unit.propertyArea].units.push(unit);
         return acc;
     }, {});
 
@@ -185,9 +215,19 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
                         </div>
                     ) : (
                         <div className="space-y-8">
-                            {Object.entries(groupedUnits).map(([area, units]) => (
+                            {Object.entries(groupedUnits).map(([area, { units, scrapeListId }]) => (
                                 <div key={area}>
-                                    <h3 className="text-xl font-bold text-gray-800 mb-4">{area}</h3>
+                                    <div className="flex items-center">
+                                        <h3 className="text-xl font-bold text-gray-800">{area}</h3>
+                                        <button
+                                            onClick={() => openNoteForm(userId, scrapeListId, area)}
+                                            className="text-blue-600 hover:text-blue-800 p-1 rounded-full ml-8 hover:bg-blue-50"
+                                            title="Add agent notes"
+                                        >
+                                            <FiEdit size={18} />
+                                        </button>
+                                    </div>
+
                                     <div className="grid gap-4 md:grid-cols-2">
                                         {units.map((unit) => (
                                             <div
@@ -284,6 +324,32 @@ export default function SavedUnitsModal({ tenantId, tenantName, onClose }: Props
 
                 </div>
             </div>
+
+            {/* Agent Note Modal */}
+            {noteModalOpen && (
+                <div className="fixed inset-0 bg-black/80 bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold">
+                                Notes for {currentNoteData.propertyArea}
+                            </h3>
+                            <button
+                                onClick={() => setNoteModalOpen(false)}
+                                className="text-gray-500 hover:text-gray-700 text-2xl"
+                            >
+                                &times;
+                            </button>
+                        </div>
+
+                        <AgentNoteForm
+                            tenantId={currentNoteData.tenantId}
+                            scrapeListId={currentNoteData.scrapeListId}
+                            propertyArea={currentNoteData.propertyArea}
+                            onClose={() => setNoteModalOpen(false)}
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
