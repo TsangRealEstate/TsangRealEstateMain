@@ -9,7 +9,8 @@ import {
     FaVideoSlash,
     FaMap,
     FaRegStar,
-    FaStar
+    FaStar,
+    FaStickyNote
 } from 'react-icons/fa';
 import Link from 'next/link';
 import { IoMdClose } from 'react-icons/io';
@@ -51,8 +52,13 @@ export default function TenantListingsPage() {
     const [loading, setLoading] = useState(true);
     const [sortBy, setSortBy] = useState<'price' | 'sqft'>('price');
     const [videos, setVideos] = useState<Video[]>([]);
+    const [agentNotes, setAgentNotes] = useState<any[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [activeVideoUrl, setActiveVideoUrl] = useState<string | null>(null);
+    const [viewingNotes, setViewingNotes] = useState<{
+        notes: any[];
+        propertyArea: string;
+    } | null>(null);
 
     useEffect(() => {
         if (typeof window === 'undefined') return;
@@ -67,14 +73,15 @@ export default function TenantListingsPage() {
 
     const fetchSavedUnits = async () => {
         try {
+            // Fetch saved units
             const res = await axiosInstance.get(`/saved-units/${userId}`);
             const allUnits = res.data.flatMap((doc: any) => doc.selectedUnits);
             setSavedUnits(allUnits);
 
             // Get unique scrapeListIds
-            const uniqueScrapeListIds = [...new Set(allUnits.map((u: { scrapeListId: any; }) => u.scrapeListId))];
+            const uniqueScrapeListIds = [...new Set(allUnits.map((u: { scrapeListId: any }) => u.scrapeListId))];
 
-            // Fetch videos for each scrapeListId
+            // Fetch videos for each scrapeListId (existing code)
             const videoPromises = uniqueScrapeListIds.map(async (id) => {
                 try {
                     const res = await axiosInstance.get(`/properties/${id}/videos`);
@@ -87,12 +94,33 @@ export default function TenantListingsPage() {
                 }
             });
 
-            const videoResults = await Promise.all(videoPromises);
-            const allVideos = videoResults.flat();
+            // Fetch agent notes for each scrapeListId
+            const notePromises = uniqueScrapeListIds.map(async (scrapeListId) => {
+                try {
+                    const res = await axiosInstance.get(`/agent-notes/${userId}/${scrapeListId}`);
+                    return res.data || [];
+                } catch (err: any) {
+                    if (err.response?.status === 404) {
+                        return [];
+                    }
+                    throw err;
+                }
+            });
 
+            // Wait for all requests
+            const [videoResults, noteResults] = await Promise.all([
+                Promise.all(videoPromises),
+                Promise.all(notePromises)
+            ]);
+
+            // Process results
+            const allVideos = videoResults.flat();
+            const allNotes = noteResults.flat();
             setVideos(allVideos);
+            setAgentNotes(allNotes);
+
         } catch (err) {
-            console.error('Error fetching saved units or videos:', err);
+            console.error('Error fetching data:', err);
         } finally {
             setLoading(false);
         }
@@ -184,6 +212,7 @@ export default function TenantListingsPage() {
                         <h1 className="text-2xl font-bold text-gray-800">
                             Saved Properties for {tenantName}
                         </h1>
+
                         <div className="flex space-x-4 mt-6 lg:mt-0">
                             {['price', 'sqft'].map((type) => (
                                 <button
@@ -225,6 +254,25 @@ export default function TenantListingsPage() {
                                             </div>
 
                                             <div className='flex items-center flex-wrap gap-4'>
+                                                {agentNotes.some(note => note.scrapeListId === group.scrapeListId) && (
+                                                    <button
+                                                        onClick={() => {
+                                                            const propertyNotes = agentNotes.filter(
+                                                                note => note.scrapeListId === group.scrapeListId
+                                                            );
+                                                            setViewingNotes({
+                                                                notes: propertyNotes,
+                                                                propertyArea: group.propertyArea // Include property area in state
+                                                            });
+                                                        }}
+                                                        className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800"
+                                                        title="View Agent Notes"
+                                                    >
+                                                        <FaStickyNote className="h-4 w-4" />
+                                                        <span>View Notes ({agentNotes.filter(note => note.scrapeListId === group.scrapeListId).length})</span>
+                                                    </button>
+                                                )}
+
                                                 {group.units.some(unit =>
                                                     videos.some(video => video.videounitid === unit.videoId)
                                                 ) ? (
@@ -370,6 +418,39 @@ export default function TenantListingsPage() {
                                 autoPlay
                                 className="size-full rounded"
                             />
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {viewingNotes && (
+                <div className="fixed inset-0 bg-black/70 bg-opacity-50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-lg p-6 w-full max-w-md">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-semibold">
+                                Agent Notes for {viewingNotes.propertyArea} {/* Show property area here */}
+                            </h3>
+                            <button
+                                onClick={() => setViewingNotes(null)}
+                                className="text-gray-500 hover:text-gray-700 text-3xl"
+                            >
+                                &times;
+                            </button>
+                        </div>
+
+                        <div className="space-y-3 max-h-[60vh] overflow-y-auto">
+                            {viewingNotes.notes.length > 0 ? (
+                                viewingNotes.notes.map((note, index) => (
+                                    <div key={index} className="bg-gray-50 p-3 rounded">
+                                        <p className="text-gray-700 whitespace-pre-wrap">{note.propertyNote}</p>
+                                        <p className="text-xs text-gray-500 mt-1">
+                                            {new Date(note.lastUpdated).toLocaleString()}
+                                        </p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-500 italic">No notes available</p>
+                            )}
                         </div>
                     </div>
                 </div>
